@@ -46,6 +46,7 @@ import com.vibecheck.app.domain.model.GameResult
 import com.vibecheck.app.domain.model.GamePack
 import com.vibecheck.app.ui.screens.GameScreen
 import com.vibecheck.app.ui.screens.HomeScreen
+import com.vibecheck.app.ui.screens.LeaderboardScreen
 import com.vibecheck.app.ui.screens.PassPhoneScreen
 import com.vibecheck.app.ui.screens.PlayerSetupScreen
 import com.vibecheck.app.ui.screens.ResultScreen
@@ -181,6 +182,7 @@ fun VibeCheckApp(
             AppScreen.PLAYERS -> gameViewModel.goBackHome()
             AppScreen.GAME -> gameViewModel.abandonGame()
             AppScreen.RESULT -> gameViewModel.goHome()
+            AppScreen.LEADERBOARD -> gameViewModel.goHome()
             AppScreen.HOME -> Unit
         }
     }
@@ -214,6 +216,7 @@ fun VibeCheckApp(
                         savedPlayerCount = players.size,
                         groupLeaderName = groupLeader?.name,
                         groupLeaderWins = groupLeader?.wins ?: 0,
+                        onOpenLeaderboard = gameViewModel::openLeaderboard,
                         onEditGroup = gameViewModel::editPlayers,
                         onBuyPremium = {
                             (context as? Activity)?.let { activity ->
@@ -361,6 +364,20 @@ fun VibeCheckApp(
                                 )
                             }
                         }
+                    }
+
+                    AppScreen.LEADERBOARD -> {
+                        val leaderboard = players
+                            .map(localStatsStore::statFor)
+                            .sortedWith(
+                                compareByDescending<com.vibecheck.app.data.PlayerStat> { it.wins }
+                                    .thenByDescending { it.bestScorePercent }
+                                    .thenBy { it.name }
+                            )
+                        LeaderboardScreen(
+                            stats = leaderboard,
+                            onBack = gameViewModel::goHome
+                        )
                     }
 
                     AppScreen.RESULT -> {
