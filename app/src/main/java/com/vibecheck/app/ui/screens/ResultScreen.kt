@@ -1,5 +1,7 @@
 package com.vibecheck.app.ui.screens
 
+import androidx.compose.animation.core.Animatable
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -19,9 +21,12 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
@@ -46,13 +51,30 @@ fun ResultScreen(
     val context = LocalContext.current
     val percent = if (result.total == 0) 0 else (result.score * 100 / result.total)
     val challengeWon = challengeTarget != null && percent > challengeTarget
+    val reveal = remember { Animatable(0f) }
+    val score = remember { Animatable(0f) }
+
+    LaunchedEffect(percent) {
+        reveal.snapTo(0f)
+        score.snapTo(0f)
+        reveal.animateTo(1f, animationSpec = tween(durationMillis = 280))
+        score.animateTo(percent.toFloat(), animationSpec = tween(durationMillis = 620))
+    }
 
     Column(
         modifier = Modifier.fillMaxSize(),
         verticalArrangement = Arrangement.SpaceBetween,
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        Column(horizontalAlignment = Alignment.CenterHorizontally) {
+        Column(
+            modifier = Modifier.graphicsLayer {
+                alpha = reveal.value
+                translationY = (1f - reveal.value) * 28f
+                scaleX = 0.985f + reveal.value * 0.015f
+                scaleY = 0.985f + reveal.value * 0.015f
+            },
+            horizontalAlignment = Alignment.CenterHorizontally
+        ) {
             Text(
                 "VIBECHECK",
                 color = Color(0xFFC9A7FF),
@@ -88,7 +110,7 @@ fun ResultScreen(
                     )
                     Spacer(Modifier.height(8.dp))
                     Text(
-                        percent.toString() + "%",
+                        score.value.toInt().toString() + "%",
                         color = Color(0xFFE8D8FF),
                         fontSize = 68.sp,
                         fontWeight = FontWeight.Black
@@ -100,7 +122,7 @@ fun ResultScreen(
                     )
                     Spacer(Modifier.height(18.dp))
                     LinearProgressIndicator(
-                        progress = { (percent / 100f).coerceIn(0f, 1f) },
+                        progress = { (score.value / 100f).coerceIn(0f, 1f) },
                         modifier = Modifier.fillMaxWidth().height(8.dp),
                         color = Color(0xFFC9A7FF),
                         trackColor = Color(0xFF3A3342)
@@ -131,7 +153,12 @@ fun ResultScreen(
             }
         }
 
-        Column(modifier = Modifier.fillMaxWidth(), verticalArrangement = Arrangement.spacedBy(10.dp)) {
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .graphicsLayer { alpha = reveal.value },
+            verticalArrangement = Arrangement.spacedBy(10.dp)
+        ) {
             Button(
                 onClick = {
                     ResultCardSharer.share(
