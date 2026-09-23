@@ -127,6 +127,12 @@ fun PlayerSetupScreen(
                 value = input,
                 onValueChange = { input = it.take(PlayerRules.MAX_NAME_LENGTH + 4) },
                 label = { Text("Prénom ou pseudo") },
+                supportingText = {
+                    Text(
+                        input.length.toString() + "/" + PlayerRules.MAX_NAME_LENGTH,
+                        color = VibeColors.TextSecondary
+                    )
+                },
                 singleLine = true,
                 keyboardOptions = KeyboardOptions(imeAction = ImeAction.Done),
                 keyboardActions = KeyboardActions(
@@ -141,7 +147,11 @@ fun PlayerSetupScreen(
                     focusedBorderColor = VibeColors.Purple,
                     focusedLabelColor = VibeColors.Purple,
                     cursorColor = VibeColors.Purple,
-                    unfocusedBorderColor = Color.White.copy(alpha = 0.14f)
+                    unfocusedBorderColor = Color.White.copy(alpha = 0.18f),
+                    focusedTextColor = VibeColors.TextPrimary,
+                    unfocusedTextColor = VibeColors.TextPrimary,
+                    focusedContainerColor = Color.White.copy(alpha = 0.035f),
+                    unfocusedContainerColor = Color.White.copy(alpha = 0.02f)
                 ),
                 shape = RoundedCornerShape(18.dp),
                 modifier = Modifier.fillMaxWidth()
@@ -267,7 +277,7 @@ fun PlayerSetupScreen(
             }
             Button(
                 onClick = onBack,
-                modifier = Modifier.fillMaxWidth(),
+                modifier = Modifier.fillMaxWidth().height(52.dp),
                 shape = RoundedCornerShape(18.dp),
                 colors = ButtonDefaults.buttonColors(
                     containerColor = Color.White.copy(alpha = 0.06f),
