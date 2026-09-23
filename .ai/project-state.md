@@ -4,7 +4,7 @@
 VibeCheck is an Android-first social party game designed around short sessions and shareable results.
 
 ## Current milestone
-M0 — runnable offline vertical slice.
+M0 — runnable offline vertical slice with real group setup.
 
 ## Implemented
 - Kotlin Android application skeleton.
@@ -13,14 +13,18 @@ M0 — runnable offline vertical slice.
 - Local question catalog.
 - Deterministic vote/result engine.
 - Native Android text sharing.
-- Unit tests for result calculation.
+- Real player setup flow.
+- 2 to 8 players with normalized names.
+- Duplicate, blank and oversized-name validation.
+- Unit tests for result calculation and player rules.
+- GitHub Actions verification: unit tests, lint and debug APK.
 
 ## Next
-1. Get CI green and fix compile/lint issues.
-2. Add player setup instead of hard-coded demo names.
-3. Improve game-state save/restore.
-4. Generate shareable 9:16 result cards.
-5. Add deep-link challenge format.
+1. Keep CI green after player-flow changes.
+2. Preserve game state across configuration/process recreation.
+3. Add shareable 9:16 result cards.
+4. Add deep-link challenge format.
+5. Expand question content and randomized sessions.
 6. Only then add lifetime remove-ads billing and ad placements.
 
 ## Constraints
