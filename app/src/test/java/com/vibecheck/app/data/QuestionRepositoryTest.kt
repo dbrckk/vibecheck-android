@@ -24,4 +24,18 @@ class QuestionRepositoryTest {
         val second = QuestionRepository.forMode(GameMode.MOST_LIKELY, seed = 2L)
         assertNotEquals(first.map { it.id }, second.map { it.id })
     }
+    @Test
+    fun catalog_has_enough_variety_per_mode() {
+        GameMode.entries.forEach { mode ->
+            assertEquals(24, QuestionRepository.forMode(mode, seed = 123L, limit = 24).size)
+        }
+    }
+
+    @Test
+    fun catalog_question_ids_are_unique_per_mode() {
+        GameMode.entries.forEach { mode ->
+            val questions = QuestionRepository.forMode(mode, seed = 456L, limit = 24)
+            assertEquals(questions.size, questions.map { it.id }.distinct().size)
+        }
+    }
 }
