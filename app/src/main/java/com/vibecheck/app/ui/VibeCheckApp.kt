@@ -194,6 +194,7 @@ fun VibeCheckApp(
                         selectedIntensity = selectedIntensity,
                         selectedPack = selectedPack,
                         savedPlayerCount = players.size,
+                        onEditGroup = gameViewModel::editPlayers,
                         onBuyPremium = {
                             (context as? Activity)?.let { activity ->
                                 billingManager.launchPurchase(activity)
@@ -201,7 +202,7 @@ fun VibeCheckApp(
                         },
                         onIntensity = gameViewModel::selectIntensity,
                         onPack = gameViewModel::selectPack,
-                        onMode = gameViewModel::selectMode
+                        onMode = gameViewModel::quickStartMode
                     )
 
                     AppScreen.PLAYERS -> PlayerSetupScreen(
