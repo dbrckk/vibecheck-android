@@ -281,7 +281,8 @@ class GameViewModelTest {
                 mode = GameMode.WHO_OF_US,
                 targetPercent = 70,
                 seed = 99L,
-                intensity = GameIntensity.CHILL
+                intensity = GameIntensity.CHILL,
+                pack = GamePack.MIX
             )
         )
 
