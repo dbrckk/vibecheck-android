@@ -1,5 +1,12 @@
 package com.vibecheck.app.domain.model
 
+enum class GamePack(val title: String, val subtitle: String) {
+    MIX("Mix", "Un mélange équilibré"),
+    FRIENDS("Friends", "Pour les groupes d'amis"),
+    DEEP("Deep", "Plus personnel et révélateur"),
+    CHAOS("Chaos", "Le plus imprévisible")
+}
+
 enum class GameIntensity(val title: String, val subtitle: String) {
     CHILL("Chill", "Léger et facile à lancer"),
     NORMAL("Normal", "Le bon équilibre"),
