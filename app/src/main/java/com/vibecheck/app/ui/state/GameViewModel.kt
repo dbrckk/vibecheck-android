@@ -26,10 +26,8 @@ class GameViewModel(
         savedStateHandle[KEY_CHALLENGE_TARGET] = challenge.targetPercent
         savedStateHandle[KEY_QUESTION_INDEX] = 0
         savedStateHandle[KEY_VOTES] = arrayListOf<String>()
+        savedStateHandle[KEY_SESSION_SEED] = challenge.seed
         savedStateHandle[KEY_SCREEN] = initialScreenFor(challenge.mode).name
-        if (challenge.mode == GameMode.RED_GREEN) {
-            savedStateHandle[KEY_SESSION_SEED] = System.currentTimeMillis()
-        }
     }
 
     fun selectMode(mode: GameMode) {
@@ -58,7 +56,9 @@ class GameViewModel(
     fun startGame() {
         savedStateHandle[KEY_VOTES] = arrayListOf<String>()
         savedStateHandle[KEY_QUESTION_INDEX] = 0
-        savedStateHandle[KEY_SESSION_SEED] = System.currentTimeMillis()
+        if (challengeTarget.value == NO_CHALLENGE) {
+            savedStateHandle[KEY_SESSION_SEED] = System.currentTimeMillis()
+        }
         savedStateHandle[KEY_SCREEN] = AppScreen.GAME.name
     }
 
@@ -84,7 +84,9 @@ class GameViewModel(
     fun replay() {
         savedStateHandle[KEY_VOTES] = arrayListOf<String>()
         savedStateHandle[KEY_QUESTION_INDEX] = 0
-        savedStateHandle[KEY_SESSION_SEED] = System.currentTimeMillis()
+        if (challengeTarget.value == NO_CHALLENGE) {
+            savedStateHandle[KEY_SESSION_SEED] = System.currentTimeMillis()
+        }
         savedStateHandle[KEY_SCREEN] = AppScreen.GAME.name
     }
 
