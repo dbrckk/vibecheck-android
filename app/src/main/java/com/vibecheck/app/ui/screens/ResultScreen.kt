@@ -69,6 +69,16 @@ fun ResultScreen(
     val context = LocalContext.current
     val percent = if (result.total == 0) 0 else (result.score * 100 / result.total)
     val challengeWon = challengeTarget != null && percent >= challengeTarget
+    val winnerFontSize = when {
+        result.winner.length > 18 -> 30.sp
+        result.winner.length > 12 -> 36.sp
+        else -> 44.sp
+    }
+    val winnerLineHeight = when {
+        result.winner.length > 18 -> 34.sp
+        result.winner.length > 12 -> 40.sp
+        else -> 48.sp
+    }
     val accent = when (mode) {
         GameMode.WHO_OF_US -> VibeColors.Purple
         GameMode.MOST_LIKELY -> VibeColors.Orange
@@ -188,8 +198,8 @@ fun ResultScreen(
                     Text(
                         result.winner,
                         color = VibeColors.TextPrimary,
-                        fontSize = 44.sp,
-                        lineHeight = 48.sp,
+                        fontSize = winnerFontSize,
+                        lineHeight = winnerLineHeight,
                         fontWeight = FontWeight.Black,
                         textAlign = TextAlign.Center,
                         modifier = Modifier.graphicsLayer {
