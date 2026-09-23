@@ -7,12 +7,16 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Share
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Icon
+import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -41,6 +45,7 @@ fun ResultScreen(
     val result = GameEngine.result(votes)
     val context = LocalContext.current
     val percent = if (result.total == 0) 0 else (result.score * 100 / result.total)
+    val challengeWon = challengeTarget != null && percent > challengeTarget
 
     Column(
         modifier = Modifier.fillMaxSize(),
@@ -48,34 +53,81 @@ fun ResultScreen(
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
         Column(horizontalAlignment = Alignment.CenterHorizontally) {
-            Text("VIBECHECK", color = Color(0xFFC9A7FF), fontWeight = FontWeight.Black)
-            Spacer(Modifier.height(30.dp))
             Text(
-                result.winner,
-                color = Color.White,
-                fontSize = 44.sp,
+                "VIBECHECK",
+                color = Color(0xFFC9A7FF),
                 fontWeight = FontWeight.Black,
-                textAlign = TextAlign.Center
+                letterSpacing = 2.sp
             )
-            Text(
-                percent.toString() + "%",
-                color = Color(0xFFE8D8FF),
-                fontSize = 72.sp,
-                fontWeight = FontWeight.Black
-            )
-            Text("sur " + mode.title, color = Color(0xFFA9A3B3), textAlign = TextAlign.Center)
-            if (challengeTarget != null) {
-                Spacer(Modifier.height(14.dp))
-                Text(
-                    if (percent > challengeTarget) {
-                        "Défi réussi • " + challengeTarget + "% à battre"
-                    } else {
-                        "Défi à battre • objectif " + challengeTarget + "%"
-                    },
-                    color = if (percent > challengeTarget) Color(0xFFC9A7FF) else Color(0xFFBEB7C9),
-                    fontWeight = FontWeight.Bold,
-                    textAlign = TextAlign.Center
-                )
+            Spacer(Modifier.height(18.dp))
+
+            Card(
+                colors = CardDefaults.cardColors(containerColor = Color(0xE6211E29)),
+                shape = RoundedCornerShape(30.dp),
+                modifier = Modifier.fillMaxWidth()
+            ) {
+                Column(
+                    modifier = Modifier.fillMaxWidth().padding(horizontal = 22.dp, vertical = 26.dp),
+                    horizontalAlignment = Alignment.CenterHorizontally
+                ) {
+                    Text(
+                        "LE GROUPE A PARLÉ",
+                        color = Color(0xFF9E91AE),
+                        fontSize = 12.sp,
+                        fontWeight = FontWeight.Bold,
+                        letterSpacing = 1.2.sp
+                    )
+                    Spacer(Modifier.height(18.dp))
+                    Text(
+                        result.winner,
+                        color = Color.White,
+                        fontSize = 42.sp,
+                        lineHeight = 46.sp,
+                        fontWeight = FontWeight.Black,
+                        textAlign = TextAlign.Center
+                    )
+                    Spacer(Modifier.height(8.dp))
+                    Text(
+                        percent.toString() + "%",
+                        color = Color(0xFFE8D8FF),
+                        fontSize = 68.sp,
+                        fontWeight = FontWeight.Black
+                    )
+                    Text(
+                        "des réponses • " + mode.title,
+                        color = Color(0xFFA9A3B3),
+                        textAlign = TextAlign.Center
+                    )
+                    Spacer(Modifier.height(18.dp))
+                    LinearProgressIndicator(
+                        progress = { (percent / 100f).coerceIn(0f, 1f) },
+                        modifier = Modifier.fillMaxWidth().height(8.dp),
+                        color = Color(0xFFC9A7FF),
+                        trackColor = Color(0xFF3A3342)
+                    )
+
+                    if (challengeTarget != null) {
+                        Spacer(Modifier.height(18.dp))
+                        Card(
+                            colors = CardDefaults.cardColors(
+                                containerColor = if (challengeWon) Color(0xFF294337) else Color(0xFF3B3044)
+                            ),
+                            shape = RoundedCornerShape(16.dp)
+                        ) {
+                            Text(
+                                if (challengeWon) {
+                                    "Défi réussi • objectif " + challengeTarget + "%"
+                                } else {
+                                    "Encore " + (challengeTarget - percent).coerceAtLeast(0) + " points pour battre le défi"
+                                },
+                                color = Color.White,
+                                fontWeight = FontWeight.Bold,
+                                textAlign = TextAlign.Center,
+                                modifier = Modifier.padding(horizontal = 16.dp, vertical = 12.dp)
+                            )
+                        }
+                    }
+                }
             }
         }
 
@@ -92,7 +144,10 @@ fun ResultScreen(
                 modifier = Modifier.fillMaxWidth().height(58.dp),
                 shape = RoundedCornerShape(18.dp)
             ) {
-                Row(horizontalArrangement = Arrangement.spacedBy(8.dp), verticalAlignment = Alignment.CenterVertically) {
+                Row(
+                    horizontalArrangement = Arrangement.spacedBy(8.dp),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
                     Icon(Icons.Default.Share, contentDescription = null)
                     Text("Partager le résultat", fontWeight = FontWeight.Bold)
                 }
@@ -105,28 +160,34 @@ fun ResultScreen(
                         challenge = Challenge(mode = mode, targetPercent = percent)
                     )
                 },
-                modifier = Modifier.fillMaxWidth(),
+                modifier = Modifier.fillMaxWidth().height(54.dp),
                 shape = RoundedCornerShape(18.dp),
                 colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF4B2E6B))
             ) {
                 Text("Défier un ami", fontWeight = FontWeight.Bold)
             }
 
-            Button(
-                onClick = onReplay,
+            Row(
                 modifier = Modifier.fillMaxWidth(),
-                shape = RoundedCornerShape(18.dp)
+                horizontalArrangement = Arrangement.spacedBy(10.dp)
             ) {
-                Text("Rejouer")
-            }
+                Button(
+                    onClick = onReplay,
+                    modifier = Modifier.weight(1f),
+                    shape = RoundedCornerShape(18.dp),
+                    colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFEEE6FF), contentColor = Color(0xFF18121F))
+                ) {
+                    Text("Rejouer", fontWeight = FontWeight.Bold)
+                }
 
-            Button(
-                onClick = onHome,
-                modifier = Modifier.fillMaxWidth(),
-                shape = RoundedCornerShape(18.dp),
-                colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF302A39))
-            ) {
-                Text("Changer de mode")
+                Button(
+                    onClick = onHome,
+                    modifier = Modifier.weight(1f),
+                    shape = RoundedCornerShape(18.dp),
+                    colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF302A39))
+                ) {
+                    Text("Modes")
+                }
             }
         }
     }
