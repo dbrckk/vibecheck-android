@@ -15,7 +15,7 @@ Android-first social party game with a viral sharing loop.
 - Jetpack Compose
 - Material 3
 - JDK 17
-- compileSdk / targetSdk 35
+- compileSdk / targetSdk 36
 - minSdk 24
 
 The architecture direction follows the Android Product references in `dbrckk/star-list`, especially `android/nowinandroid`. `airbnb/lottie-android` is reserved for later micro-animation work where it adds real UX value.
