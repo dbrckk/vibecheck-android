@@ -1,9 +1,12 @@
 package com.vibecheck.app.ui.screens
 
 import androidx.compose.animation.core.Animatable
+import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
+import androidx.compose.foundation.interaction.MutableInteractionSource
+import androidx.compose.foundation.interaction.collectIsPressedAsState
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -77,6 +80,34 @@ fun ResultScreen(
     val scope = rememberCoroutineScope()
     var isSharing by remember { mutableStateOf(false) }
     var shareError by remember { mutableStateOf(false) }
+    val shareInteraction = remember { MutableInteractionSource() }
+    val challengeInteraction = remember { MutableInteractionSource() }
+    val replayInteraction = remember { MutableInteractionSource() }
+    val homeInteraction = remember { MutableInteractionSource() }
+    val sharePressed by shareInteraction.collectIsPressedAsState()
+    val challengePressed by challengeInteraction.collectIsPressedAsState()
+    val replayPressed by replayInteraction.collectIsPressedAsState()
+    val homePressed by homeInteraction.collectIsPressedAsState()
+    val shareScale by animateFloatAsState(
+        targetValue = if (sharePressed) 0.985f else 1f,
+        animationSpec = tween(durationMillis = if (sharePressed) 80 else 130),
+        label = "shareScale"
+    )
+    val challengeScale by animateFloatAsState(
+        targetValue = if (challengePressed) 0.988f else 1f,
+        animationSpec = tween(durationMillis = if (challengePressed) 80 else 130),
+        label = "challengeScale"
+    )
+    val replayScale by animateFloatAsState(
+        targetValue = if (replayPressed) 0.985f else 1f,
+        animationSpec = tween(durationMillis = if (replayPressed) 80 else 130),
+        label = "replayScale"
+    )
+    val homeScale by animateFloatAsState(
+        targetValue = if (homePressed) 0.985f else 1f,
+        animationSpec = tween(durationMillis = if (homePressed) 80 else 130),
+        label = "homeScale"
+    )
 
     LaunchedEffect(percent) {
         reveal.snapTo(0f)
@@ -229,7 +260,14 @@ fun ResultScreen(
                     }
                 },
                 enabled = !isSharing,
-                modifier = Modifier.fillMaxWidth().height(60.dp),
+                interactionSource = shareInteraction,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(60.dp)
+                    .graphicsLayer {
+                        scaleX = shareScale
+                        scaleY = shareScale
+                    },
                 shape = RoundedCornerShape(20.dp),
                 colors = ButtonDefaults.buttonColors(
                     containerColor = accent,
@@ -267,7 +305,14 @@ fun ResultScreen(
                         challenge = Challenge(mode = mode, targetPercent = percent, seed = sessionSeed)
                     )
                 },
-                modifier = Modifier.fillMaxWidth().height(56.dp),
+                interactionSource = challengeInteraction,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(56.dp)
+                    .graphicsLayer {
+                        scaleX = challengeScale
+                        scaleY = challengeScale
+                    },
                 shape = RoundedCornerShape(20.dp),
                 colors = ButtonDefaults.buttonColors(
                     containerColor = accent.copy(alpha = 0.16f),
@@ -283,7 +328,13 @@ fun ResultScreen(
             ) {
                 Button(
                     onClick = onReplay,
-                    modifier = Modifier.weight(1f),
+                    interactionSource = replayInteraction,
+                    modifier = Modifier
+                        .weight(1f)
+                        .graphicsLayer {
+                            scaleX = replayScale
+                            scaleY = replayScale
+                        },
                     shape = RoundedCornerShape(18.dp),
                     colors = ButtonDefaults.buttonColors(
                         containerColor = VibeColors.PurpleBright,
@@ -295,7 +346,13 @@ fun ResultScreen(
 
                 Button(
                     onClick = onHome,
-                    modifier = Modifier.weight(1f),
+                    interactionSource = homeInteraction,
+                    modifier = Modifier
+                        .weight(1f)
+                        .graphicsLayer {
+                            scaleX = homeScale
+                            scaleY = homeScale
+                        },
                     shape = RoundedCornerShape(18.dp),
                     colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF302A39))
                 ) {
