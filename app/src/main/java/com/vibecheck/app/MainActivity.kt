@@ -36,6 +36,7 @@ import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -49,6 +50,7 @@ import androidx.compose.ui.unit.sp
 import com.vibecheck.app.data.QuestionRepository
 import com.vibecheck.app.domain.GameEngine
 import com.vibecheck.app.domain.PlayerRules
+import com.vibecheck.app.domain.SessionCodec
 import com.vibecheck.app.domain.model.GameMode
 import com.vibecheck.app.domain.model.Vote
 
@@ -75,29 +77,37 @@ fun VibeCheckApp() {
                     .background(background)
                     .padding(horizontal = 20.dp, vertical = 24.dp)
             ) {
-                var screen by remember { mutableStateOf(Screen.HOME) }
-                var selectedMode by remember { mutableStateOf(GameMode.WHO_OF_US) }
-                var questionIndex by remember { mutableIntStateOf(0) }
-                val votes = remember { mutableStateListOf<Vote>() }
-                val players = remember { mutableStateListOf<String>() }
+                var screenName by rememberSaveable { mutableStateOf(Screen.HOME.name) }
+                var modeName by rememberSaveable { mutableStateOf(GameMode.WHO_OF_US.name) }
+                var questionIndex by rememberSaveable { mutableIntStateOf(0) }
+                var savedVotes by rememberSaveable { mutableStateOf(arrayListOf<String>()) }
+                var players by rememberSaveable { mutableStateOf(arrayListOf<String>()) }
+
+                val screen = runCatching { Screen.valueOf(screenName) }.getOrDefault(Screen.HOME)
+                val selectedMode = runCatching { GameMode.valueOf(modeName) }.getOrDefault(GameMode.WHO_OF_US)
+                val votes = SessionCodec.decodeVotes(savedVotes)
 
                 when (screen) {
                     Screen.HOME -> HomeScreen { mode ->
-                        selectedMode = mode
+                        modeName = mode.name
                         questionIndex = 0
-                        votes.clear()
-                        screen = Screen.PLAYERS
+                        savedVotes = arrayListOf()
+                        screenName = Screen.PLAYERS.name
                     }
 
                     Screen.PLAYERS -> PlayerSetupScreen(
                         players = players,
-                        onBack = { screen = Screen.HOME },
-                        onAddPlayer = { players += it },
-                        onRemovePlayer = { players.remove(it) },
+                        onBack = { screenName = Screen.HOME.name },
+                        onAddPlayer = { player ->
+                            players = ArrayList(players + player)
+                        },
+                        onRemovePlayer = { player ->
+                            players = ArrayList(players.filterNot { it == player })
+                        },
                         onStart = {
-                            votes.clear()
+                            savedVotes = arrayListOf()
                             questionIndex = 0
-                            screen = Screen.GAME
+                            screenName = Screen.GAME.name
                         }
                     )
 
@@ -112,12 +122,13 @@ fun VibeCheckApp() {
                             answers = if (selectedMode == GameMode.RED_GREEN) {
                                 listOf("Green Flag", "Red Flag")
                             } else {
-                                players.toList()
+                                players
                             },
                             onAnswer = { answer ->
-                                votes += Vote(question.id, answer)
+                                val updatedVotes = votes + Vote(question.id, answer)
+                                savedVotes = ArrayList(SessionCodec.encodeVotes(updatedVotes))
                                 if (questionIndex == questions.lastIndex) {
-                                    screen = Screen.RESULT
+                                    screenName = Screen.RESULT.name
                                 } else {
                                     questionIndex += 1
                                 }
@@ -129,13 +140,13 @@ fun VibeCheckApp() {
                         mode = selectedMode,
                         votes = votes,
                         onReplay = {
-                            votes.clear()
+                            savedVotes = arrayListOf()
                             questionIndex = 0
-                            screen = Screen.GAME
+                            screenName = Screen.GAME.name
                         },
                         onHome = {
-                            votes.clear()
-                            screen = Screen.HOME
+                            savedVotes = arrayListOf()
+                            screenName = Screen.HOME.name
                         }
                     )
                 }
