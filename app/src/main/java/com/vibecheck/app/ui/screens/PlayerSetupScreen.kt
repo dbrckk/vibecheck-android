@@ -2,6 +2,7 @@ package com.vibecheck.app.ui.screens
 
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
+import androidx.compose.animation.animateContentSize
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -189,7 +190,10 @@ fun PlayerSetupScreen(
                 }
             } else {
                 LazyColumn(
-                    modifier = Modifier.fillMaxWidth().weight(1f),
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .weight(1f)
+                        .animateContentSize(),
                     verticalArrangement = Arrangement.spacedBy(8.dp)
                 ) {
                     items(players, key = { it }) { player ->
@@ -198,7 +202,9 @@ fun PlayerSetupScreen(
                             border = BorderStroke(1.dp, VibeColors.Purple.copy(alpha = 0.16f)),
                             elevation = CardDefaults.cardElevation(defaultElevation = 4.dp),
                             shape = RoundedCornerShape(18.dp),
-                            modifier = Modifier.fillMaxWidth()
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .animateItem()
                         ) {
                             Row(
                                 modifier = Modifier.fillMaxWidth().padding(start = 16.dp, end = 6.dp),
