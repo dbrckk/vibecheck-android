@@ -65,6 +65,20 @@ class GameViewModelTest {
     }
 
     @Test
+    fun abandoning_game_clears_progress_and_returns_home() {
+        val viewModel = GameViewModel(SavedStateHandle())
+
+        viewModel.selectMode(GameMode.RED_GREEN)
+        viewModel.answer("q1", "Green Flag", isLastQuestion = false)
+        viewModel.abandonGame()
+
+        assertEquals(AppScreen.HOME.name, viewModel.screenName.value)
+        assertEquals(0, viewModel.questionIndex.value)
+        assertTrue(viewModel.savedVotes.value.isEmpty())
+        assertEquals(GameViewModel.NO_CHALLENGE, viewModel.challengeTarget.value)
+    }
+
+    @Test
     fun intermediate_answer_advances_question() {
         val viewModel = GameViewModel(SavedStateHandle())
 
