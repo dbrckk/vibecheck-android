@@ -8,6 +8,7 @@ import com.vibecheck.app.domain.model.GameMode
 import com.vibecheck.app.domain.model.GamePack
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
+import org.junit.Assert.assertNotEquals
 import org.junit.Assert.assertTrue
 import org.junit.Test
 
@@ -395,5 +396,39 @@ class GameViewModelTest {
         assertEquals(AppScreen.PLAYERS.name, viewModel.screenName.value)
         assertEquals(GamePack.DEEP.name, viewModel.packName.value)
         assertEquals(GameIntensity.SAVAGE.name, viewModel.intensityName.value)
+    }
+    @Test
+    fun session_instance_survives_viewmodel_recreation() {
+        val state = SavedStateHandle()
+        val first = GameViewModel(state)
+        first.restorePlayers(listOf("Alice", "Bob"))
+        first.quickStartMode(GameMode.WHO_OF_US)
+        val instance = first.sessionInstanceId.value
+
+        val restored = GameViewModel(state)
+
+        assertEquals(instance, restored.sessionInstanceId.value)
+    }
+
+    @Test
+    fun replay_creates_a_new_session_instance_even_for_same_challenge_seed() {
+        val state = SavedStateHandle()
+        val viewModel = GameViewModel(state)
+        viewModel.restorePlayers(listOf("Alice", "Bob"))
+        viewModel.acceptChallenge(
+            Challenge(
+                mode = GameMode.WHO_OF_US,
+                targetPercent = 50,
+                seed = 123L,
+                intensity = GameIntensity.NORMAL,
+                pack = GamePack.MIX
+            )
+        )
+        val firstInstance = viewModel.sessionInstanceId.value
+
+        viewModel.replay()
+
+        assertEquals(123L, viewModel.sessionSeed.value)
+        assertNotEquals(firstInstance, viewModel.sessionInstanceId.value)
     }
 }
