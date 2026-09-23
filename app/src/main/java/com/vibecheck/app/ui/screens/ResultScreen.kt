@@ -49,6 +49,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.vibecheck.app.domain.Challenge
 import com.vibecheck.app.domain.GameEngine
+import com.vibecheck.app.domain.model.GameIntensity
 import com.vibecheck.app.domain.model.GameMode
 import com.vibecheck.app.domain.model.GameResult
 import com.vibecheck.app.domain.model.Vote
@@ -64,6 +65,7 @@ fun ResultScreen(
     resultOverride: GameResult? = null,
     challengeTarget: Int?,
     sessionSeed: Long,
+    intensity: GameIntensity,
     onReplay: () -> Unit,
     onHome: () -> Unit
 ) {
@@ -352,7 +354,8 @@ fun ResultScreen(
                             challenge = Challenge(
                                 mode = mode,
                                 targetPercent = percent,
-                                seed = sessionSeed
+                                seed = sessionSeed,
+                                intensity = intensity
                             )
                         )
                     } catch (_: Exception) {
