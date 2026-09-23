@@ -31,10 +31,12 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.vibecheck.app.billing.PremiumBillingManager
 import com.vibecheck.app.billing.PurchaseStatus
+import com.vibecheck.app.data.KnowMeRepository
 import com.vibecheck.app.data.QuestionRepository
 import com.vibecheck.app.domain.Challenge
 import com.vibecheck.app.domain.SessionCodec
 import com.vibecheck.app.domain.model.GameMode
+import com.vibecheck.app.domain.model.GameResult
 import com.vibecheck.app.ui.screens.GameScreen
 import com.vibecheck.app.ui.screens.HomeScreen
 import com.vibecheck.app.ui.screens.PlayerSetupScreen
@@ -43,6 +45,7 @@ import com.vibecheck.app.ui.state.AppScreen
 import com.vibecheck.app.ui.state.GameViewModel
 import com.vibecheck.app.ui.theme.VibeBackdrop
 import com.vibecheck.app.ui.theme.VibeCheckTheme
+import com.vibecheck.app.ui.theme.VibeColors
 
 @Composable
 fun VibeCheckApp(
@@ -72,6 +75,9 @@ fun VibeCheckApp(
     val players by gameViewModel.players.collectAsState()
     val challengeTargetRaw by gameViewModel.challengeTarget.collectAsState()
     val sessionSeed by gameViewModel.sessionSeed.collectAsState()
+    val knowSecretAnswer by gameViewModel.knowSecretAnswer.collectAsState()
+    val knowGuesserIndex by gameViewModel.knowGuesserIndex.collectAsState()
+    val knowScores by gameViewModel.knowScores.collectAsState()
 
     val screen = runCatching { AppScreen.valueOf(screenName) }.getOrDefault(AppScreen.HOME)
     val selectedMode = runCatching { GameMode.valueOf(modeName) }.getOrDefault(GameMode.WHO_OF_US)
@@ -136,70 +142,140 @@ fun VibeCheckApp(
                     )
 
                     AppScreen.GAME -> {
-                        val questions = QuestionRepository.forMode(
-                            mode = selectedMode,
-                            seed = sessionSeed
-                        )
+                        if (selectedMode == GameMode.KNOWS_ME) {
+                            val prompts = KnowMeRepository.forSeed(sessionSeed)
+                            val target = players.firstOrNull()
+                            val guessers = players.drop(1)
 
-                        if (questions.isEmpty()) {
-                            Box(
-                                modifier = Modifier.fillMaxSize(),
-                                contentAlignment = Alignment.Center
-                            ) {
-                                androidx.compose.foundation.layout.Column(
-                                    horizontalAlignment = Alignment.CenterHorizontally
+                            if (prompts.isEmpty() || target == null || guessers.isEmpty()) {
+                                Box(
+                                    modifier = Modifier.fillMaxSize(),
+                                    contentAlignment = Alignment.Center
                                 ) {
                                     Text(
-                                        "Questions indisponibles",
-                                        color = Color.White,
+                                        "Ajoute au moins 2 joueurs pour ce mode.",
+                                        color = VibeColors.TextPrimary,
                                         fontWeight = FontWeight.Bold
                                     )
-                                    Text(
-                                        "Ce mode n'a actuellement aucune question.",
-                                        color = Color(0xFFAAA2B5)
-                                    )
-                                    androidx.compose.foundation.layout.Spacer(
-                                        Modifier.height(12.dp)
-                                    )
-                                    Button(onClick = gameViewModel::abandonGame) {
-                                        Text("Retour aux modes")
-                                    }
                                 }
+                            } else {
+                                val safeIndex = questionIndex.coerceIn(0, prompts.lastIndex)
+                                val currentPrompt = prompts[safeIndex]
+                                val secretPhase = knowSecretAnswer.isBlank()
+                                val safeGuesserIndex = knowGuesserIndex.coerceIn(0, guessers.lastIndex)
+                                val guesser = guessers[safeGuesserIndex]
+                                val promptText = if (secretPhase) {
+                                    target + ", réponds secrètement.\n\n" + currentPrompt.text
+                                } else {
+                                    guesser + ", que choisirait " + target + " ?\n\n" + currentPrompt.text
+                                }
+
+                                GameScreen(
+                                    mode = selectedMode,
+                                    questionText = promptText,
+                                    progress = safeIndex + 1,
+                                    total = prompts.size,
+                                    answers = currentPrompt.options,
+                                    onAnswer = { answer ->
+                                        if (secretPhase) {
+                                            gameViewModel.setKnowMeSecret(answer)
+                                        } else {
+                                            gameViewModel.submitKnowMeGuess(
+                                                answer = answer,
+                                                isLastQuestion = safeIndex == prompts.lastIndex
+                                            )
+                                        }
+                                    },
+                                    onExit = gameViewModel::abandonGame
+                                )
                             }
                         } else {
-                            val safeIndex = questionIndex.coerceIn(0, questions.lastIndex)
-                            val question = questions[safeIndex]
-
-                            GameScreen(
+                            val questions = QuestionRepository.forMode(
                                 mode = selectedMode,
-                                questionText = question.text,
-                                progress = safeIndex + 1,
-                                total = questions.size,
-                                answers = if (selectedMode == GameMode.RED_GREEN) {
-                                    listOf("Green Flag", "Red Flag")
-                                } else {
-                                    players
-                                },
-                                onAnswer = { answer ->
-                                    gameViewModel.answer(
-                                        questionId = question.id,
-                                        answer = answer,
-                                        isLastQuestion = safeIndex == questions.lastIndex
-                                    )
-                                },
-                                onExit = gameViewModel::abandonGame
+                                seed = sessionSeed
                             )
+
+                            if (questions.isEmpty()) {
+                                Box(
+                                    modifier = Modifier.fillMaxSize(),
+                                    contentAlignment = Alignment.Center
+                                ) {
+                                    androidx.compose.foundation.layout.Column(
+                                        horizontalAlignment = Alignment.CenterHorizontally
+                                    ) {
+                                        Text(
+                                            "Questions indisponibles",
+                                            color = Color.White,
+                                            fontWeight = FontWeight.Bold
+                                        )
+                                        Text(
+                                            "Ce mode n'a actuellement aucune question.",
+                                            color = Color(0xFFAAA2B5)
+                                        )
+                                        androidx.compose.foundation.layout.Spacer(
+                                            Modifier.height(12.dp)
+                                        )
+                                        Button(onClick = gameViewModel::abandonGame) {
+                                            Text("Retour aux modes")
+                                        }
+                                    }
+                                }
+                            } else {
+                                val safeIndex = questionIndex.coerceIn(0, questions.lastIndex)
+                                val question = questions[safeIndex]
+
+                                GameScreen(
+                                    mode = selectedMode,
+                                    questionText = question.text,
+                                    progress = safeIndex + 1,
+                                    total = questions.size,
+                                    answers = if (selectedMode == GameMode.RED_GREEN) {
+                                        listOf("Green Flag", "Red Flag")
+                                    } else {
+                                        players
+                                    },
+                                    onAnswer = { answer ->
+                                        gameViewModel.answer(
+                                            questionId = question.id,
+                                            answer = answer,
+                                            isLastQuestion = safeIndex == questions.lastIndex
+                                        )
+                                    },
+                                    onExit = gameViewModel::abandonGame
+                                )
+                            }
                         }
                     }
 
-                    AppScreen.RESULT -> ResultScreen(
-                        mode = selectedMode,
-                        votes = votes,
-                        challengeTarget = challengeTarget,
-                        sessionSeed = sessionSeed,
-                        onReplay = gameViewModel::replay,
-                        onHome = gameViewModel::goHome
-                    )
+                    AppScreen.RESULT -> {
+                        val knowMeResult = if (selectedMode == GameMode.KNOWS_ME) {
+                            val guessers = players.drop(1)
+                            val ranking = guessers.mapIndexed { index, name ->
+                                name to (knowScores.getOrNull(index) ?: 0)
+                            }.sortedWith(
+                                compareByDescending<Pair<String, Int>> { it.second }
+                                    .thenBy { it.first }
+                            )
+                            val best = ranking.firstOrNull()
+                            GameResult(
+                                winner = best?.first ?: "Personne",
+                                score = best?.second ?: 0,
+                                total = KnowMeRepository.forSeed(sessionSeed).size
+                            )
+                        } else {
+                            null
+                        }
+
+                        ResultScreen(
+                            mode = selectedMode,
+                            votes = votes,
+                            resultOverride = knowMeResult,
+                            challengeTarget = challengeTarget,
+                            sessionSeed = sessionSeed,
+                            onReplay = gameViewModel::replay,
+                            onHome = gameViewModel::goHome
+                        )
+                    }
                     }
                 }
                 }
