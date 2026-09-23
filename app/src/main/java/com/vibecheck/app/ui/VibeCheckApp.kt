@@ -30,6 +30,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.vibecheck.app.billing.PremiumBillingManager
+import com.vibecheck.app.billing.PurchaseStatus
 import com.vibecheck.app.data.QuestionRepository
 import com.vibecheck.app.domain.Challenge
 import com.vibecheck.app.domain.SessionCodec
@@ -62,6 +63,7 @@ fun VibeCheckApp(
     val isPremium by billingManager.isPremium.collectAsState()
     val premiumReady by billingManager.isPurchaseReady.collectAsState()
     val premiumPrice by billingManager.formattedPrice.collectAsState()
+    val purchaseStatus by billingManager.purchaseStatus.collectAsState()
 
     val screenName by gameViewModel.screenName.collectAsState()
     val modeName by gameViewModel.modeName.collectAsState()
@@ -115,6 +117,7 @@ fun VibeCheckApp(
                         isPremium = isPremium,
                         premiumReady = premiumReady,
                         premiumPrice = premiumPrice,
+                        purchaseStatus = purchaseStatus,
                         onBuyPremium = {
                             (context as? Activity)?.let { activity ->
                                 billingManager.launchPurchase(activity)
