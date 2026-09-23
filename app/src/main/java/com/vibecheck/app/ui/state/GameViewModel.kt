@@ -23,6 +23,7 @@ class GameViewModel(
     val knowSecretAnswer = savedStateHandle.getStateFlow(KEY_KNOW_SECRET, "")
     val knowGuesserIndex = savedStateHandle.getStateFlow(KEY_KNOW_GUESSER_INDEX, 0)
     val knowScores = savedStateHandle.getStateFlow(KEY_KNOW_SCORES, arrayListOf<Int>())
+    val knowHandoffPending = savedStateHandle.getStateFlow(KEY_KNOW_HANDOFF, false)
 
     fun acceptChallenge(challenge: Challenge) {
         savedStateHandle[KEY_MODE] = challenge.mode.name
@@ -89,6 +90,7 @@ class GameViewModel(
         if (knowSecretAnswer.value.isNotBlank()) return
         savedStateHandle[KEY_KNOW_SECRET] = answer
         savedStateHandle[KEY_KNOW_GUESSER_INDEX] = 0
+        savedStateHandle[KEY_KNOW_HANDOFF] = true
         ensureKnowScoreSlots()
     }
 
@@ -108,13 +110,20 @@ class GameViewModel(
 
         if (index < guessers.lastIndex) {
             savedStateHandle[KEY_KNOW_GUESSER_INDEX] = index + 1
+            savedStateHandle[KEY_KNOW_HANDOFF] = true
         } else if (isLastQuestion) {
             savedStateHandle[KEY_SCREEN] = AppScreen.RESULT.name
         } else {
             savedStateHandle[KEY_QUESTION_INDEX] = questionIndex.value + 1
             savedStateHandle[KEY_KNOW_SECRET] = ""
             savedStateHandle[KEY_KNOW_GUESSER_INDEX] = 0
+            savedStateHandle[KEY_KNOW_HANDOFF] = true
         }
+    }
+
+    fun confirmKnowMeHandoff() {
+        if (modeName.value != GameMode.KNOWS_ME.name) return
+        savedStateHandle[KEY_KNOW_HANDOFF] = false
     }
 
     fun abandonGame() {
@@ -154,6 +163,7 @@ class GameViewModel(
         savedStateHandle[KEY_KNOW_SECRET] = ""
         savedStateHandle[KEY_KNOW_GUESSER_INDEX] = 0
         savedStateHandle[KEY_KNOW_SCORES] = arrayListOf<Int>()
+        savedStateHandle[KEY_KNOW_HANDOFF] = false
     }
 
     private fun initialScreenFor(mode: GameMode): AppScreen =
@@ -172,5 +182,6 @@ class GameViewModel(
         private const val KEY_KNOW_SECRET = "know_secret"
         private const val KEY_KNOW_GUESSER_INDEX = "know_guesser_index"
         private const val KEY_KNOW_SCORES = "know_scores"
+        private const val KEY_KNOW_HANDOFF = "know_handoff"
     }
 }
