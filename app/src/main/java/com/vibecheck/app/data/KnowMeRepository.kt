@@ -1,5 +1,6 @@
 package com.vibecheck.app.data
 
+import com.vibecheck.app.domain.model.GameIntensity
 import kotlin.random.Random
 
 data class KnowMePrompt(
@@ -39,11 +40,21 @@ object KnowMeRepository {
     fun forSeed(
         seed: Long,
         limit: Int = 8,
-        avoidIds: Set<String> = emptySet()
+        avoidIds: Set<String> = emptySet(),
+        intensity: GameIntensity? = null
     ): List<KnowMePrompt> {
-        val shuffled = prompts.shuffled(Random(seed))
+        val filtered = prompts.filter { intensity == null || intensityForId(it.id) == intensity }
+        val shuffled = filtered.shuffled(Random(seed))
         val preferred = shuffled.filterNot { it.id in avoidIds }
         val fallback = shuffled.filter { it.id in avoidIds }
         return (preferred + fallback).take(limit.coerceAtLeast(0))
+    }
+    private fun intensityForId(id: String): GameIntensity {
+        val index = id.substringAfterLast("_").toIntOrNull() ?: return GameIntensity.NORMAL
+        return when (index) {
+            in 1..8 -> GameIntensity.CHILL
+            in 9..16 -> GameIntensity.NORMAL
+            else -> GameIntensity.SAVAGE
+        }
     }
 }
