@@ -18,13 +18,16 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Share
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -45,6 +48,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.vibecheck.app.data.QuestionRepository
 import com.vibecheck.app.domain.GameEngine
+import com.vibecheck.app.domain.PlayerRules
 import com.vibecheck.app.domain.model.GameMode
 import com.vibecheck.app.domain.model.Vote
 
@@ -55,13 +59,14 @@ class MainActivity : ComponentActivity() {
     }
 }
 
-private enum class Screen { HOME, GAME, RESULT }
+private enum class Screen { HOME, PLAYERS, GAME, RESULT }
 
 @Composable
 fun VibeCheckApp() {
     val background = Brush.verticalGradient(
         listOf(Color(0xFF101014), Color(0xFF24153A), Color(0xFF101014))
     )
+
     MaterialTheme {
         Surface(modifier = Modifier.fillMaxSize(), color = Color.Transparent) {
             Box(
@@ -74,15 +79,28 @@ fun VibeCheckApp() {
                 var selectedMode by remember { mutableStateOf(GameMode.WHO_OF_US) }
                 var questionIndex by remember { mutableIntStateOf(0) }
                 val votes = remember { mutableStateListOf<Vote>() }
-                val players = remember { listOf("Alex", "Sam", "Mia") }
+                val players = remember { mutableStateListOf<String>() }
 
                 when (screen) {
                     Screen.HOME -> HomeScreen { mode ->
                         selectedMode = mode
                         questionIndex = 0
                         votes.clear()
-                        screen = Screen.GAME
+                        screen = Screen.PLAYERS
                     }
+
+                    Screen.PLAYERS -> PlayerSetupScreen(
+                        players = players,
+                        onBack = { screen = Screen.HOME },
+                        onAddPlayer = { players += it },
+                        onRemovePlayer = { players.remove(it) },
+                        onStart = {
+                            votes.clear()
+                            questionIndex = 0
+                            screen = Screen.GAME
+                        }
+                    )
+
                     Screen.GAME -> {
                         val questions = QuestionRepository.forMode(selectedMode)
                         val question = questions[questionIndex]
@@ -93,7 +111,9 @@ fun VibeCheckApp() {
                             total = questions.size,
                             answers = if (selectedMode == GameMode.RED_GREEN) {
                                 listOf("Green Flag", "Red Flag")
-                            } else players,
+                            } else {
+                                players.toList()
+                            },
                             onAnswer = { answer ->
                                 votes += Vote(question.id, answer)
                                 if (questionIndex == questions.lastIndex) {
@@ -104,6 +124,7 @@ fun VibeCheckApp() {
                             }
                         )
                     }
+
                     Screen.RESULT -> ResultScreen(
                         mode = selectedMode,
                         votes = votes,
@@ -144,6 +165,109 @@ private fun HomeScreen(onMode: (GameMode) -> Unit) {
                         Text(mode.subtitle, color = Color(0xFFA9A3B3), fontSize = 14.sp)
                     }
                 }
+            }
+        }
+    }
+}
+
+@Composable
+private fun PlayerSetupScreen(
+    players: List<String>,
+    onBack: () -> Unit,
+    onAddPlayer: (String) -> Unit,
+    onRemovePlayer: (String) -> Unit,
+    onStart: () -> Unit
+) {
+    var input by remember { mutableStateOf("") }
+    val normalized = PlayerRules.normalize(input)
+    val canAdd = PlayerRules.canAdd(players, input)
+    val canStart = PlayerRules.canStart(players)
+
+    Column(
+        modifier = Modifier.fillMaxSize(),
+        verticalArrangement = Arrangement.SpaceBetween
+    ) {
+        Column {
+            Text("Crée ton groupe", color = Color.White, fontSize = 32.sp, fontWeight = FontWeight.Black)
+            Text(
+                "Ajoute entre " + PlayerRules.MIN_PLAYERS + " et " + PlayerRules.MAX_PLAYERS + " joueurs.",
+                color = Color(0xFFBEB7C9)
+            )
+            Spacer(Modifier.height(20.dp))
+
+            OutlinedTextField(
+                value = input,
+                onValueChange = { input = it.take(PlayerRules.MAX_NAME_LENGTH + 4) },
+                label = { Text("Prénom ou pseudo") },
+                singleLine = true,
+                modifier = Modifier.fillMaxWidth()
+            )
+
+            Spacer(Modifier.height(10.dp))
+
+            Button(
+                onClick = {
+                    onAddPlayer(normalized)
+                    input = ""
+                },
+                enabled = canAdd,
+                modifier = Modifier.fillMaxWidth(),
+                shape = RoundedCornerShape(16.dp)
+            ) {
+                Text("Ajouter le joueur")
+            }
+
+            Spacer(Modifier.height(18.dp))
+
+            if (players.isEmpty()) {
+                Text("Aucun joueur ajouté pour le moment.", color = Color(0xFF8B8494))
+            } else {
+                LazyColumn(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                    items(players, key = { it }) { player ->
+                        Card(
+                            colors = CardDefaults.cardColors(containerColor = Color(0xFF211E29)),
+                            shape = RoundedCornerShape(16.dp),
+                            modifier = Modifier.fillMaxWidth()
+                        ) {
+                            Row(
+                                modifier = Modifier.fillMaxWidth().padding(start = 16.dp, end = 6.dp),
+                                horizontalArrangement = Arrangement.SpaceBetween,
+                                verticalAlignment = Alignment.CenterVertically
+                            ) {
+                                Text(player, color = Color.White, fontWeight = FontWeight.Bold)
+                                IconButton(onClick = { onRemovePlayer(player) }) {
+                                    Icon(
+                                        imageVector = Icons.Default.Close,
+                                        contentDescription = "Supprimer " + player,
+                                        tint = Color(0xFFBEB7C9)
+                                    )
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+        Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+            Button(
+                onClick = onStart,
+                enabled = canStart,
+                modifier = Modifier.fillMaxWidth().height(58.dp),
+                shape = RoundedCornerShape(18.dp)
+            ) {
+                Text(
+                    if (canStart) "Lancer la partie" else "Ajoute au moins " + PlayerRules.MIN_PLAYERS + " joueurs",
+                    fontWeight = FontWeight.Bold
+                )
+            }
+            Button(
+                onClick = onBack,
+                modifier = Modifier.fillMaxWidth(),
+                shape = RoundedCornerShape(18.dp),
+                colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF302A39))
+            ) {
+                Text("Retour")
             }
         }
     }
@@ -248,7 +372,11 @@ private fun ResultScreen(
                 }
             }
 
-            Button(onClick = onReplay, modifier = Modifier.fillMaxWidth(), shape = RoundedCornerShape(18.dp)) {
+            Button(
+                onClick = onReplay,
+                modifier = Modifier.fillMaxWidth(),
+                shape = RoundedCornerShape(18.dp)
+            ) {
                 Text("Rejouer")
             }
 
