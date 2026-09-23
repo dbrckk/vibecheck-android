@@ -5,6 +5,7 @@ import com.vibecheck.app.domain.Challenge
 import com.vibecheck.app.domain.SessionCodec
 import com.vibecheck.app.domain.model.GameIntensity
 import com.vibecheck.app.domain.model.GameMode
+import com.vibecheck.app.domain.model.GamePack
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
 import org.junit.Assert.assertTrue
@@ -301,5 +302,26 @@ class GameViewModelTest {
 
         assertTrue(viewModel.legacyChallenge.value)
         assertEquals(GameIntensity.NORMAL.name, viewModel.intensityName.value)
+    }
+    @Test
+    fun pack_is_persisted_and_locked_by_challenge() {
+        val viewModel = GameViewModel(SavedStateHandle())
+
+        viewModel.selectPack(GamePack.DEEP)
+        assertEquals(GamePack.DEEP.name, viewModel.packName.value)
+
+        viewModel.acceptChallenge(
+            Challenge(
+                mode = GameMode.WHO_OF_US,
+                targetPercent = 70,
+                seed = 44L,
+                intensity = GameIntensity.NORMAL,
+                pack = GamePack.FRIENDS
+            )
+        )
+
+        assertEquals(GamePack.FRIENDS.name, viewModel.packName.value)
+        viewModel.selectPack(GamePack.CHAOS)
+        assertEquals(GamePack.FRIENDS.name, viewModel.packName.value)
     }
 }
