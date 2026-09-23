@@ -34,6 +34,7 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import com.vibecheck.app.billing.PremiumBillingManager
 import com.vibecheck.app.billing.PurchaseStatus
 import com.vibecheck.app.data.KnowMeRepository
+import com.vibecheck.app.data.LocalStatsStore
 import com.vibecheck.app.data.PlayerGroupStore
 import com.vibecheck.app.data.QuestionHistoryStore
 import com.vibecheck.app.data.QuestionRepository
@@ -69,6 +70,9 @@ fun VibeCheckApp(
     }
     val playerGroupStore = remember(context.applicationContext) {
         PlayerGroupStore(context.applicationContext)
+    }
+    val localStatsStore = remember(context.applicationContext) {
+        LocalStatsStore(context.applicationContext)
     }
     var groupHydrated by remember { mutableStateOf(false) }
 
@@ -115,6 +119,19 @@ fun VibeCheckApp(
     }
     val sessionIntensity = if (legacyChallenge) null else selectedIntensity
     val sessionPack = if (legacyChallenge) GamePack.MIX else selectedPack
+    val groupLeader = if (screen == AppScreen.HOME) {
+        players
+            .map(localStatsStore::statFor)
+            .filter { it.wins > 0 }
+            .sortedWith(
+                compareByDescending<com.vibecheck.app.data.PlayerStat> { it.wins }
+                    .thenByDescending { it.bestScorePercent }
+                    .thenBy { it.name }
+            )
+            .firstOrNull()
+    } else {
+        null
+    }
 
     LaunchedEffect(Unit) {
         val restored = playerGroupStore.load()
@@ -195,6 +212,8 @@ fun VibeCheckApp(
                         selectedIntensity = selectedIntensity,
                         selectedPack = selectedPack,
                         savedPlayerCount = players.size,
+                        groupLeaderName = groupLeader?.name,
+                        groupLeaderWins = groupLeader?.wins ?: 0,
                         onEditGroup = gameViewModel::editPlayers,
                         onBuyPremium = {
                             (context as? Activity)?.let { activity ->
