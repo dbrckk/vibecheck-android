@@ -10,7 +10,8 @@ M0 — runnable offline vertical slice with real group setup.
 - Kotlin Android application skeleton.
 - Jetpack Compose single-activity UI.
 - Four initial modes.
-- Local question catalog.
+- Local question catalog with 48 starter prompts.
+- Seeded randomized 8-question sessions that survive activity recreation.
 - Deterministic vote/result engine.
 - Native Android result sharing.
 - Generated 1080x1920 PNG result cards.
@@ -26,9 +27,9 @@ M0 — runnable offline vertical slice with real group setup.
 
 ## Next
 1. Keep CI green after player-flow changes.
-2. Expand question content and randomized sessions.
-3. Refine challenge UX and prepare verified HTTPS App Links when a public domain exists.
-4. Refine result-card visual quality and variants.
+2. Refine challenge UX and prepare verified HTTPS App Links when a public domain exists.
+3. Refine result-card visual quality and variants.
+4. Split the growing UI into feature files/ViewModel before adding monetization.
 5. Only then add lifetime remove-ads billing and ad placements.
 
 ## Constraints
