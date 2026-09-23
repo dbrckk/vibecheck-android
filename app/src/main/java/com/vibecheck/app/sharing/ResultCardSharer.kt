@@ -82,12 +82,23 @@ object ResultCardSharer {
             type = "image/png"
             putExtra(Intent.EXTRA_STREAM, uri)
             clipData = ClipData.newUri(context.contentResolver, "VibeCheck result", uri)
+            val podiumText = if (ranking.isNotEmpty() && totalVotes > 0) {
+                ranking.take(3).mapIndexed { index, entry ->
+                    val pct = (entry.second * 100 / totalVotes).coerceIn(0, 100)
+                    (index + 1).toString() + ". " + sanitizeWinner(entry.first) + " " + pct + "%"
+                }.joinToString(" • ")
+            } else {
+                ""
+            }
             putExtra(
                 Intent.EXTRA_TEXT,
-                if (mode == GameMode.KNOWS_ME) {
-                    "Mon VibeCheck : $safeWinner connaît le mieux le groupe avec $safePercent% — ${mode.title}."
-                } else {
-                    "Mon VibeCheck : $safeWinner arrive en tête avec $safePercent% — ${mode.title}."
+                when {
+                    mode == GameMode.KNOWS_ME ->
+                        "Mon VibeCheck : $safeWinner connaît le mieux le groupe avec $safePercent% — ${mode.title}."
+                    podiumText.isNotBlank() ->
+                        "Mon VibeCheck : $safeWinner arrive en tête avec $safePercent% — $podiumText"
+                    else ->
+                        "Mon VibeCheck : $safeWinner arrive en tête avec $safePercent% — ${mode.title}."
                 }
             )
             addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
