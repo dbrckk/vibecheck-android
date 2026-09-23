@@ -1,6 +1,7 @@
 package com.vibecheck.app.ui
 
 import android.app.Activity
+import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
@@ -76,6 +77,15 @@ fun VibeCheckApp(
         incomingChallenge?.let { challenge ->
             gameViewModel.acceptChallenge(challenge)
             onChallengeConsumed()
+        }
+    }
+
+    BackHandler(enabled = screen != AppScreen.HOME) {
+        when (screen) {
+            AppScreen.PLAYERS -> gameViewModel.goBackHome()
+            AppScreen.GAME -> gameViewModel.abandonGame()
+            AppScreen.RESULT -> gameViewModel.goHome()
+            AppScreen.HOME -> Unit
         }
     }
 
