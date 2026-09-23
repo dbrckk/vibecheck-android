@@ -53,20 +53,36 @@ object ResultCardSharer {
             )
             try {
                 val directory = File(context.cacheDir, "shared_results")
-                check(directory.exists() || directory.mkdirs()) {
-                    "Unable to create shared results cache directory"
+                if (directory.exists()) {
+                    check(directory.isDirectory) {
+                        "Shared results cache path is not a directory"
+                    }
+                } else {
+                    check(directory.mkdirs()) {
+                        "Unable to create shared results cache directory"
+                    }
                 }
+
                 val outputFile = File.createTempFile(
-                    "vibecheck-result-",
+                    "vibecheck-story-",
                     ".png",
                     directory
                 )
 
-                FileOutputStream(outputFile).use { output ->
-                    check(bitmap.compress(Bitmap.CompressFormat.PNG, 100, output))
+                try {
+                    FileOutputStream(outputFile).use { output ->
+                        check(bitmap.compress(Bitmap.CompressFormat.PNG, 100, output))
+                        output.fd.sync()
+                    }
+                    check(outputFile.isFile && outputFile.length() > 0L) {
+                        "Shared result image is empty"
+                    }
+                    pruneOldCards(directory)
+                    outputFile
+                } catch (error: Exception) {
+                    outputFile.delete()
+                    throw error
                 }
-                pruneOldCards(directory)
-                outputFile
             } finally {
                 bitmap.recycle()
             }
@@ -303,7 +319,12 @@ object ResultCardSharer {
 
     private fun pruneOldCards(directory: File) {
         directory.listFiles()
-            ?.filter { it.isFile && it.name.startsWith("vibecheck-result-") }
+            ?.filter {
+                it.isFile && (
+                    it.name.startsWith("vibecheck-result-") ||
+                    it.name.startsWith("vibecheck-story-")
+                )
+            }
             ?.sortedByDescending { it.lastModified() }
             ?.drop(MAX_CACHED_CARDS)
             ?.forEach { it.delete() }
