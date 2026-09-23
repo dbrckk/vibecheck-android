@@ -29,6 +29,9 @@ class PremiumBillingManager(
     private val _isPurchaseReady = MutableStateFlow(false)
     val isPurchaseReady: StateFlow<Boolean> = _isPurchaseReady.asStateFlow()
 
+    private val _formattedPrice = MutableStateFlow<String?>(null)
+    val formattedPrice: StateFlow<String?> = _formattedPrice.asStateFlow()
+
     private var productDetails: ProductDetails? = null
     private var selectedOfferToken: String? = null
 
@@ -111,6 +114,7 @@ class PremiumBillingManager(
         billingClient.queryProductDetailsAsync(params) { billingResult, result ->
             if (billingResult.responseCode != BillingClient.BillingResponseCode.OK) {
                 _isPurchaseReady.value = false
+                _formattedPrice.value = null
                 return@queryProductDetailsAsync
             }
 
@@ -119,9 +123,11 @@ class PremiumBillingManager(
             val offer = details
                 ?.oneTimePurchaseOfferDetailsList
                 ?.firstOrNull()
+                ?: details?.oneTimePurchaseOfferDetails
 
             productDetails = details
             selectedOfferToken = offer?.offerToken
+            _formattedPrice.value = offer?.formattedPrice
             _isPurchaseReady.value = details != null && selectedOfferToken != null
         }
     }
