@@ -1,6 +1,9 @@
 package com.vibecheck.app.ui.screens
 
+import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -8,8 +11,10 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Close
@@ -20,6 +25,8 @@ import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.LinearProgressIndicator
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -37,6 +44,7 @@ import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.vibecheck.app.domain.PlayerRules
+import com.vibecheck.app.ui.theme.VibeColors
 
 @Composable
 fun PlayerSetupScreen(
@@ -58,7 +66,21 @@ fun PlayerSetupScreen(
         verticalArrangement = Arrangement.SpaceBetween
     ) {
         Column(modifier = Modifier.weight(1f)) {
-            Text("Crée ton groupe", color = Color.White, fontSize = 32.sp, fontWeight = FontWeight.Black)
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(10.dp)
+            ) {
+                Box(
+                    modifier = Modifier
+                        .size(9.dp)
+                        .background(VibeColors.Purple, CircleShape)
+                )
+                Text(
+                    "Crée ton groupe",
+                    color = VibeColors.TextPrimary,
+                    style = MaterialTheme.typography.headlineLarge
+                )
+            }
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.SpaceBetween,
@@ -70,22 +92,24 @@ fun PlayerSetupScreen(
                 )
                 Text(
                     players.size.toString() + "/" + PlayerRules.MAX_PLAYERS,
-                    color = Color(0xFFC9A7FF),
-                    fontWeight = FontWeight.Bold
+                    color = VibeColors.Purple,
+                    fontWeight = FontWeight.Black
                 )
             }
             Spacer(Modifier.height(8.dp))
             LinearProgressIndicator(
                 progress = { capacityProgress.coerceIn(0f, 1f) },
                 modifier = Modifier.fillMaxWidth(),
-                color = Color(0xFFC9A7FF),
-                trackColor = Color(0xFF302A39)
+                color = VibeColors.Purple,
+                trackColor = VibeColors.Purple.copy(alpha = 0.14f)
             )
             if (challengeTarget != null) {
                 Spacer(Modifier.height(10.dp))
                 Card(
-                    colors = CardDefaults.cardColors(containerColor = Color(0xFF4B2E6B)),
-                    shape = RoundedCornerShape(16.dp),
+                    colors = CardDefaults.cardColors(containerColor = VibeColors.Purple.copy(alpha = 0.14f)),
+                    border = BorderStroke(1.dp, VibeColors.Purple.copy(alpha = 0.4f)),
+                    elevation = CardDefaults.cardElevation(defaultElevation = 6.dp),
+                    shape = RoundedCornerShape(18.dp),
                     modifier = Modifier.fillMaxWidth()
                 ) {
                     Text(
@@ -112,6 +136,13 @@ fun PlayerSetupScreen(
                         }
                     }
                 ),
+                colors = OutlinedTextFieldDefaults.colors(
+                    focusedBorderColor = VibeColors.Purple,
+                    focusedLabelColor = VibeColors.Purple,
+                    cursorColor = VibeColors.Purple,
+                    unfocusedBorderColor = Color.White.copy(alpha = 0.14f)
+                ),
+                shape = RoundedCornerShape(18.dp),
                 modifier = Modifier.fillMaxWidth()
             )
 
@@ -123,8 +154,14 @@ fun PlayerSetupScreen(
                     input = ""
                 },
                 enabled = canAdd && players.size < PlayerRules.MAX_PLAYERS,
-                modifier = Modifier.fillMaxWidth(),
-                shape = RoundedCornerShape(16.dp)
+                modifier = Modifier.fillMaxWidth().height(54.dp),
+                shape = RoundedCornerShape(18.dp),
+                colors = ButtonDefaults.buttonColors(
+                    containerColor = VibeColors.Purple.copy(alpha = 0.16f),
+                    contentColor = VibeColors.TextPrimary,
+                    disabledContainerColor = VibeColors.SurfaceStrong.copy(alpha = 0.6f),
+                    disabledContentColor = Color.White.copy(alpha = 0.35f)
+                )
             ) {
                 Text("Ajouter le joueur")
             }
@@ -133,8 +170,9 @@ fun PlayerSetupScreen(
 
             if (players.isEmpty()) {
                 Card(
-                    colors = CardDefaults.cardColors(containerColor = Color(0xFF1B1821)),
-                    shape = RoundedCornerShape(18.dp),
+                    colors = CardDefaults.cardColors(containerColor = Color(0xCC17131D)),
+                    border = BorderStroke(1.dp, Color.White.copy(alpha = 0.07f)),
+                    shape = RoundedCornerShape(20.dp),
                     modifier = Modifier.fillMaxWidth()
                 ) {
                     Column(modifier = Modifier.padding(16.dp)) {
@@ -156,8 +194,10 @@ fun PlayerSetupScreen(
                 ) {
                     items(players, key = { it }) { player ->
                         Card(
-                            colors = CardDefaults.cardColors(containerColor = Color(0xFF211E29)),
-                            shape = RoundedCornerShape(16.dp),
+                            colors = CardDefaults.cardColors(containerColor = Color(0xE61D1824)),
+                            border = BorderStroke(1.dp, VibeColors.Purple.copy(alpha = 0.16f)),
+                            elevation = CardDefaults.cardElevation(defaultElevation = 4.dp),
+                            shape = RoundedCornerShape(18.dp),
                             modifier = Modifier.fillMaxWidth()
                         ) {
                             Row(
@@ -165,7 +205,28 @@ fun PlayerSetupScreen(
                                 horizontalArrangement = Arrangement.SpaceBetween,
                                 verticalAlignment = Alignment.CenterVertically
                             ) {
-                                Text(player, color = Color.White, fontWeight = FontWeight.Bold)
+                                Row(
+                                    verticalAlignment = Alignment.CenterVertically,
+                                    horizontalArrangement = Arrangement.spacedBy(10.dp)
+                                ) {
+                                    Box(
+                                        modifier = Modifier
+                                            .size(30.dp)
+                                            .background(VibeColors.Purple.copy(alpha = 0.16f), CircleShape),
+                                        contentAlignment = Alignment.Center
+                                    ) {
+                                        Text(
+                                            player.take(1).uppercase(),
+                                            color = VibeColors.Purple,
+                                            fontWeight = FontWeight.Black
+                                        )
+                                    }
+                                    Text(
+                                        player,
+                                        color = VibeColors.TextPrimary,
+                                        style = MaterialTheme.typography.titleMedium
+                                    )
+                                }
                                 IconButton(onClick = { onRemovePlayer(player) }) {
                                     Icon(
                                         imageVector = Icons.Default.Close,
@@ -184,8 +245,14 @@ fun PlayerSetupScreen(
             Button(
                 onClick = onStart,
                 enabled = canStart,
-                modifier = Modifier.fillMaxWidth().height(58.dp),
-                shape = RoundedCornerShape(18.dp)
+                modifier = Modifier.fillMaxWidth().height(60.dp),
+                shape = RoundedCornerShape(20.dp),
+                colors = ButtonDefaults.buttonColors(
+                    containerColor = VibeColors.Purple,
+                    contentColor = Color(0xFF18121F),
+                    disabledContainerColor = VibeColors.SurfaceStrong,
+                    disabledContentColor = Color.White.copy(alpha = 0.34f)
+                )
             ) {
                 Text(
                     if (canStart) "Lancer la partie" else "Ajoute au moins " + PlayerRules.MIN_PLAYERS + " joueurs",
@@ -196,7 +263,10 @@ fun PlayerSetupScreen(
                 onClick = onBack,
                 modifier = Modifier.fillMaxWidth(),
                 shape = RoundedCornerShape(18.dp),
-                colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF302A39))
+                colors = ButtonDefaults.buttonColors(
+                    containerColor = Color.White.copy(alpha = 0.06f),
+                    contentColor = VibeColors.TextPrimary
+                )
             ) {
                 Text("Retour")
             }
