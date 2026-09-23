@@ -36,6 +36,7 @@ import com.vibecheck.app.data.QuestionHistoryStore
 import com.vibecheck.app.data.QuestionRepository
 import com.vibecheck.app.domain.Challenge
 import com.vibecheck.app.domain.SessionCodec
+import com.vibecheck.app.domain.model.GameIntensity
 import com.vibecheck.app.domain.model.GameMode
 import com.vibecheck.app.domain.model.GameResult
 import com.vibecheck.app.ui.screens.GameScreen
@@ -80,6 +81,8 @@ fun VibeCheckApp(
     val players by gameViewModel.players.collectAsState()
     val challengeTargetRaw by gameViewModel.challengeTarget.collectAsState()
     val sessionSeed by gameViewModel.sessionSeed.collectAsState()
+    val intensityName by gameViewModel.intensityName.collectAsState()
+    val legacyChallenge by gameViewModel.legacyChallenge.collectAsState()
     val knowSecretAnswer by gameViewModel.knowSecretAnswer.collectAsState()
     val knowGuesserIndex by gameViewModel.knowGuesserIndex.collectAsState()
     val knowScores by gameViewModel.knowScores.collectAsState()
@@ -87,6 +90,9 @@ fun VibeCheckApp(
 
     val screen = runCatching { AppScreen.valueOf(screenName) }.getOrDefault(AppScreen.HOME)
     val selectedMode = runCatching { GameMode.valueOf(modeName) }.getOrDefault(GameMode.WHO_OF_US)
+    val selectedIntensity = runCatching {
+        GameIntensity.valueOf(intensityName)
+    }.getOrDefault(GameIntensity.NORMAL)
     val votes = SessionCodec.decodeVotes(savedVotes)
     val challengeTarget = challengeTargetRaw.takeIf { it != GameViewModel.NO_CHALLENGE }
     val avoidedIds = if (challengeTarget == null) {
@@ -94,6 +100,7 @@ fun VibeCheckApp(
     } else {
         emptySet()
     }
+    val sessionIntensity = if (legacyChallenge) null else selectedIntensity
 
     LaunchedEffect(incomingChallenge) {
         incomingChallenge?.let { challenge ->
@@ -153,11 +160,13 @@ fun VibeCheckApp(
                         premiumReady = premiumReady,
                         premiumPrice = premiumPrice,
                         purchaseStatus = purchaseStatus,
+                        selectedIntensity = selectedIntensity,
                         onBuyPremium = {
                             (context as? Activity)?.let { activity ->
                                 billingManager.launchPurchase(activity)
                             }
                         },
+                        onIntensity = gameViewModel::selectIntensity,
                         onMode = gameViewModel::selectMode
                     )
 
@@ -174,7 +183,8 @@ fun VibeCheckApp(
                         if (selectedMode == GameMode.KNOWS_ME) {
                             val prompts = KnowMeRepository.forSeed(
                                 seed = sessionSeed,
-                                avoidIds = avoidedIds
+                                avoidIds = avoidedIds,
+                                intensity = sessionIntensity
                             )
                             val target = players.firstOrNull()
                             val guessers = players.drop(1)
@@ -239,7 +249,8 @@ fun VibeCheckApp(
                             val questions = QuestionRepository.forMode(
                                 mode = selectedMode,
                                 seed = sessionSeed,
-                                avoidIds = avoidedIds
+                                avoidIds = avoidedIds,
+                                intensity = sessionIntensity
                             )
 
                             if (questions.isEmpty()) {
@@ -309,7 +320,8 @@ fun VibeCheckApp(
                                 score = best?.second ?: 0,
                                 total = KnowMeRepository.forSeed(
                                     seed = sessionSeed,
-                                    avoidIds = avoidedIds
+                                    avoidIds = avoidedIds,
+                                    intensity = sessionIntensity
                                 ).size
                             )
                         } else {
@@ -322,6 +334,7 @@ fun VibeCheckApp(
                             resultOverride = knowMeResult,
                             challengeTarget = challengeTarget,
                             sessionSeed = sessionSeed,
+                            intensity = selectedIntensity,
                             onReplay = gameViewModel::replay,
                             onHome = gameViewModel::goHome
                         )
