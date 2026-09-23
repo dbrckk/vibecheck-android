@@ -200,4 +200,62 @@ class GameViewModelTest {
         assertEquals(4242L, viewModel.sessionSeed.value)
     }
 
+    @Test
+    fun know_me_scores_each_guesser_and_advances_after_everyone_guesses() {
+        val viewModel = GameViewModel(SavedStateHandle())
+        viewModel.selectMode(GameMode.KNOWS_ME)
+        viewModel.addPlayer("Alice")
+        viewModel.addPlayer("Bob")
+        viewModel.addPlayer("Chloe")
+        viewModel.startGame()
+
+        viewModel.setKnowMeSecret("Mer")
+        assertEquals("Mer", viewModel.knowSecretAnswer.value)
+        assertEquals(0, viewModel.knowGuesserIndex.value)
+
+        viewModel.submitKnowMeGuess("Mer", isLastQuestion = false)
+        assertEquals(1, viewModel.knowGuesserIndex.value)
+        assertEquals(listOf(1, 0), viewModel.knowScores.value)
+        assertEquals(0, viewModel.questionIndex.value)
+
+        viewModel.submitKnowMeGuess("Montagne", isLastQuestion = false)
+        assertEquals(1, viewModel.questionIndex.value)
+        assertEquals("", viewModel.knowSecretAnswer.value)
+        assertEquals(0, viewModel.knowGuesserIndex.value)
+        assertEquals(listOf(1, 0), viewModel.knowScores.value)
+    }
+
+    @Test
+    fun know_me_last_round_reaches_result_and_survives_recreation() {
+        val state = SavedStateHandle()
+        val viewModel = GameViewModel(state)
+        viewModel.selectMode(GameMode.KNOWS_ME)
+        viewModel.addPlayer("Alice")
+        viewModel.addPlayer("Bob")
+        viewModel.startGame()
+        viewModel.setKnowMeSecret("Mer")
+        viewModel.submitKnowMeGuess("Mer", isLastQuestion = true)
+
+        val restored = GameViewModel(state)
+        assertEquals(AppScreen.RESULT.name, restored.screenName.value)
+        assertEquals(listOf(1), restored.knowScores.value)
+        assertEquals("Mer", restored.knowSecretAnswer.value)
+    }
+
+    @Test
+    fun abandoning_know_me_clears_private_answer_and_scores() {
+        val viewModel = GameViewModel(SavedStateHandle())
+        viewModel.selectMode(GameMode.KNOWS_ME)
+        viewModel.addPlayer("Alice")
+        viewModel.addPlayer("Bob")
+        viewModel.startGame()
+        viewModel.setKnowMeSecret("Mer")
+        viewModel.submitKnowMeGuess("Mer", isLastQuestion = false)
+
+        viewModel.abandonGame()
+
+        assertEquals("", viewModel.knowSecretAnswer.value)
+        assertTrue(viewModel.knowScores.value.isEmpty())
+        assertEquals(0, viewModel.knowGuesserIndex.value)
+    }
 }
