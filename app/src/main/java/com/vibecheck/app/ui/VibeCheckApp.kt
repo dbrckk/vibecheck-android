@@ -114,13 +114,15 @@ fun VibeCheckApp(
             val ids = if (selectedMode == GameMode.KNOWS_ME) {
                 KnowMeRepository.forSeed(
                     seed = sessionSeed,
-                    avoidIds = questionHistory.recentIds(selectedMode)
+                    avoidIds = questionHistory.recentIds(selectedMode),
+                    intensity = sessionIntensity
                 ).map { it.id }
             } else {
                 QuestionRepository.forMode(
                     mode = selectedMode,
                     seed = sessionSeed,
-                    avoidIds = questionHistory.recentIds(selectedMode)
+                    avoidIds = questionHistory.recentIds(selectedMode),
+                    intensity = sessionIntensity
                 ).map { it.id }
             }
             questionHistory.remember(selectedMode, ids)
