@@ -72,6 +72,18 @@ fun GameScreen(
         GameMode.RED_GREEN -> VibeColors.Green
         GameMode.KNOWS_ME -> VibeColors.Blue
     }
+    val questionFontSize = when {
+        questionText.length > 110 -> 23.sp
+        questionText.length > 80 -> 25.sp
+        questionText.length > 55 -> 27.sp
+        else -> 30.sp
+    }
+    val questionLineHeight = when {
+        questionText.length > 110 -> 29.sp
+        questionText.length > 80 -> 31.sp
+        questionText.length > 55 -> 33.sp
+        else -> 36.sp
+    }
     val haptic = LocalHapticFeedback.current
     var answering by remember(progress) { mutableStateOf(false) }
 
@@ -181,8 +193,8 @@ fun GameScreen(
                 Text(
                     questionText,
                     color = VibeColors.TextPrimary,
-                    fontSize = 30.sp,
-                    lineHeight = 36.sp,
+                    fontSize = questionFontSize,
+                    lineHeight = questionLineHeight,
                     fontWeight = FontWeight.Black,
                     textAlign = TextAlign.Center
                 )
