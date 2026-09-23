@@ -7,6 +7,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Button
+import androidx.compose.material3.TextButton
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -24,15 +25,26 @@ fun GameScreen(
     progress: Int,
     total: Int,
     answers: List<String>,
-    onAnswer: (String) -> Unit
+    onAnswer: (String) -> Unit,
+    onExit: () -> Unit
 ) {
     Column(
         modifier = Modifier.fillMaxSize(),
         verticalArrangement = Arrangement.SpaceBetween
     ) {
         Column {
-            Text(mode.title, color = Color(0xFFC9A7FF), fontWeight = FontWeight.Bold)
-            Text(progress.toString() + " / " + total, color = Color(0xFF8B8494), fontSize = 14.sp)
+            androidx.compose.foundation.layout.Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween
+            ) {
+                Column {
+                    Text(mode.title, color = Color(0xFFC9A7FF), fontWeight = FontWeight.Bold)
+                    Text(progress.toString() + " / " + total, color = Color(0xFF8B8494), fontSize = 14.sp)
+                }
+                TextButton(onClick = onExit) {
+                    Text("Quitter", color = Color(0xFFBEB7C9))
+                }
+            }
         }
 
         Text(
