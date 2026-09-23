@@ -102,4 +102,21 @@ class QuestionRepositoryTest {
             }
         }
     }
+    @Test
+    fun every_pack_and_intensity_combination_can_fill_a_session() {
+        GameMode.entries.forEach { mode ->
+            GamePack.entries.forEach { pack ->
+                GameIntensity.entries.forEach { intensity ->
+                    val questions = QuestionRepository.forMode(
+                        mode = mode,
+                        seed = 21L,
+                        limit = 8,
+                        pack = pack,
+                        intensity = intensity
+                    )
+                    assertEquals(8, questions.size)
+                }
+            }
+        }
+    }
 }
