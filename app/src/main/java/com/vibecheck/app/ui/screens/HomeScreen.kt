@@ -237,23 +237,19 @@ private fun ModeCard(
             }
 
             Column(modifier = Modifier.weight(1f)) {
-                Row(
-                    verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.spacedBy(8.dp)
-                ) {
-                    Text(
-                        mode.title,
-                        color = VibeColors.TextPrimary,
-                        style = MaterialTheme.typography.titleLarge
-                    )
-                    Text(
-                        "8 QUESTIONS",
-                        color = visual.accent,
-                        fontSize = 10.sp,
-                        fontWeight = FontWeight.Black,
-                        letterSpacing = 0.8.sp
-                    )
-                }
+                Text(
+                    mode.title,
+                    color = VibeColors.TextPrimary,
+                    style = MaterialTheme.typography.titleLarge
+                )
+                Spacer(Modifier.height(3.dp))
+                Text(
+                    "8 QUESTIONS",
+                    color = visual.accent,
+                    fontSize = 10.sp,
+                    fontWeight = FontWeight.Black,
+                    letterSpacing = 0.8.sp
+                )
                 Spacer(Modifier.height(5.dp))
                 Text(
                     mode.subtitle,
