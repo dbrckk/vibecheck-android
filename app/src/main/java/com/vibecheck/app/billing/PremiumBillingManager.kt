@@ -82,9 +82,7 @@ class PremiumBillingManager(
     }
 
     fun close() {
-        if (billingClient.isReady) {
-            billingClient.endConnection()
-        }
+        billingClient.endConnection()
     }
 
     override fun onPurchasesUpdated(
@@ -157,10 +155,10 @@ class PremiumBillingManager(
                 .setPurchaseToken(ownedPurchase.purchaseToken)
                 .build()
 
-            billingClient.acknowledgePurchase(params) { billingResult ->
-                if (billingResult.responseCode != BillingClient.BillingResponseCode.OK) {
-                    queryExistingPurchases()
-                }
+            billingClient.acknowledgePurchase(params) {
+                // Ownership is already granted from the PURCHASED state.
+                // Do not recursively re-query on acknowledgement failure:
+                // a later app start/refresh can retry safely without a tight loop.
             }
         }
     }
