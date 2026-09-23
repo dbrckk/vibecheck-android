@@ -1,43 +1,50 @@
 # Project state
 
 ## Product
-VibeCheck is an Android-first social party game designed around short sessions and shareable results.
+VibeCheck is an Android-first social party game built around fast group sessions, shareable 9:16 results and friend challenges.
 
 ## Current milestone
-M0 — runnable offline vertical slice with real group setup.
+M1 — stable offline vertical slice with polished core UX, reproducible challenges and lifetime Premium billing foundation.
 
 ## Implemented
-- Kotlin Android application skeleton.
-- Jetpack Compose single-activity UI.
-- Four initial modes.
-- Local question catalog with 48 starter prompts.
-- Seeded randomized 8-question sessions that survive activity recreation.
-- Deterministic vote/result engine.
-- Native Android result sharing.
-- Generated 1080x1920 PNG result cards.
-- Secure FileProvider-based image sharing from app cache.
-- Backend-free challenge links with vibecheck://challenge.
-- Incoming challenges open directly into the selected mode.
-- Native challenge sharing with a score-to-beat link.
-- Real player setup flow.
-- 2 to 8 players with normalized names.
-- Duplicate, blank and oversized-name validation.
-- Unit tests for result calculation and player rules.
-- GitHub Actions verification: unit tests, lint and debug APK.
-- UI split into dedicated Home, PlayerSetup, Game and Result screen files.
-- Activity reduced to Android lifecycle/deep-link responsibilities.
-- Game session state centralized in GameViewModel with SavedStateHandle.
+- Kotlin + Jetpack Compose single-activity Android app.
+- Four initial game modes with distinct visual identities.
+- Local 48-question catalog and seeded randomized 8-question sessions.
+- 2–8 player setup with normalized names and validation.
+- RED_GREEN starts directly without unnecessary player setup.
+- Game session state centralized in GameViewModel + SavedStateHandle.
+- Deterministic vote/result engine with unit coverage.
+- Lightweight native question/progress/result animations.
+- Duplicate-answer tap protection and haptic answer feedback.
+- Recoverable empty-question state instead of an index crash.
+- Native 1080x1920 result-card rendering with per-mode palettes.
+- Result PNG generation, compression and cache writing off the UI thread.
+- Share preparation/error state and duplicate-share protection.
+- Secure FileProvider + ClipData image sharing with cache pruning.
+- Versioned challenge links carrying mode, target and session seed.
+- Legacy challenge links remain readable.
+- Incoming challenges reproduce the same question selection/order.
+- Challenge replay preserves the seed; tied target score counts as success.
+- Lifetime Premium BillingClient foundation with localized Play price.
+- Existing purchases restored; acknowledgement retry cannot recurse tightly.
+- GitHub Actions: unit tests, lint, debug APK build and APK artifact.
+- CI uses checkout/setup-java v5 and Gradle setup v4.
+- Dedicated Home, PlayerSetup, Game and Result screens.
+- Home, gameplay, result and shared cards use a coherent mode-specific visual system.
 
 ## Next
-1. Keep CI green after player-flow changes.
-2. Refine challenge UX and prepare verified HTTPS App Links when a public domain exists.
-3. Refine result-card visual quality and variants.
-4. Keep architecture/CI green after the ViewModel refactor.
-5. Add lifetime remove-ads billing and carefully placed ads only after core UX is stable.
+1. Improve player setup ergonomics and Android back-navigation behavior.
+2. Add focused UI/instrumentation tests for the main play path.
+3. Extract hardcoded user-facing strings for localization/accessibility.
+4. Replace custom challenge URI with verified HTTPS App Links once a real domain exists.
+5. Add ads/consent only after real AdMob identifiers exist; never ship placeholder IDs.
+6. Prepare release signing, AAB workflow, privacy policy and Play Store release checklist.
+7. Revisit challenge-score semantics per mode and evolve KNOWS_ME into a genuinely distinct game mechanic.
 
 ## Constraints
-- Offline-first.
-- No account required for core play.
-- Keep infrastructure cost near zero.
-- Free/open-source dependencies preferred.
-- Freemium: ads + one-time lifetime remove-ads purchase.
+- Offline-first core play.
+- No account required.
+- Near-zero infrastructure cost.
+- Prefer free/open-source dependencies.
+- Monetization: carefully placed ads + one-time lifetime remove-ads purchase.
+- Do not invent production domains, ad IDs, signing credentials or store configuration.
