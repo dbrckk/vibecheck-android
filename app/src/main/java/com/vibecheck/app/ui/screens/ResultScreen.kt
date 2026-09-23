@@ -2,7 +2,10 @@ package com.vibecheck.app.ui.screens
 
 import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.tween
+import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -10,8 +13,10 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Share
@@ -21,6 +26,7 @@ import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.LinearProgressIndicator
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -44,6 +50,7 @@ import com.vibecheck.app.domain.model.GameMode
 import com.vibecheck.app.domain.model.Vote
 import com.vibecheck.app.sharing.ChallengeSharer
 import com.vibecheck.app.sharing.ResultCardSharer
+import com.vibecheck.app.ui.theme.VibeColors
 import kotlinx.coroutines.launch
 
 @Composable
@@ -59,6 +66,12 @@ fun ResultScreen(
     val context = LocalContext.current
     val percent = if (result.total == 0) 0 else (result.score * 100 / result.total)
     val challengeWon = challengeTarget != null && percent >= challengeTarget
+    val accent = when (mode) {
+        GameMode.WHO_OF_US -> VibeColors.Purple
+        GameMode.MOST_LIKELY -> VibeColors.Orange
+        GameMode.RED_GREEN -> VibeColors.Green
+        GameMode.KNOWS_ME -> VibeColors.Blue
+    }
     val reveal = remember { Animatable(0f) }
     val score = remember { Animatable(0f) }
     val scope = rememberCoroutineScope()
@@ -88,44 +101,62 @@ fun ResultScreen(
             },
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            Text(
-                "VIBECHECK",
-                color = Color(0xFFC9A7FF),
-                fontWeight = FontWeight.Black,
-                letterSpacing = 2.sp
-            )
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(8.dp)
+            ) {
+                Box(
+                    modifier = Modifier
+                        .size(8.dp)
+                        .background(accent, CircleShape)
+                )
+                Text(
+                    "VIBECHECK",
+                    color = accent,
+                    fontWeight = FontWeight.Black,
+                    letterSpacing = 2.sp
+                )
+            }
             Spacer(Modifier.height(18.dp))
 
             Card(
-                colors = CardDefaults.cardColors(containerColor = Color(0xE6211E29)),
-                shape = RoundedCornerShape(30.dp),
+                colors = CardDefaults.cardColors(containerColor = Color(0xF21B1721)),
+                border = BorderStroke(1.dp, accent.copy(alpha = 0.32f)),
+                elevation = CardDefaults.cardElevation(defaultElevation = 14.dp),
+                shape = RoundedCornerShape(32.dp),
                 modifier = Modifier.fillMaxWidth()
             ) {
                 Column(
                     modifier = Modifier.fillMaxWidth().padding(horizontal = 22.dp, vertical = 26.dp),
                     horizontalAlignment = Alignment.CenterHorizontally
                 ) {
-                    Text(
-                        "LE GROUPE A PARLÉ",
-                        color = Color(0xFF9E91AE),
-                        fontSize = 12.sp,
-                        fontWeight = FontWeight.Bold,
-                        letterSpacing = 1.2.sp
-                    )
+                    Box(
+                        modifier = Modifier
+                            .background(accent.copy(alpha = 0.12f), RoundedCornerShape(999.dp))
+                            .padding(horizontal = 13.dp, vertical = 7.dp)
+                    ) {
+                        Text(
+                            "LE GROUPE A PARLÉ",
+                            color = accent,
+                            fontSize = 11.sp,
+                            fontWeight = FontWeight.Black,
+                            letterSpacing = 1.15.sp
+                        )
+                    }
                     Spacer(Modifier.height(18.dp))
                     Text(
                         result.winner,
-                        color = Color.White,
-                        fontSize = 42.sp,
-                        lineHeight = 46.sp,
+                        color = VibeColors.TextPrimary,
+                        fontSize = 44.sp,
+                        lineHeight = 48.sp,
                         fontWeight = FontWeight.Black,
                         textAlign = TextAlign.Center
                     )
                     Spacer(Modifier.height(8.dp))
                     Text(
                         score.value.toInt().toString() + "%",
-                        color = Color(0xFFE8D8FF),
-                        fontSize = 68.sp,
+                        color = accent,
+                        fontSize = 72.sp,
                         fontWeight = FontWeight.Black
                     )
                     Text(
@@ -137,17 +168,21 @@ fun ResultScreen(
                     LinearProgressIndicator(
                         progress = { (score.value / 100f).coerceIn(0f, 1f) },
                         modifier = Modifier.fillMaxWidth().height(8.dp),
-                        color = Color(0xFFC9A7FF),
-                        trackColor = Color(0xFF3A3342)
+                        color = accent,
+                        trackColor = accent.copy(alpha = 0.14f)
                     )
 
                     if (challengeTarget != null) {
                         Spacer(Modifier.height(18.dp))
                         Card(
                             colors = CardDefaults.cardColors(
-                                containerColor = if (challengeWon) Color(0xFF294337) else Color(0xFF3B3044)
+                                containerColor = if (challengeWon) VibeColors.Green.copy(alpha = 0.18f) else accent.copy(alpha = 0.12f)
                             ),
-                            shape = RoundedCornerShape(16.dp)
+                            border = BorderStroke(
+                                1.dp,
+                                if (challengeWon) VibeColors.Green.copy(alpha = 0.5f) else accent.copy(alpha = 0.35f)
+                            ),
+                            shape = RoundedCornerShape(18.dp)
                         ) {
                             Text(
                                 if (challengeWon) {
@@ -194,8 +229,14 @@ fun ResultScreen(
                     }
                 },
                 enabled = !isSharing,
-                modifier = Modifier.fillMaxWidth().height(58.dp),
-                shape = RoundedCornerShape(18.dp)
+                modifier = Modifier.fillMaxWidth().height(60.dp),
+                shape = RoundedCornerShape(20.dp),
+                colors = ButtonDefaults.buttonColors(
+                    containerColor = accent,
+                    contentColor = Color(0xFF161019),
+                    disabledContainerColor = accent.copy(alpha = 0.35f),
+                    disabledContentColor = Color(0xFF161019).copy(alpha = 0.6f)
+                )
             ) {
                 Row(
                     horizontalArrangement = Arrangement.spacedBy(8.dp),
@@ -226,9 +267,12 @@ fun ResultScreen(
                         challenge = Challenge(mode = mode, targetPercent = percent, seed = sessionSeed)
                     )
                 },
-                modifier = Modifier.fillMaxWidth().height(54.dp),
-                shape = RoundedCornerShape(18.dp),
-                colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF4B2E6B))
+                modifier = Modifier.fillMaxWidth().height(56.dp),
+                shape = RoundedCornerShape(20.dp),
+                colors = ButtonDefaults.buttonColors(
+                    containerColor = accent.copy(alpha = 0.16f),
+                    contentColor = VibeColors.TextPrimary
+                )
             ) {
                 Text("Défier un ami", fontWeight = FontWeight.Bold)
             }
@@ -241,7 +285,10 @@ fun ResultScreen(
                     onClick = onReplay,
                     modifier = Modifier.weight(1f),
                     shape = RoundedCornerShape(18.dp),
-                    colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFEEE6FF), contentColor = Color(0xFF18121F))
+                    colors = ButtonDefaults.buttonColors(
+                        containerColor = VibeColors.PurpleBright,
+                        contentColor = Color(0xFF18121F)
+                    )
                 ) {
                     Text("Rejouer", fontWeight = FontWeight.Bold)
                 }
