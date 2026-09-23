@@ -1,5 +1,6 @@
 package com.vibecheck.app.data
 
+import com.vibecheck.app.domain.model.GameIntensity
 import com.vibecheck.app.domain.model.GameMode
 import com.vibecheck.app.domain.model.Question
 import kotlin.random.Random
@@ -111,13 +112,23 @@ object QuestionRepository {
         mode: GameMode,
         seed: Long = 0L,
         limit: Int = 8,
-        avoidIds: Set<String> = emptySet()
+        avoidIds: Set<String> = emptySet(),
+        intensity: GameIntensity? = null
     ): List<Question> {
         val shuffled = questions
             .filter { it.mode == mode }
+            .filter { intensity == null || intensityForId(it.id) == intensity }
             .shuffled(Random(seed))
         val preferred = shuffled.filterNot { it.id in avoidIds }
         val fallback = shuffled.filter { it.id in avoidIds }
         return (preferred + fallback).take(limit.coerceAtLeast(0))
+    }
+    private fun intensityForId(id: String): GameIntensity {
+        val index = id.substringAfterLast("_").toIntOrNull() ?: return GameIntensity.NORMAL
+        return when (index) {
+            in 1..8 -> GameIntensity.CHILL
+            in 9..16 -> GameIntensity.NORMAL
+            else -> GameIntensity.SAVAGE
+        }
     }
 }
