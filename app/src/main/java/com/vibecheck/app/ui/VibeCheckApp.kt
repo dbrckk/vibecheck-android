@@ -39,6 +39,7 @@ import com.vibecheck.app.domain.SessionCodec
 import com.vibecheck.app.domain.model.GameIntensity
 import com.vibecheck.app.domain.model.GameMode
 import com.vibecheck.app.domain.model.GameResult
+import com.vibecheck.app.domain.model.GamePack
 import com.vibecheck.app.ui.screens.GameScreen
 import com.vibecheck.app.ui.screens.HomeScreen
 import com.vibecheck.app.ui.screens.PassPhoneScreen
@@ -82,6 +83,7 @@ fun VibeCheckApp(
     val challengeTargetRaw by gameViewModel.challengeTarget.collectAsState()
     val sessionSeed by gameViewModel.sessionSeed.collectAsState()
     val intensityName by gameViewModel.intensityName.collectAsState()
+    val packName by gameViewModel.packName.collectAsState()
     val legacyChallenge by gameViewModel.legacyChallenge.collectAsState()
     val knowSecretAnswer by gameViewModel.knowSecretAnswer.collectAsState()
     val knowGuesserIndex by gameViewModel.knowGuesserIndex.collectAsState()
@@ -93,6 +95,9 @@ fun VibeCheckApp(
     val selectedIntensity = runCatching {
         GameIntensity.valueOf(intensityName)
     }.getOrDefault(GameIntensity.NORMAL)
+    val selectedPack = runCatching {
+        GamePack.valueOf(packName)
+    }.getOrDefault(GamePack.MIX)
     val votes = SessionCodec.decodeVotes(savedVotes)
     val challengeTarget = challengeTargetRaw.takeIf { it != GameViewModel.NO_CHALLENGE }
     val avoidedIds = if (challengeTarget == null) {
@@ -101,6 +106,7 @@ fun VibeCheckApp(
         emptySet()
     }
     val sessionIntensity = if (legacyChallenge) null else selectedIntensity
+    val sessionPack = if (legacyChallenge) GamePack.MIX else selectedPack
 
     LaunchedEffect(incomingChallenge) {
         incomingChallenge?.let { challenge ->
@@ -115,14 +121,16 @@ fun VibeCheckApp(
                 KnowMeRepository.forSeed(
                     seed = sessionSeed,
                     avoidIds = questionHistory.recentIds(selectedMode),
-                    intensity = sessionIntensity
+                    intensity = sessionIntensity,
+                pack = sessionPack
                 ).map { it.id }
             } else {
                 QuestionRepository.forMode(
                     mode = selectedMode,
                     seed = sessionSeed,
                     avoidIds = questionHistory.recentIds(selectedMode),
-                    intensity = sessionIntensity
+                    intensity = sessionIntensity,
+                pack = sessionPack
                 ).map { it.id }
             }
             questionHistory.remember(selectedMode, ids)
@@ -163,12 +171,14 @@ fun VibeCheckApp(
                         premiumPrice = premiumPrice,
                         purchaseStatus = purchaseStatus,
                         selectedIntensity = selectedIntensity,
+                        selectedPack = selectedPack,
                         onBuyPremium = {
                             (context as? Activity)?.let { activity ->
                                 billingManager.launchPurchase(activity)
                             }
                         },
                         onIntensity = gameViewModel::selectIntensity,
+                        onPack = gameViewModel::selectPack,
                         onMode = gameViewModel::selectMode
                     )
 
@@ -187,7 +197,8 @@ fun VibeCheckApp(
                             val prompts = KnowMeRepository.forSeed(
                                 seed = sessionSeed,
                                 avoidIds = avoidedIds,
-                                intensity = sessionIntensity
+                                intensity = sessionIntensity,
+                            pack = sessionPack
                             )
                             val target = players.firstOrNull()
                             val guessers = players.drop(1)
@@ -253,7 +264,8 @@ fun VibeCheckApp(
                                 mode = selectedMode,
                                 seed = sessionSeed,
                                 avoidIds = avoidedIds,
-                                intensity = sessionIntensity
+                                intensity = sessionIntensity,
+                            pack = sessionPack
                             )
 
                             if (questions.isEmpty()) {
@@ -324,7 +336,8 @@ fun VibeCheckApp(
                                 total = KnowMeRepository.forSeed(
                                     seed = sessionSeed,
                                     avoidIds = avoidedIds,
-                                    intensity = sessionIntensity
+                                    intensity = sessionIntensity,
+                                pack = sessionPack
                                 ).size
                             )
                         } else {
@@ -338,6 +351,7 @@ fun VibeCheckApp(
                             challengeTarget = challengeTarget,
                             sessionSeed = sessionSeed,
                             intensity = selectedIntensity,
+                            pack = selectedPack,
                             onReplay = gameViewModel::replay,
                             onHome = gameViewModel::goHome
                         )
