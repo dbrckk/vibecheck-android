@@ -247,9 +247,9 @@ fun ResultScreen(
                         ) {
                             Text(
                                 if (challengeWon) {
-                                    "Défi réussi • objectif " + challengeTarget + "%"
+                                    "Défi réussi • consensus " + challengeTarget + "% atteint"
                                 } else {
-                                    "Encore " + (challengeTarget - percent).coerceAtLeast(0) + " points pour battre le défi"
+                                    "Encore " + (challengeTarget - percent).coerceAtLeast(0) + " points pour atteindre le consensus cible"
                                 },
                                 color = Color.White,
                                 fontWeight = FontWeight.Bold,
