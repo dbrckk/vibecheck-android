@@ -45,10 +45,12 @@ import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.vibecheck.app.domain.PlayerRules
+import com.vibecheck.app.domain.model.GameMode
 import com.vibecheck.app.ui.theme.VibeColors
 
 @Composable
 fun PlayerSetupScreen(
+    mode: GameMode,
     players: List<String>,
     challengeTarget: Int?,
     onBack: () -> Unit,
@@ -114,7 +116,11 @@ fun PlayerSetupScreen(
                     modifier = Modifier.fillMaxWidth()
                 ) {
                     Text(
-                        "Défi reçu • consensus cible : " + challengeTarget + "%",
+                        if (mode == GameMode.KNOWS_ME) {
+                            "Défi reçu • score cible : " + challengeTarget + "%"
+                        } else {
+                            "Défi reçu • consensus cible : " + challengeTarget + "%"
+                        },
                         color = Color.White,
                         fontWeight = FontWeight.Bold,
                         modifier = Modifier.padding(14.dp)
