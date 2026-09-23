@@ -5,8 +5,10 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
+import androidx.compose.material3.Button
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
@@ -17,6 +19,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.vibecheck.app.billing.PremiumBillingManager
@@ -110,28 +114,56 @@ fun VibeCheckApp(
                             mode = selectedMode,
                             seed = sessionSeed
                         )
-                        val safeIndex = questionIndex.coerceIn(0, questions.lastIndex)
-                        val question = questions[safeIndex]
 
-                        GameScreen(
-                            mode = selectedMode,
-                            questionText = question.text,
-                            progress = safeIndex + 1,
-                            total = questions.size,
-                            answers = if (selectedMode == GameMode.RED_GREEN) {
-                                listOf("Green Flag", "Red Flag")
-                            } else {
-                                players
-                            },
-                            onAnswer = { answer ->
-                                gameViewModel.answer(
-                                    questionId = question.id,
-                                    answer = answer,
-                                    isLastQuestion = safeIndex == questions.lastIndex
-                                )
-                            },
-                            onExit = gameViewModel::abandonGame
-                        )
+                        if (questions.isEmpty()) {
+                            Box(
+                                modifier = Modifier.fillMaxSize(),
+                                contentAlignment = Alignment.Center
+                            ) {
+                                androidx.compose.foundation.layout.Column(
+                                    horizontalAlignment = Alignment.CenterHorizontally
+                                ) {
+                                    Text(
+                                        "Questions indisponibles",
+                                        color = Color.White,
+                                        fontWeight = FontWeight.Bold
+                                    )
+                                    Text(
+                                        "Ce mode n'a actuellement aucune question.",
+                                        color = Color(0xFFAAA2B5)
+                                    )
+                                    androidx.compose.foundation.layout.Spacer(
+                                        Modifier.padding(top = 8.dp)
+                                    )
+                                    Button(onClick = gameViewModel::abandonGame) {
+                                        Text("Retour aux modes")
+                                    }
+                                }
+                            }
+                        } else {
+                            val safeIndex = questionIndex.coerceIn(0, questions.lastIndex)
+                            val question = questions[safeIndex]
+
+                            GameScreen(
+                                mode = selectedMode,
+                                questionText = question.text,
+                                progress = safeIndex + 1,
+                                total = questions.size,
+                                answers = if (selectedMode == GameMode.RED_GREEN) {
+                                    listOf("Green Flag", "Red Flag")
+                                } else {
+                                    players
+                                },
+                                onAnswer = { answer ->
+                                    gameViewModel.answer(
+                                        questionId = question.id,
+                                        answer = answer,
+                                        isLastQuestion = safeIndex == questions.lastIndex
+                                    )
+                                },
+                                onExit = gameViewModel::abandonGame
+                            )
+                        }
                     }
 
                     AppScreen.RESULT -> ResultScreen(
