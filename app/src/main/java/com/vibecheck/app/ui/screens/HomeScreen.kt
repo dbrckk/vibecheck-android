@@ -46,6 +46,7 @@ import androidx.compose.ui.unit.sp
 import com.vibecheck.app.billing.PurchaseStatus
 import com.vibecheck.app.domain.model.GameIntensity
 import com.vibecheck.app.domain.model.GameMode
+import com.vibecheck.app.domain.model.GamePack
 import com.vibecheck.app.ui.theme.VibeColors
 
 @Composable
@@ -55,8 +56,10 @@ fun HomeScreen(
     premiumPrice: String?,
     purchaseStatus: PurchaseStatus,
     selectedIntensity: GameIntensity,
+    selectedPack: GamePack,
     onBuyPremium: () -> Unit,
     onIntensity: (GameIntensity) -> Unit,
+    onPack: (GamePack) -> Unit,
     onMode: (GameMode) -> Unit
 ) {
     Column(modifier = Modifier.fillMaxSize()) {
@@ -101,6 +104,46 @@ fun HomeScreen(
         )
 
         Spacer(Modifier.height(18.dp))
+
+        Text(
+            "PACK",
+            color = Color(0xFF8F8799),
+            fontSize = 12.sp,
+            fontWeight = FontWeight.Bold,
+            letterSpacing = 1.2.sp
+        )
+        Spacer(Modifier.height(9.dp))
+        Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+            GamePack.entries.chunked(2).forEach { rowPacks ->
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.spacedBy(8.dp)
+                ) {
+                    rowPacks.forEach { pack ->
+                        val selected = pack == selectedPack
+                        Button(
+                            onClick = { onPack(pack) },
+                            modifier = Modifier.weight(1f),
+                            shape = RoundedCornerShape(15.dp),
+                            colors = ButtonDefaults.buttonColors(
+                                containerColor = if (selected) VibeColors.Blue else Color.White.copy(alpha = 0.055f),
+                                contentColor = if (selected) Color(0xFF11151C) else VibeColors.TextPrimary
+                            )
+                        ) {
+                            Text(pack.title, fontSize = 12.sp, fontWeight = FontWeight.Black)
+                        }
+                    }
+                    if (rowPacks.size == 1) Spacer(Modifier.weight(1f))
+                }
+            }
+        }
+        Spacer(Modifier.height(6.dp))
+        Text(
+            selectedPack.subtitle,
+            color = VibeColors.TextSecondary,
+            fontSize = 12.sp
+        )
+        Spacer(Modifier.height(16.dp))
 
         Text(
             "INTENSITÉ",
