@@ -7,20 +7,19 @@ object PlayerGroupCodec {
     private const val SEPARATOR = "\u001F"
 
     fun encode(players: List<String>): String =
-        players
-            .map(PlayerRules::normalize)
-            .filter { it.isNotBlank() }
-            .distinct()
-            .take(PlayerRules.MAX_PLAYERS)
-            .joinToString(SEPARATOR)
+        sanitize(players).joinToString(SEPARATOR)
 
     fun decode(raw: String?): List<String> =
-        raw.orEmpty()
-            .split(SEPARATOR)
-            .map(PlayerRules::normalize)
-            .filter { it.isNotBlank() }
-            .distinct()
-            .take(PlayerRules.MAX_PLAYERS)
+        sanitize(raw.orEmpty().split(SEPARATOR))
+
+    private fun sanitize(players: List<String>): List<String> =
+        players.fold(emptyList()) { accepted, candidate ->
+            if (PlayerRules.canAdd(accepted, candidate)) {
+                accepted + PlayerRules.normalize(candidate)
+            } else {
+                accepted
+            }
+        }
 }
 
 class PlayerGroupStore(context: Context) {
