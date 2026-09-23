@@ -4,7 +4,7 @@ enum class GameMode(val title: String, val subtitle: String) {
     WHO_OF_US("Qui de nous ?", "Vote pour la personne qui correspond le mieux."),
     MOST_LIKELY("Most Likely To", "Le plus probable de faire ça."),
     RED_GREEN("Red Flag / Green Flag", "Décide si le comportement passe ou casse."),
-    KNOWS_ME("Qui connaît le groupe ?", "Vote pour celui ou celle qui connaît le mieux les autres.")
+    KNOWS_ME("Qui me connaît le mieux ?", "Une personne répond en secret. Les autres doivent deviner.")
 }
 data class Question(val id: String, val mode: GameMode, val text: String)
 data class Vote(val questionId: String, val answer: String)
