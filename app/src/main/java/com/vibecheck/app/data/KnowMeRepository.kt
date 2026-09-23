@@ -36,6 +36,14 @@ object KnowMeRepository {
         KnowMePrompt("km_24", "Pour prendre une décision importante ?", listOf("Demander des avis", "Décider seul"))
     )
 
-    fun forSeed(seed: Long, limit: Int = 8): List<KnowMePrompt> =
-        prompts.shuffled(Random(seed)).take(limit.coerceAtLeast(0))
+    fun forSeed(
+        seed: Long,
+        limit: Int = 8,
+        avoidIds: Set<String> = emptySet()
+    ): List<KnowMePrompt> {
+        val shuffled = prompts.shuffled(Random(seed))
+        val preferred = shuffled.filterNot { it.id in avoidIds }
+        val fallback = shuffled.filter { it.id in avoidIds }
+        return (preferred + fallback).take(limit.coerceAtLeast(0))
+    }
 }
