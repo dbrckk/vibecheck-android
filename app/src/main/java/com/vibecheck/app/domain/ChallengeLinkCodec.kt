@@ -1,5 +1,6 @@
 package com.vibecheck.app.domain
 
+import com.vibecheck.app.domain.model.GameIntensity
 import com.vibecheck.app.domain.model.GameMode
 import java.net.URI
 import java.net.URLDecoder
@@ -9,20 +10,26 @@ import java.nio.charset.StandardCharsets
 data class Challenge(
     val mode: GameMode,
     val targetPercent: Int,
-    val seed: Long = 0L
+    val seed: Long = 0L,
+    val intensity: GameIntensity? = null
 )
 
 object ChallengeLinkCodec {
     private const val SCHEME = "vibecheck"
     private const val HOST = "challenge"
-    private const val VERSION = 1
+    private const val VERSION = 2
     private const val MAX_LINK_LENGTH = 512
     private const val MAX_QUERY_PARTS = 8
 
     fun encode(challenge: Challenge): String {
         val mode = URLEncoder.encode(challenge.mode.name, StandardCharsets.UTF_8.name())
         val target = challenge.targetPercent.coerceIn(0, 100)
-        return "$SCHEME://$HOST?v=$VERSION&mode=$mode&target=$target&seed=${challenge.seed}"
+        val intensity = challenge.intensity
+        return if (intensity == null) {
+            "$SCHEME://$HOST?v=1&mode=$mode&target=$target&seed=${challenge.seed}"
+        } else {
+            "$SCHEME://$HOST?v=$VERSION&mode=$mode&target=$target&seed=${challenge.seed}&intensity=${intensity.name}"
+        }
     }
 
     fun decode(raw: String?): Challenge? {
@@ -56,17 +63,25 @@ object ChallengeLinkCodec {
             entries.toMap()
         }.getOrNull() ?: return null
 
-        val version = params["v"]?.toIntOrNull() ?: VERSION
-        if (version != VERSION) return null
+        val version = params["v"]?.toIntOrNull() ?: 1
+        if (version !in 1..VERSION) return null
 
         val mode = runCatching { GameMode.valueOf(params["mode"].orEmpty()) }.getOrNull() ?: return null
         val target = params["target"]?.toIntOrNull()?.takeIf { it in 0..100 } ?: return null
         val seed = params["seed"]?.toLongOrNull() ?: 0L
+        val intensity = if (version >= 2) {
+            runCatching {
+                GameIntensity.valueOf(params["intensity"].orEmpty())
+            }.getOrNull() ?: return null
+        } else {
+            null
+        }
 
         return Challenge(
             mode = mode,
             targetPercent = target,
-            seed = seed
+            seed = seed,
+            intensity = intensity
         )
     }
 }
