@@ -26,7 +26,10 @@ class GameViewModel(
         savedStateHandle[KEY_CHALLENGE_TARGET] = challenge.targetPercent
         savedStateHandle[KEY_QUESTION_INDEX] = 0
         savedStateHandle[KEY_VOTES] = arrayListOf<String>()
-        savedStateHandle[KEY_SCREEN] = AppScreen.PLAYERS.name
+        savedStateHandle[KEY_SCREEN] = initialScreenFor(challenge.mode).name
+        if (challenge.mode == GameMode.RED_GREEN) {
+            savedStateHandle[KEY_SESSION_SEED] = System.currentTimeMillis()
+        }
     }
 
     fun selectMode(mode: GameMode) {
@@ -34,7 +37,10 @@ class GameViewModel(
         savedStateHandle[KEY_CHALLENGE_TARGET] = NO_CHALLENGE
         savedStateHandle[KEY_QUESTION_INDEX] = 0
         savedStateHandle[KEY_VOTES] = arrayListOf<String>()
-        savedStateHandle[KEY_SCREEN] = AppScreen.PLAYERS.name
+        savedStateHandle[KEY_SCREEN] = initialScreenFor(mode).name
+        if (mode == GameMode.RED_GREEN) {
+            savedStateHandle[KEY_SESSION_SEED] = System.currentTimeMillis()
+        }
     }
 
     fun addPlayer(player: String) {
@@ -80,6 +86,9 @@ class GameViewModel(
         savedStateHandle[KEY_CHALLENGE_TARGET] = NO_CHALLENGE
         savedStateHandle[KEY_SCREEN] = AppScreen.HOME.name
     }
+
+    private fun initialScreenFor(mode: GameMode): AppScreen =
+        if (mode == GameMode.RED_GREEN) AppScreen.GAME else AppScreen.PLAYERS
 
     companion object {
         const val NO_CHALLENGE = -1
