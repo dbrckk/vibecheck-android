@@ -22,7 +22,11 @@ import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -38,6 +42,7 @@ import com.vibecheck.app.domain.model.GameMode
 import com.vibecheck.app.domain.model.Vote
 import com.vibecheck.app.sharing.ChallengeSharer
 import com.vibecheck.app.sharing.ResultCardSharer
+import kotlinx.coroutines.launch
 
 @Composable
 fun ResultScreen(
@@ -54,6 +59,9 @@ fun ResultScreen(
     val challengeWon = challengeTarget != null && percent >= challengeTarget
     val reveal = remember { Animatable(0f) }
     val score = remember { Animatable(0f) }
+    val scope = rememberCoroutineScope()
+    var isSharing by remember { mutableStateOf(false) }
+    var shareError by remember { mutableStateOf(false) }
 
     LaunchedEffect(percent) {
         reveal.snapTo(0f)
@@ -162,13 +170,26 @@ fun ResultScreen(
         ) {
             Button(
                 onClick = {
-                    ResultCardSharer.share(
-                        context = context,
-                        mode = mode,
-                        winner = result.winner,
-                        percent = percent
-                    )
+                    if (!isSharing) {
+                        shareError = false
+                        isSharing = true
+                        scope.launch {
+                            try {
+                                ResultCardSharer.share(
+                                    context = context,
+                                    mode = mode,
+                                    winner = result.winner,
+                                    percent = percent
+                                )
+                            } catch (_: Exception) {
+                                shareError = true
+                            } finally {
+                                isSharing = false
+                            }
+                        }
+                    }
                 },
+                enabled = !isSharing,
                 modifier = Modifier.fillMaxWidth().height(58.dp),
                 shape = RoundedCornerShape(18.dp)
             ) {
@@ -177,8 +198,21 @@ fun ResultScreen(
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     Icon(Icons.Default.Share, contentDescription = null)
-                    Text("Partager le résultat", fontWeight = FontWeight.Bold)
+                    Text(
+                        if (isSharing) "Préparation..." else "Partager le résultat",
+                        fontWeight = FontWeight.Bold
+                    )
                 }
+            }
+
+            if (shareError) {
+                Text(
+                    "Le partage n'a pas pu être préparé. Réessaie.",
+                    color = Color(0xFFFFA3B1),
+                    fontSize = 13.sp,
+                    textAlign = TextAlign.Center,
+                    modifier = Modifier.fillMaxWidth()
+                )
             }
 
             Button(
