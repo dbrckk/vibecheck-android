@@ -85,7 +85,7 @@ fun GameScreen(
         else -> 36.sp
     }
     val haptic = LocalHapticFeedback.current
-    var answering by remember(progress) { mutableStateOf(false) }
+    var answering by remember(progress, questionText) { mutableStateOf(false) }
 
     LaunchedEffect(progress) {
         reveal.snapTo(0f)
