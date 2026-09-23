@@ -24,8 +24,10 @@ object ResultCardSharer {
     private const val MAX_CACHED_CARDS = 5
 
     suspend fun share(context: Context, mode: GameMode, winner: String, percent: Int) {
+        val safeWinner = sanitizeWinner(winner)
+        val safePercent = percent.coerceIn(0, 100)
         val file = withContext(Dispatchers.IO) {
-            val bitmap = createCard(mode, winner, percent)
+            val bitmap = createCard(mode, safeWinner, safePercent)
             try {
                 val directory = File(context.cacheDir, "shared_results").apply { mkdirs() }
                 pruneOldCards(directory)
@@ -55,7 +57,7 @@ object ResultCardSharer {
             clipData = ClipData.newUri(context.contentResolver, "VibeCheck result", uri)
             putExtra(
                 Intent.EXTRA_TEXT,
-                "Mon VibeCheck : $winner arrive en tête avec $percent% — ${mode.title}."
+                "Mon VibeCheck : $safeWinner arrive en tête avec $safePercent% — ${mode.title}."
             )
             addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
         }
@@ -64,13 +66,6 @@ object ResultCardSharer {
     }
 
     private fun createCard(mode: GameMode, winner: String, percent: Int): Bitmap {
-        val safeWinner = winner
-            .replace(Regex("[\\p{Cntrl}&&[^\\n\\t]]"), "")
-            .replace(Regex("\\s+"), " ")
-            .trim()
-            .take(MAX_WINNER_LENGTH)
-            .ifBlank { "Le groupe" }
-        val safePercent = percent.coerceIn(0, 100)
         val bitmap = Bitmap.createBitmap(WIDTH, HEIGHT, Bitmap.Config.ARGB_8888)
         val canvas = Canvas(bitmap)
         val accent = accentFor(mode)
@@ -194,6 +189,14 @@ object ResultCardSharer {
                 soft = Color.rgb(220, 237, 255)
             )
         }
+
+    private fun sanitizeWinner(winner: String): String =
+        winner
+            .replace(Regex("[\\p{Cntrl}&&[^\\n\\t]]"), "")
+            .replace(Regex("\\s+"), " ")
+            .trim()
+            .take(MAX_WINNER_LENGTH)
+            .ifBlank { "Le groupe" }
 
     private fun pruneOldCards(directory: File) {
         directory.listFiles()
