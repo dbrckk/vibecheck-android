@@ -5,6 +5,7 @@ import com.vibecheck.app.domain.Challenge
 import com.vibecheck.app.domain.SessionCodec
 import com.vibecheck.app.domain.model.GameMode
 import org.junit.Assert.assertEquals
+import org.junit.Assert.assertFalse
 import org.junit.Assert.assertTrue
 import org.junit.Test
 
