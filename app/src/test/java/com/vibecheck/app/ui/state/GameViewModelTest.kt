@@ -335,4 +335,21 @@ class GameViewModelTest {
         viewModel.restorePlayers(listOf("Chloe", "Dan"))
         assertEquals(listOf("Alice", "Bob"), viewModel.players.value)
     }
+    @Test
+    fun v2_challenge_preserves_intensity_with_mix_pack() {
+        val viewModel = GameViewModel(SavedStateHandle())
+
+        viewModel.acceptChallenge(
+            Challenge(
+                mode = GameMode.WHO_OF_US,
+                targetPercent = 65,
+                seed = 12L,
+                intensity = GameIntensity.SAVAGE
+            )
+        )
+
+        assertEquals(GameIntensity.SAVAGE.name, viewModel.intensityName.value)
+        assertEquals(GamePack.MIX.name, viewModel.packName.value)
+        assertFalse(viewModel.legacyChallenge.value)
+    }
 }
