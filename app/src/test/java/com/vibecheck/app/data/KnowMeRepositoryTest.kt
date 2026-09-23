@@ -1,5 +1,7 @@
 package com.vibecheck.app.data
 
+import com.vibecheck.app.domain.model.GameIntensity
+
 import org.junit.Assert.assertEquals
 import org.junit.Test
 
@@ -30,5 +32,16 @@ class KnowMeRepositoryTest {
         )
 
         assertEquals(0, next.count { prompt -> baseline.any { it.id == prompt.id } })
+    }
+    @Test
+    fun every_hot_seat_intensity_has_sixteen_prompts() {
+        GameIntensity.entries.forEach { intensity ->
+            val prompts = KnowMeRepository.forSeed(
+                seed = 9L,
+                limit = 24,
+                intensity = intensity
+            )
+            assertEquals(16, prompts.size)
+        }
     }
 }
