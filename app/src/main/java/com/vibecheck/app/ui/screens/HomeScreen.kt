@@ -247,7 +247,11 @@ fun HomeScreen(
             verticalArrangement = Arrangement.spacedBy(12.dp)
         ) {
             items(GameMode.entries) { mode ->
-                ModeCard(mode = mode, onClick = { onMode(mode) })
+                ModeCard(
+                    mode = mode,
+                    expressStart = savedPlayerCount >= 2 || mode == GameMode.RED_GREEN,
+                    onClick = { onMode(mode) }
+                )
             }
         }
     }
@@ -340,6 +344,7 @@ private fun PremiumCard(
 @Composable
 private fun ModeCard(
     mode: GameMode,
+    expressStart: Boolean,
     onClick: () -> Unit
 ) {
     val visual = modeVisual(mode)
@@ -391,7 +396,7 @@ private fun ModeCard(
                 )
                 Spacer(Modifier.height(3.dp))
                 Text(
-                    "8 QUESTIONS",
+                    if (expressStart) "8 QUESTIONS • DÉMARRAGE DIRECT" else "8 QUESTIONS",
                     color = visual.accent,
                     fontSize = 10.sp,
                     fontWeight = FontWeight.Black,
