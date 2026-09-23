@@ -23,6 +23,7 @@ class GameViewModel(
     val players = savedStateHandle.getStateFlow(KEY_PLAYERS, arrayListOf<String>())
     val challengeTarget = savedStateHandle.getStateFlow(KEY_CHALLENGE_TARGET, NO_CHALLENGE)
     val sessionSeed = savedStateHandle.getStateFlow(KEY_SESSION_SEED, System.currentTimeMillis())
+    val sessionInstanceId = savedStateHandle.getStateFlow(KEY_SESSION_INSTANCE_ID, System.nanoTime())
     val intensityName = savedStateHandle.getStateFlow(KEY_INTENSITY, GameIntensity.NORMAL.name)
     val packName = savedStateHandle.getStateFlow(KEY_PACK, GamePack.MIX.name)
     val legacyChallenge = savedStateHandle.getStateFlow(KEY_LEGACY_CHALLENGE, false)
@@ -37,6 +38,7 @@ class GameViewModel(
         savedStateHandle[KEY_QUESTION_INDEX] = 0
         savedStateHandle[KEY_VOTES] = arrayListOf<String>()
         savedStateHandle[KEY_SESSION_SEED] = challenge.seed
+        savedStateHandle[KEY_SESSION_INSTANCE_ID] = System.nanoTime()
         savedStateHandle[KEY_INTENSITY] = (challenge.intensity ?: GameIntensity.NORMAL).name
         savedStateHandle[KEY_PACK] = (challenge.pack ?: GamePack.MIX).name
         savedStateHandle[KEY_LEGACY_CHALLENGE] = challenge.intensity == null
@@ -68,6 +70,7 @@ class GameViewModel(
         val canStartImmediately = mode == GameMode.RED_GREEN || PlayerRules.canStart(players.value)
         if (canStartImmediately) {
             savedStateHandle[KEY_SESSION_SEED] = System.currentTimeMillis()
+            savedStateHandle[KEY_SESSION_INSTANCE_ID] = System.nanoTime()
             savedStateHandle[KEY_SCREEN] = AppScreen.GAME.name
         } else {
             savedStateHandle[KEY_SCREEN] = AppScreen.PLAYERS.name
@@ -122,6 +125,7 @@ class GameViewModel(
         if (challengeTarget.value == NO_CHALLENGE) {
             savedStateHandle[KEY_SESSION_SEED] = System.currentTimeMillis()
         }
+        savedStateHandle[KEY_SESSION_INSTANCE_ID] = System.nanoTime()
         savedStateHandle[KEY_SCREEN] = AppScreen.GAME.name
     }
 
@@ -193,6 +197,7 @@ class GameViewModel(
         if (challengeTarget.value == NO_CHALLENGE) {
             savedStateHandle[KEY_SESSION_SEED] = System.currentTimeMillis()
         }
+        savedStateHandle[KEY_SESSION_INSTANCE_ID] = System.nanoTime()
         savedStateHandle[KEY_SCREEN] = AppScreen.GAME.name
     }
 
@@ -231,6 +236,7 @@ class GameViewModel(
         private const val KEY_PLAYERS = "players"
         private const val KEY_CHALLENGE_TARGET = "challenge_target"
         private const val KEY_SESSION_SEED = "session_seed"
+        private const val KEY_SESSION_INSTANCE_ID = "session_instance_id"
         private const val KEY_INTENSITY = "intensity"
         private const val KEY_PACK = "pack"
         private const val KEY_LEGACY_CHALLENGE = "legacy_challenge"
