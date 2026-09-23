@@ -1,6 +1,7 @@
 package com.vibecheck.app.data
 
 import com.vibecheck.app.domain.model.GameIntensity
+import com.vibecheck.app.domain.model.GamePack
 
 import org.junit.Assert.assertEquals
 import org.junit.Test
@@ -42,6 +43,17 @@ class KnowMeRepositoryTest {
                 intensity = intensity
             )
             assertEquals(16, prompts.size)
+        }
+    }
+    @Test
+    fun thematic_hot_seat_packs_have_enough_prompts() {
+        GamePack.entries.forEach { pack ->
+            val prompts = KnowMeRepository.forSeed(
+                seed = 12L,
+                limit = 24,
+                pack = pack
+            )
+            assertEquals(if (pack == GamePack.MIX) 24 else 16, prompts.size)
         }
     }
 }
