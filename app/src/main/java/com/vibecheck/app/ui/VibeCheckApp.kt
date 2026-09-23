@@ -32,6 +32,7 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import com.vibecheck.app.billing.PremiumBillingManager
 import com.vibecheck.app.billing.PurchaseStatus
 import com.vibecheck.app.data.KnowMeRepository
+import com.vibecheck.app.data.QuestionHistoryStore
 import com.vibecheck.app.data.QuestionRepository
 import com.vibecheck.app.domain.Challenge
 import com.vibecheck.app.domain.SessionCodec
@@ -57,6 +58,9 @@ fun VibeCheckApp(
     val context = LocalContext.current
     val billingManager = remember(context.applicationContext) {
         PremiumBillingManager(context.applicationContext)
+    }
+    val questionHistory = remember(context.applicationContext) {
+        QuestionHistoryStore(context.applicationContext)
     }
 
     DisposableEffect(billingManager) {
@@ -85,11 +89,34 @@ fun VibeCheckApp(
     val selectedMode = runCatching { GameMode.valueOf(modeName) }.getOrDefault(GameMode.WHO_OF_US)
     val votes = SessionCodec.decodeVotes(savedVotes)
     val challengeTarget = challengeTargetRaw.takeIf { it != GameViewModel.NO_CHALLENGE }
+    val avoidedIds = if (challengeTarget == null) {
+        questionHistory.recentIds(selectedMode)
+    } else {
+        emptySet()
+    }
 
     LaunchedEffect(incomingChallenge) {
         incomingChallenge?.let { challenge ->
             gameViewModel.acceptChallenge(challenge)
             onChallengeConsumed()
+        }
+    }
+
+    LaunchedEffect(screen, selectedMode, sessionSeed) {
+        if (screen == AppScreen.RESULT && challengeTarget == null) {
+            val ids = if (selectedMode == GameMode.KNOWS_ME) {
+                KnowMeRepository.forSeed(
+                    seed = sessionSeed,
+                    avoidIds = questionHistory.recentIds(selectedMode)
+                ).map { it.id }
+            } else {
+                QuestionRepository.forMode(
+                    mode = selectedMode,
+                    seed = sessionSeed,
+                    avoidIds = questionHistory.recentIds(selectedMode)
+                ).map { it.id }
+            }
+            questionHistory.remember(selectedMode, ids)
         }
     }
 
@@ -145,7 +172,10 @@ fun VibeCheckApp(
 
                     AppScreen.GAME -> {
                         if (selectedMode == GameMode.KNOWS_ME) {
-                            val prompts = KnowMeRepository.forSeed(sessionSeed)
+                            val prompts = KnowMeRepository.forSeed(
+                                seed = sessionSeed,
+                                avoidIds = avoidedIds
+                            )
                             val target = players.firstOrNull()
                             val guessers = players.drop(1)
 
@@ -208,7 +238,8 @@ fun VibeCheckApp(
                         } else {
                             val questions = QuestionRepository.forMode(
                                 mode = selectedMode,
-                                seed = sessionSeed
+                                seed = sessionSeed,
+                                avoidIds = avoidedIds
                             )
 
                             if (questions.isEmpty()) {
@@ -276,7 +307,10 @@ fun VibeCheckApp(
                             GameResult(
                                 winner = best?.first ?: "Personne",
                                 score = best?.second ?: 0,
-                                total = KnowMeRepository.forSeed(sessionSeed).size
+                                total = KnowMeRepository.forSeed(
+                                    seed = sessionSeed,
+                                    avoidIds = avoidedIds
+                                ).size
                             )
                         } else {
                             null
