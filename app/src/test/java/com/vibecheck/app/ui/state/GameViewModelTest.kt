@@ -212,16 +212,22 @@ class GameViewModelTest {
         viewModel.setKnowMeSecret("Mer")
         assertEquals("Mer", viewModel.knowSecretAnswer.value)
         assertEquals(0, viewModel.knowGuesserIndex.value)
+        assertTrue(viewModel.knowHandoffPending.value)
+        viewModel.confirmKnowMeHandoff()
+        assertFalse(viewModel.knowHandoffPending.value)
 
         viewModel.submitKnowMeGuess("Mer", isLastQuestion = false)
         assertEquals(1, viewModel.knowGuesserIndex.value)
         assertEquals(listOf(1, 0), viewModel.knowScores.value)
+        assertTrue(viewModel.knowHandoffPending.value)
+        viewModel.confirmKnowMeHandoff()
         assertEquals(0, viewModel.questionIndex.value)
 
         viewModel.submitKnowMeGuess("Montagne", isLastQuestion = false)
         assertEquals(1, viewModel.questionIndex.value)
         assertEquals("", viewModel.knowSecretAnswer.value)
         assertEquals(0, viewModel.knowGuesserIndex.value)
+        assertTrue(viewModel.knowHandoffPending.value)
         assertEquals(listOf(1, 0), viewModel.knowScores.value)
     }
 
@@ -257,5 +263,6 @@ class GameViewModelTest {
         assertEquals("", viewModel.knowSecretAnswer.value)
         assertTrue(viewModel.knowScores.value.isEmpty())
         assertEquals(0, viewModel.knowGuesserIndex.value)
+        assertFalse(viewModel.knowHandoffPending.value)
     }
 }
