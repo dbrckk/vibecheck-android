@@ -12,6 +12,8 @@ import android.graphics.Shader
 import android.graphics.Typeface
 import androidx.core.content.FileProvider
 import com.vibecheck.app.domain.model.GameMode
+import com.vibecheck.app.domain.model.GameIntensity
+import com.vibecheck.app.domain.model.GamePack
 import java.io.File
 import java.io.FileOutputStream
 import kotlinx.coroutines.Dispatchers
@@ -23,11 +25,28 @@ object ResultCardSharer {
     private const val MAX_WINNER_LENGTH = 48
     private const val MAX_CACHED_CARDS = 5
 
-    suspend fun share(context: Context, mode: GameMode, winner: String, percent: Int) {
+    suspend fun share(
+        context: Context,
+        mode: GameMode,
+        winner: String,
+        percent: Int,
+        intensity: GameIntensity,
+        pack: GamePack,
+        localWins: Int = 0,
+        bestScorePercent: Int = 0
+    ) {
         val safeWinner = sanitizeWinner(winner)
         val safePercent = percent.coerceIn(0, 100)
         val file = withContext(Dispatchers.IO) {
-            val bitmap = createCard(mode, safeWinner, safePercent)
+            val bitmap = createCard(
+                mode = mode,
+                winner = safeWinner,
+                percent = safePercent,
+                intensity = intensity,
+                pack = pack,
+                localWins = localWins.coerceAtLeast(0),
+                bestScorePercent = bestScorePercent.coerceIn(0, 100)
+            )
             try {
                 val directory = File(context.cacheDir, "shared_results")
                 check(directory.exists() || directory.mkdirs()) {
@@ -73,7 +92,15 @@ object ResultCardSharer {
         context.startActivity(Intent.createChooser(shareIntent, "Partager le VibeCheck"))
     }
 
-    private fun createCard(mode: GameMode, winner: String, percent: Int): Bitmap {
+    private fun createCard(
+        mode: GameMode,
+        winner: String,
+        percent: Int,
+        intensity: GameIntensity,
+        pack: GamePack,
+        localWins: Int,
+        bestScorePercent: Int
+    ): Bitmap {
         val bitmap = Bitmap.createBitmap(WIDTH, HEIGHT, Bitmap.Config.ARGB_8888)
         val canvas = Canvas(bitmap)
         val accent = accentFor(mode)
@@ -113,20 +140,31 @@ object ResultCardSharer {
 
         val eyebrow = textPaint(44f, Color.rgb(186, 177, 202), false)
         canvas.drawText("LE RÉSULTAT DU GROUPE", 86f, 270f, eyebrow)
+        val badgePaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
+            color = Color.argb(70, 255, 255, 255)
+        }
+        val badgeText = textPaint(32f, Color.WHITE, true)
+        val packLabel = "PACK " + pack.title.uppercase()
+        val intensityLabel = intensity.title.uppercase()
+        canvas.drawRoundRect(86f, 310f, 420f, 374f, 28f, 28f, badgePaint)
+        canvas.drawText(packLabel, 110f, 352f, badgeText)
+        canvas.drawRoundRect(446f, 310f, 730f, 374f, 28f, 28f, badgePaint)
+        canvas.drawText(intensityLabel, 470f, 352f, badgeText)
+
 
         val cardPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
             color = Color.argb(225, 28, 24, 36)
         }
-        canvas.drawRoundRect(64f, 400f, 1016f, 1510f, 72f, 72f, cardPaint)
+        canvas.drawRoundRect(64f, 420f, 1016f, 1540f, 72f, 72f, cardPaint)
 
         val modePaint = textPaint(46f, accent.highlight, true)
         drawCenteredWrappedText(
-            canvas, mode.title.uppercase(), modePaint, WIDTH / 2f, 540f, 820f, 58f
+            canvas, mode.title.uppercase(), modePaint, WIDTH / 2f, 565f, 820f, 58f
         )
 
         val winnerPaint = textPaint(112f, Color.WHITE, true)
         drawCenteredWrappedText(
-            canvas, winner, winnerPaint, WIDTH / 2f, 820f, 820f, 126f
+            canvas, winner, winnerPaint, WIDTH / 2f, 835f, 820f, 126f
         )
 
         val percentPaint = textPaint(250f, accent.soft, true)
@@ -134,7 +172,7 @@ object ResultCardSharer {
         canvas.drawText(
             percentText,
             WIDTH / 2f - percentPaint.measureText(percentText) / 2f,
-            1215f,
+            1230f,
             percentPaint
         )
 
@@ -143,16 +181,38 @@ object ResultCardSharer {
         canvas.drawText(
             subtitle,
             WIDTH / 2f - subtitlePaint.measureText(subtitle) / 2f,
-            1315f,
+            1330f,
             subtitlePaint
         )
+
+        if (localWins > 0) {
+            val historyPaint = textPaint(34f, Color.rgb(201, 193, 214), true)
+            val history = localWins.toString() +
+                if (localWins == 1) " victoire locale" else " victoires locales"
+            canvas.drawText(
+                history,
+                WIDTH / 2f - historyPaint.measureText(history) / 2f,
+                1435f,
+                historyPaint
+            )
+            if (bestScorePercent > 0) {
+                val bestPaint = textPaint(30f, Color.rgb(159, 150, 174), false)
+                val best = "Meilleur score : " + bestScorePercent + "%"
+                canvas.drawText(
+                    best,
+                    WIDTH / 2f - bestPaint.measureText(best) / 2f,
+                    1485f,
+                    bestPaint
+                )
+            }
+        }
 
         val ctaPaint = textPaint(45f, Color.WHITE, true)
         val cta = "Et toi, ton groupe dirait quoi ?"
         canvas.drawText(
             cta,
             WIDTH / 2f - ctaPaint.measureText(cta) / 2f,
-            1680f,
+            1700f,
             ctaPaint
         )
 
@@ -161,7 +221,7 @@ object ResultCardSharer {
         canvas.drawText(
             footer,
             WIDTH / 2f - footerPaint.measureText(footer) / 2f,
-            1790f,
+            1810f,
             footerPaint
         )
 
