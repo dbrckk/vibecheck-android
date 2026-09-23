@@ -38,4 +38,38 @@ class QuestionRepositoryTest {
             assertEquals(questions.size, questions.map { it.id }.distinct().size)
         }
     }
+    @Test
+    fun recent_questions_are_deprioritized_when_enough_unseen_exist() {
+        val baseline = QuestionRepository.forMode(
+            GameMode.WHO_OF_US,
+            seed = 99L,
+            limit = 8
+        )
+        val next = QuestionRepository.forMode(
+            GameMode.WHO_OF_US,
+            seed = 99L,
+            limit = 8,
+            avoidIds = baseline.map { it.id }.toSet()
+        )
+
+        assertEquals(0, next.count { question -> baseline.any { it.id == question.id } })
+    }
+
+    @Test
+    fun recent_questions_fall_back_when_unseen_pool_is_too_small() {
+        val all = QuestionRepository.forMode(
+            GameMode.RED_GREEN,
+            seed = 7L,
+            limit = 24
+        )
+        val next = QuestionRepository.forMode(
+            GameMode.RED_GREEN,
+            seed = 7L,
+            limit = 8,
+            avoidIds = all.dropLast(3).map { it.id }.toSet()
+        )
+
+        assertEquals(8, next.size)
+        assertEquals(3, next.take(3).count { it.id !in all.dropLast(3).map { q -> q.id }.toSet() })
+    }
 }
