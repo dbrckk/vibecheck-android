@@ -48,24 +48,44 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.vibecheck.app.data.QuestionRepository
+import com.vibecheck.app.domain.Challenge
+import com.vibecheck.app.domain.ChallengeLinkCodec
 import com.vibecheck.app.domain.GameEngine
 import com.vibecheck.app.domain.PlayerRules
 import com.vibecheck.app.domain.SessionCodec
 import com.vibecheck.app.domain.model.GameMode
 import com.vibecheck.app.domain.model.Vote
+import com.vibecheck.app.sharing.ChallengeSharer
 import com.vibecheck.app.sharing.ResultCardSharer
 
 class MainActivity : ComponentActivity() {
+    private var incomingChallenge by mutableStateOf<Challenge?>(null)
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContent { VibeCheckApp() }
+        incomingChallenge = ChallengeLinkCodec.decode(intent?.dataString)
+        setContent {
+            VibeCheckApp(
+                incomingChallenge = incomingChallenge,
+                onChallengeConsumed = { incomingChallenge = null }
+            )
+        }
+    }
+
+    override fun onNewIntent(intent: Intent) {
+        super.onNewIntent(intent)
+        setIntent(intent)
+        incomingChallenge = ChallengeLinkCodec.decode(intent.dataString)
     }
 }
 
 private enum class Screen { HOME, PLAYERS, GAME, RESULT }
 
 @Composable
-fun VibeCheckApp() {
+fun VibeCheckApp(
+    incomingChallenge: Challenge? = null,
+    onChallengeConsumed: () -> Unit = {}
+) {
     val background = Brush.verticalGradient(
         listOf(Color(0xFF101014), Color(0xFF24153A), Color(0xFF101014))
     )
@@ -87,6 +107,14 @@ fun VibeCheckApp() {
                 val screen = runCatching { Screen.valueOf(screenName) }.getOrDefault(Screen.HOME)
                 val selectedMode = runCatching { GameMode.valueOf(modeName) }.getOrDefault(GameMode.WHO_OF_US)
                 val votes = SessionCodec.decodeVotes(savedVotes)
+
+                if (incomingChallenge != null) {
+                    modeName = incomingChallenge.mode.name
+                    questionIndex = 0
+                    savedVotes = arrayListOf()
+                    screenName = Screen.PLAYERS.name
+                    onChallengeConsumed()
+                }
 
                 when (screen) {
                     Screen.HOME -> HomeScreen { mode ->
@@ -381,6 +409,20 @@ private fun ResultScreen(
                     Icon(Icons.Default.Share, contentDescription = null)
                     Text("Partager le résultat", fontWeight = FontWeight.Bold)
                 }
+            }
+
+            Button(
+                onClick = {
+                    ChallengeSharer.share(
+                        context = context,
+                        challenge = Challenge(mode = mode, targetPercent = percent)
+                    )
+                },
+                modifier = Modifier.fillMaxWidth(),
+                shape = RoundedCornerShape(18.dp),
+                colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF4B2E6B))
+            ) {
+                Text("Défier un ami", fontWeight = FontWeight.Bold)
             }
 
             Button(
