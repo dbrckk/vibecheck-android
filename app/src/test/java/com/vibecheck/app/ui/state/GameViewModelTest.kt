@@ -325,4 +325,14 @@ class GameViewModelTest {
         viewModel.selectPack(GamePack.CHAOS)
         assertEquals(GamePack.FRIENDS.name, viewModel.packName.value)
     }
+    @Test
+    fun persisted_group_restores_only_when_session_has_no_players() {
+        val viewModel = GameViewModel(SavedStateHandle())
+
+        viewModel.restorePlayers(listOf("Alice", "Bob"))
+        assertEquals(listOf("Alice", "Bob"), viewModel.players.value)
+
+        viewModel.restorePlayers(listOf("Chloe", "Dan"))
+        assertEquals(listOf("Alice", "Bob"), viewModel.players.value)
+    }
 }
