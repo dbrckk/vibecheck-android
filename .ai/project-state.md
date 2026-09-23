@@ -9,7 +9,7 @@ M1 — stable offline vertical slice with polished core UX, reproducible challen
 ## Implemented
 - Kotlin + Jetpack Compose single-activity Android app.
 - Four initial game modes with distinct visual identities.
-- Local 48-question catalog and seeded randomized 8-question sessions.
+- Local 96-question catalog and seeded randomized 8-question sessions.
 - 2–8 player setup with normalized names and validation.
 - RED_GREEN starts directly without unnecessary player setup.
 - Game session state centralized in GameViewModel + SavedStateHandle.
@@ -27,7 +27,7 @@ M1 — stable offline vertical slice with polished core UX, reproducible challen
 - Challenge replay preserves the seed; tied target score counts as success.
 - Lifetime Premium BillingClient foundation with localized Play price.
 - Existing purchases restored; acknowledgement retry cannot recurse tightly.
-- GitHub Actions: unit tests, lint, debug APK build and APK artifact.
+- GitHub Actions: unit tests, lint, debug APK build, release AAB build and artifacts.
 - CI uses checkout/setup-java v5 and Gradle setup v4.
 - Dedicated Home, PlayerSetup, Game and Result screens.
 - Home, gameplay, result and shared cards use a coherent mode-specific visual system.
@@ -38,7 +38,7 @@ M1 — stable offline vertical slice with polished core UX, reproducible challen
 3. Extract hardcoded user-facing strings for localization/accessibility.
 4. Replace custom challenge URI with verified HTTPS App Links once a real domain exists.
 5. Add ads/consent only after real AdMob identifiers exist; never ship placeholder IDs.
-6. Prepare release signing, AAB workflow, privacy policy and Play Store release checklist.
+6. Prepare release signing, privacy policy, Data safety and Play Store release checklist.
 7. Revisit challenge-score semantics per mode and evolve KNOWS_ME into a genuinely distinct game mechanic.
 
 ## Constraints
