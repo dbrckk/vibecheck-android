@@ -51,7 +51,7 @@ fun ResultScreen(
     val result = GameEngine.result(votes)
     val context = LocalContext.current
     val percent = if (result.total == 0) 0 else (result.score * 100 / result.total)
-    val challengeWon = challengeTarget != null && percent > challengeTarget
+    val challengeWon = challengeTarget != null && percent >= challengeTarget
     val reveal = remember { Animatable(0f) }
     val score = remember { Animatable(0f) }
 
