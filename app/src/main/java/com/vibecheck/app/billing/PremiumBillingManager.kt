@@ -17,6 +17,16 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 
+enum class PurchaseStatus {
+    IDLE,
+    LOADING,
+    READY,
+    PENDING,
+    CANCELLED,
+    ERROR,
+    PREMIUM
+}
+
 class PremiumBillingManager(
     context: Context
 ) : PurchasesUpdatedListener {
@@ -31,6 +41,9 @@ class PremiumBillingManager(
 
     private val _formattedPrice = MutableStateFlow<String?>(null)
     val formattedPrice: StateFlow<String?> = _formattedPrice.asStateFlow()
+
+    private val _purchaseStatus = MutableStateFlow(PurchaseStatus.LOADING)
+    val purchaseStatus: StateFlow<PurchaseStatus> = _purchaseStatus.asStateFlow()
 
     private var productDetails: ProductDetails? = null
     private var selectedOfferToken: String? = null
@@ -85,7 +98,12 @@ class PremiumBillingManager(
             .build()
 
         val result = billingClient.launchBillingFlow(activity, flowParams)
-        return result.responseCode == BillingClient.BillingResponseCode.OK
+        if (result.responseCode != BillingClient.BillingResponseCode.OK) {
+            _purchaseStatus.value = PurchaseStatus.ERROR
+            return false
+        }
+        _purchaseStatus.value = PurchaseStatus.LOADING
+        return true
     }
 
     fun close() {
@@ -101,7 +119,11 @@ class PremiumBillingManager(
             BillingClient.BillingResponseCode.OK -> {
                 if (purchases != null) processPurchases(purchases)
             }
-            BillingClient.BillingResponseCode.ITEM_ALREADY_OWNED -> queryExistingPurchases()
+            BillingClient.BillingResponseCode.USER_CANCELED ->
+                _purchaseStatus.value = PurchaseStatus.CANCELLED
+            BillingClient.BillingResponseCode.ITEM_ALREADY_OWNED ->
+                queryExistingPurchases()
+            else -> _purchaseStatus.value = PurchaseStatus.ERROR
         }
     }
 
@@ -124,6 +146,7 @@ class PremiumBillingManager(
             if (billingResult.responseCode != BillingClient.BillingResponseCode.OK) {
                 _isPurchaseReady.value = false
                 _formattedPrice.value = null
+                _purchaseStatus.value = PurchaseStatus.ERROR
                 return@queryProductDetailsAsync
             }
 
@@ -138,6 +161,8 @@ class PremiumBillingManager(
             selectedOfferToken = offer?.offerToken
             _formattedPrice.value = offer?.formattedPrice
             _isPurchaseReady.value = details != null && selectedOfferToken != null
+            _purchaseStatus.value =
+                if (_isPurchaseReady.value) PurchaseStatus.READY else PurchaseStatus.ERROR
         }
     }
 
@@ -160,6 +185,16 @@ class PremiumBillingManager(
         }
 
         _isPremium.value = ownedPurchase != null
+        val hasPendingPurchase = purchases.any { purchase ->
+            purchase.products.contains(PRODUCT_REMOVE_ADS_LIFETIME) &&
+                purchase.purchaseState == Purchase.PurchaseState.PENDING
+        }
+        _purchaseStatus.value = when {
+            ownedPurchase != null -> PurchaseStatus.PREMIUM
+            hasPendingPurchase -> PurchaseStatus.PENDING
+            _isPurchaseReady.value -> PurchaseStatus.READY
+            else -> PurchaseStatus.LOADING
+        }
 
         if (ownedPurchase != null && !ownedPurchase.isAcknowledged) {
             val params = AcknowledgePurchaseParams.newBuilder()
