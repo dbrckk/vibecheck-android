@@ -33,6 +33,26 @@ class GameViewModelTest {
     }
 
     @Test
+    fun red_green_starts_immediately_without_player_setup() {
+        val viewModel = GameViewModel(SavedStateHandle())
+
+        viewModel.selectMode(GameMode.RED_GREEN)
+
+        assertEquals(GameMode.RED_GREEN.name, viewModel.modeName.value)
+        assertEquals(AppScreen.GAME.name, viewModel.screenName.value)
+    }
+
+    @Test
+    fun red_green_challenge_starts_immediately_and_keeps_target() {
+        val viewModel = GameViewModel(SavedStateHandle())
+
+        viewModel.acceptChallenge(Challenge(GameMode.RED_GREEN, 75))
+
+        assertEquals(AppScreen.GAME.name, viewModel.screenName.value)
+        assertEquals(75, viewModel.challengeTarget.value)
+    }
+
+    @Test
     fun final_answer_opens_result_and_saves_vote() {
         val viewModel = GameViewModel(SavedStateHandle())
 
