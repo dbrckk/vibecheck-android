@@ -155,9 +155,49 @@ class GameViewModelTest {
         viewModel.goHome()
 
         assertEquals(AppScreen.HOME.name, viewModel.screenName.value)
+        assertEquals(0, viewModel.questionIndex.value)
         assertTrue(viewModel.savedVotes.value.isEmpty())
         assertEquals(GameViewModel.NO_CHALLENGE, viewModel.challengeTarget.value)
         assertEquals(listOf("Alice", "Bob"), viewModel.players.value)
+    }
+    @Test
+    fun saved_state_restores_active_session_after_recreation() {
+        val state = SavedStateHandle()
+        val first = GameViewModel(state)
+
+        first.selectMode(GameMode.WHO_OF_US)
+        first.addPlayer("Alice")
+        first.addPlayer("Bob")
+        first.startGame()
+        first.answer("q1", "Alice", isLastQuestion = false)
+
+        val restored = GameViewModel(state)
+
+        assertEquals(AppScreen.GAME.name, restored.screenName.value)
+        assertEquals(GameMode.WHO_OF_US.name, restored.modeName.value)
+        assertEquals(1, restored.questionIndex.value)
+        assertEquals(listOf("Alice", "Bob"), restored.players.value)
+        assertEquals(1, SessionCodec.decodeVotes(restored.savedVotes.value).size)
+        assertEquals(first.sessionSeed.value, restored.sessionSeed.value)
+    }
+
+    @Test
+    fun new_challenge_replaces_active_session_atomically() {
+        val viewModel = GameViewModel(SavedStateHandle())
+        viewModel.selectMode(GameMode.WHO_OF_US)
+        viewModel.addPlayer("Alice")
+        viewModel.addPlayer("Bob")
+        viewModel.startGame()
+        viewModel.answer("q1", "Alice", isLastQuestion = false)
+
+        viewModel.acceptChallenge(Challenge(GameMode.RED_GREEN, 70, seed = 4242L))
+
+        assertEquals(AppScreen.GAME.name, viewModel.screenName.value)
+        assertEquals(GameMode.RED_GREEN.name, viewModel.modeName.value)
+        assertEquals(0, viewModel.questionIndex.value)
+        assertTrue(viewModel.savedVotes.value.isEmpty())
+        assertEquals(70, viewModel.challengeTarget.value)
+        assertEquals(4242L, viewModel.sessionSeed.value)
     }
 
 }
