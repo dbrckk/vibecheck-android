@@ -56,4 +56,18 @@ class KnowMeRepositoryTest {
             assertEquals(if (pack == GamePack.MIX) 24 else 16, prompts.size)
         }
     }
+    @Test
+    fun every_hot_seat_pack_and_intensity_combination_can_fill_a_session() {
+        GamePack.entries.forEach { pack ->
+            GameIntensity.entries.forEach { intensity ->
+                val prompts = KnowMeRepository.forSeed(
+                    seed = 21L,
+                    limit = 8,
+                    pack = pack,
+                    intensity = intensity
+                )
+                assertEquals(8, prompts.size)
+            }
+        }
+    }
 }
