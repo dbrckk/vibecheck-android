@@ -114,7 +114,7 @@ fun PlayerSetupScreen(
                     modifier = Modifier.fillMaxWidth()
                 ) {
                     Text(
-                        "Défi reçu • score à battre : " + challengeTarget + "%",
+                        "Défi reçu • consensus cible : " + challengeTarget + "%",
                         color = Color.White,
                         fontWeight = FontWeight.Bold,
                         modifier = Modifier.padding(14.dp)
