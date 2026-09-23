@@ -58,6 +58,7 @@ fun HomeScreen(
     selectedIntensity: GameIntensity,
     selectedPack: GamePack,
     savedPlayerCount: Int,
+    onEditGroup: () -> Unit,
     onBuyPremium: () -> Unit,
     onIntensity: (GameIntensity) -> Unit,
     onPack: (GamePack) -> Unit,
@@ -104,13 +105,31 @@ fun HomeScreen(
                 shape = RoundedCornerShape(16.dp),
                 modifier = Modifier.fillMaxWidth()
             ) {
-                Text(
-                    "$savedPlayerCount joueurs mémorisés • ton groupe est prêt",
-                    color = VibeColors.TextPrimary,
-                    fontSize = 13.sp,
-                    fontWeight = FontWeight.Bold,
-                    modifier = Modifier.padding(horizontal = 14.dp, vertical = 10.dp)
-                )
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(horizontal = 14.dp, vertical = 8.dp),
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.SpaceBetween
+                ) {
+                    Text(
+                        "$savedPlayerCount joueurs mémorisés • groupe prêt",
+                        color = VibeColors.TextPrimary,
+                        fontSize = 13.sp,
+                        fontWeight = FontWeight.Bold,
+                        modifier = Modifier.weight(1f)
+                    )
+                    Button(
+                        onClick = onEditGroup,
+                        shape = RoundedCornerShape(12.dp),
+                        colors = ButtonDefaults.buttonColors(
+                            containerColor = VibeColors.Green.copy(alpha = 0.18f),
+                            contentColor = VibeColors.TextPrimary
+                        )
+                    ) {
+                        Text("Modifier", fontSize = 12.sp, fontWeight = FontWeight.Bold)
+                    }
+                }
             }
         }
 
