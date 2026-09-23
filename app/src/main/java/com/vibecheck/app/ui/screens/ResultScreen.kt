@@ -77,6 +77,8 @@ fun ResultScreen(
     }
     val reveal = remember { Animatable(0f) }
     val score = remember { Animatable(0f) }
+    val winnerPulse = remember { Animatable(0f) }
+    val challengePulse = remember { Animatable(0f) }
     val scope = rememberCoroutineScope()
     var isSharing by remember { mutableStateOf(false) }
     var shareError by remember { mutableStateOf(false) }
@@ -112,8 +114,16 @@ fun ResultScreen(
     LaunchedEffect(percent) {
         reveal.snapTo(0f)
         score.snapTo(0f)
+        winnerPulse.snapTo(0f)
+        challengePulse.snapTo(0f)
         reveal.animateTo(1f, animationSpec = tween(durationMillis = 280))
+        winnerPulse.animateTo(1f, animationSpec = tween(durationMillis = 220))
+        winnerPulse.animateTo(0f, animationSpec = tween(durationMillis = 260))
         score.animateTo(percent.toFloat(), animationSpec = tween(durationMillis = 620))
+        if (challengeWon) {
+            challengePulse.animateTo(1f, animationSpec = tween(durationMillis = 180))
+            challengePulse.animateTo(0f, animationSpec = tween(durationMillis = 260))
+        }
     }
 
     Column(
@@ -181,7 +191,12 @@ fun ResultScreen(
                         fontSize = 44.sp,
                         lineHeight = 48.sp,
                         fontWeight = FontWeight.Black,
-                        textAlign = TextAlign.Center
+                        textAlign = TextAlign.Center,
+                        modifier = Modifier.graphicsLayer {
+                            val scale = 1f + winnerPulse.value * 0.035f
+                            scaleX = scale
+                            scaleY = scale
+                        }
                     )
                     Spacer(Modifier.height(8.dp))
                     Text(
@@ -213,7 +228,12 @@ fun ResultScreen(
                                 1.dp,
                                 if (challengeWon) VibeColors.Green.copy(alpha = 0.5f) else accent.copy(alpha = 0.35f)
                             ),
-                            shape = RoundedCornerShape(18.dp)
+                            shape = RoundedCornerShape(18.dp),
+                            modifier = Modifier.graphicsLayer {
+                                val scale = 1f + challengePulse.value * 0.025f
+                                scaleX = scale
+                                scaleY = scale
+                            }
                         ) {
                             Text(
                                 if (challengeWon) {
