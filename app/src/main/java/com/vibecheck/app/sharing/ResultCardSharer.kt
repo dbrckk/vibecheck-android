@@ -118,11 +118,11 @@ object ResultCardSharer {
 
         val winnerPaint = textPaint(112f, Color.WHITE, true)
         drawCenteredWrappedText(
-            canvas, safeWinner, winnerPaint, WIDTH / 2f, 820f, 820f, 126f
+            canvas, winner, winnerPaint, WIDTH / 2f, 820f, 820f, 126f
         )
 
         val percentPaint = textPaint(250f, accent.soft, true)
-        val percentText = "$safePercent%"
+        val percentText = "$percent%"
         canvas.drawText(
             percentText,
             WIDTH / 2f - percentPaint.measureText(percentText) / 2f,
