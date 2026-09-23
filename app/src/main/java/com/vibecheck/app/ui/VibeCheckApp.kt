@@ -35,6 +35,7 @@ import com.vibecheck.app.billing.PremiumBillingManager
 import com.vibecheck.app.billing.PurchaseStatus
 import com.vibecheck.app.data.KnowMeRepository
 import com.vibecheck.app.data.LocalStatsStore
+import com.vibecheck.app.data.OnboardingStore
 import com.vibecheck.app.data.PlayerGroupStore
 import com.vibecheck.app.data.QuestionHistoryStore
 import com.vibecheck.app.data.QuestionRepository
@@ -47,6 +48,7 @@ import com.vibecheck.app.domain.model.GamePack
 import com.vibecheck.app.ui.screens.GameScreen
 import com.vibecheck.app.ui.screens.HomeScreen
 import com.vibecheck.app.ui.screens.LeaderboardScreen
+import com.vibecheck.app.ui.screens.OnboardingScreen
 import com.vibecheck.app.ui.screens.PassPhoneScreen
 import com.vibecheck.app.ui.screens.PlayerSetupScreen
 import com.vibecheck.app.ui.screens.ResultScreen
@@ -74,6 +76,12 @@ fun VibeCheckApp(
     }
     val localStatsStore = remember(context.applicationContext) {
         LocalStatsStore(context.applicationContext)
+    }
+    val onboardingStore = remember(context.applicationContext) {
+        OnboardingStore(context.applicationContext)
+    }
+    var showOnboarding by remember {
+        mutableStateOf(!onboardingStore.isCompleted())
     }
     var groupHydrated by remember { mutableStateOf(false) }
 
@@ -196,6 +204,14 @@ fun VibeCheckApp(
                         .safeDrawingPadding()
                         .padding(horizontal = 20.dp, vertical = 16.dp)
                 ) {
+                if (showOnboarding && incomingChallenge == null && screen == AppScreen.HOME) {
+                    OnboardingScreen(
+                        onStart = {
+                            onboardingStore.markCompleted()
+                            showOnboarding = false
+                        }
+                    )
+                } else {
                 AnimatedContent(
                     targetState = screen,
                     transitionSpec = {
@@ -418,6 +434,7 @@ fun VibeCheckApp(
                         )
                     }
                     }
+                }
                 }
                 }
             }
