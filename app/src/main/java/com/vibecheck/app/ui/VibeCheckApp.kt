@@ -49,6 +49,7 @@ fun VibeCheckApp(
 
     val isPremium by billingManager.isPremium.collectAsState()
     val premiumReady by billingManager.isPurchaseReady.collectAsState()
+    val premiumPrice by billingManager.formattedPrice.collectAsState()
 
     val background = Brush.verticalGradient(
         listOf(Color(0xFF101014), Color(0xFF24153A), Color(0xFF101014))
@@ -86,6 +87,7 @@ fun VibeCheckApp(
                     AppScreen.HOME -> HomeScreen(
                         isPremium = isPremium,
                         premiumReady = premiumReady,
+                        premiumPrice = premiumPrice,
                         onBuyPremium = {
                             (context as? Activity)?.let { activity ->
                                 billingManager.launchPurchase(activity)
