@@ -39,6 +39,7 @@ import com.vibecheck.app.domain.model.GameMode
 import com.vibecheck.app.domain.model.GameResult
 import com.vibecheck.app.ui.screens.GameScreen
 import com.vibecheck.app.ui.screens.HomeScreen
+import com.vibecheck.app.ui.screens.PassPhoneScreen
 import com.vibecheck.app.ui.screens.PlayerSetupScreen
 import com.vibecheck.app.ui.screens.ResultScreen
 import com.vibecheck.app.ui.state.AppScreen
@@ -78,6 +79,7 @@ fun VibeCheckApp(
     val knowSecretAnswer by gameViewModel.knowSecretAnswer.collectAsState()
     val knowGuesserIndex by gameViewModel.knowGuesserIndex.collectAsState()
     val knowScores by gameViewModel.knowScores.collectAsState()
+    val knowHandoffPending by gameViewModel.knowHandoffPending.collectAsState()
 
     val screen = runCatching { AppScreen.valueOf(screenName) }.getOrDefault(AppScreen.HOME)
     val selectedMode = runCatching { GameMode.valueOf(modeName) }.getOrDefault(GameMode.WHO_OF_US)
@@ -170,24 +172,38 @@ fun VibeCheckApp(
                                     guesser + ", que choisirait " + target + " ?\n\n" + currentPrompt.text
                                 }
 
-                                GameScreen(
-                                    mode = selectedMode,
-                                    questionText = promptText,
-                                    progress = safeIndex + 1,
-                                    total = prompts.size,
-                                    answers = currentPrompt.options,
-                                    onAnswer = { answer ->
-                                        if (secretPhase) {
-                                            gameViewModel.setKnowMeSecret(answer)
-                                        } else {
-                                            gameViewModel.submitKnowMeGuess(
-                                                answer = answer,
-                                                isLastQuestion = safeIndex == prompts.lastIndex
-                                            )
-                                        }
-                                    },
-                                    onExit = gameViewModel::abandonGame
-                                )
+                                if (knowHandoffPending) {
+                                    val nextPlayer = if (secretPhase) target else guesser
+                                    val handoffLabel = if (secretPhase) {
+                                        "La réponse précédente est masquée. $target doit répondre avant de repasser le téléphone."
+                                    } else {
+                                        "La réponse secrète est masquée. Ne continue que lorsque $guesser tient le téléphone."
+                                    }
+                                    PassPhoneScreen(
+                                        nextPlayer = nextPlayer,
+                                        promptLabel = handoffLabel,
+                                        onReady = gameViewModel::confirmKnowMeHandoff
+                                    )
+                                } else {
+                                    GameScreen(
+                                        mode = selectedMode,
+                                        questionText = promptText,
+                                        progress = safeIndex + 1,
+                                        total = prompts.size,
+                                        answers = currentPrompt.options,
+                                        onAnswer = { answer ->
+                                            if (secretPhase) {
+                                                gameViewModel.setKnowMeSecret(answer)
+                                            } else {
+                                                gameViewModel.submitKnowMeGuess(
+                                                    answer = answer,
+                                                    isLastQuestion = safeIndex == prompts.lastIndex
+                                                )
+                                            }
+                                        },
+                                        onExit = gameViewModel::abandonGame
+                                    )
+                                }
                             }
                         } else {
                             val questions = QuestionRepository.forMode(
