@@ -5,6 +5,8 @@ import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
+import androidx.compose.foundation.interaction.MutableInteractionSource
+import androidx.compose.foundation.interaction.collectIsPressedAsState
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -191,11 +193,26 @@ fun GameScreen(
             verticalArrangement = Arrangement.spacedBy(10.dp)
         ) {
             itemsIndexed(answers, key = { index, answer -> index.toString() + ":" + answer }) { index, answer ->
+                val interactionSource = remember(answer, progress) { MutableInteractionSource() }
+                val isPressed by interactionSource.collectIsPressedAsState()
+                val answerScale by animateFloatAsState(
+                    targetValue = if (isPressed) 0.985f else 1f,
+                    animationSpec = tween(durationMillis = if (isPressed) 80 else 130),
+                    label = "answerScale"
+                )
+
                 if (mode == GameMode.RED_GREEN) {
                     OutlinedButton(
                         onClick = { submit(answer) },
                         enabled = !answering,
-                        modifier = Modifier.fillMaxWidth().height(62.dp),
+                        interactionSource = interactionSource,
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .height(62.dp)
+                            .graphicsLayer {
+                                scaleX = answerScale
+                                scaleY = answerScale
+                            },
                         shape = RoundedCornerShape(18.dp),
                         border = BorderStroke(
                             1.5.dp,
@@ -212,7 +229,14 @@ fun GameScreen(
                     Button(
                         onClick = { submit(answer) },
                         enabled = !answering,
-                        modifier = Modifier.fillMaxWidth().height(62.dp),
+                        interactionSource = interactionSource,
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .height(62.dp)
+                            .graphicsLayer {
+                                scaleX = answerScale
+                                scaleY = answerScale
+                            },
                         shape = RoundedCornerShape(20.dp),
                         colors = ButtonDefaults.buttonColors(
                             containerColor = accent.copy(alpha = 0.16f),
