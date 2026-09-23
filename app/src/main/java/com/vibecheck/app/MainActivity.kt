@@ -16,7 +16,9 @@ class MainActivity : ComponentActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        incomingChallenge = ChallengeLinkCodec.decode(intent?.dataString)
+        if (savedInstanceState == null) {
+            incomingChallenge = ChallengeLinkCodec.decode(intent?.dataString)
+        }
 
         setContent {
             VibeCheckApp(
