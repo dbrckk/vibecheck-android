@@ -89,6 +89,7 @@ fun VibeCheckApp(
     val players by gameViewModel.players.collectAsState()
     val challengeTargetRaw by gameViewModel.challengeTarget.collectAsState()
     val sessionSeed by gameViewModel.sessionSeed.collectAsState()
+    val sessionInstanceId by gameViewModel.sessionInstanceId.collectAsState()
     val intensityName by gameViewModel.intensityName.collectAsState()
     val packName by gameViewModel.packName.collectAsState()
     val legacyChallenge by gameViewModel.legacyChallenge.collectAsState()
@@ -373,6 +374,7 @@ fun VibeCheckApp(
                             resultOverride = knowMeResult,
                             challengeTarget = challengeTarget,
                             sessionSeed = sessionSeed,
+                            sessionInstanceId = sessionInstanceId,
                             intensity = selectedIntensity,
                             pack = selectedPack,
                             onReplay = gameViewModel::replay,
