@@ -44,6 +44,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.vibecheck.app.billing.PurchaseStatus
+import com.vibecheck.app.domain.model.GameIntensity
 import com.vibecheck.app.domain.model.GameMode
 import com.vibecheck.app.ui.theme.VibeColors
 
@@ -53,7 +54,9 @@ fun HomeScreen(
     premiumReady: Boolean,
     premiumPrice: String?,
     purchaseStatus: PurchaseStatus,
+    selectedIntensity: GameIntensity,
     onBuyPremium: () -> Unit,
+    onIntensity: (GameIntensity) -> Unit,
     onMode: (GameMode) -> Unit
 ) {
     Column(modifier = Modifier.fillMaxSize()) {
@@ -97,6 +100,54 @@ fun HomeScreen(
             onBuyPremium = onBuyPremium
         )
 
+        Spacer(Modifier.height(18.dp))
+
+        Text(
+            "INTENSITÉ",
+            color = Color(0xFF8F8799),
+            fontSize = 12.sp,
+            fontWeight = FontWeight.Bold,
+            letterSpacing = 1.2.sp
+        )
+        Spacer(Modifier.height(9.dp))
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.spacedBy(8.dp)
+        ) {
+            GameIntensity.entries.forEach { intensity ->
+                val selected = intensity == selectedIntensity
+                Button(
+                    onClick = { onIntensity(intensity) },
+                    modifier = Modifier.weight(1f),
+                    shape = RoundedCornerShape(15.dp),
+                    colors = ButtonDefaults.buttonColors(
+                        containerColor = if (selected) {
+                            VibeColors.Purple
+                        } else {
+                            Color.White.copy(alpha = 0.055f)
+                        },
+                        contentColor = if (selected) Color(0xFF18121F) else VibeColors.TextPrimary
+                    ),
+                    contentPadding = androidx.compose.foundation.layout.PaddingValues(
+                        horizontal = 6.dp,
+                        vertical = 10.dp
+                    )
+                ) {
+                    Text(
+                        intensity.title,
+                        fontSize = 12.sp,
+                        fontWeight = FontWeight.Black,
+                        maxLines = 1
+                    )
+                }
+            }
+        }
+        Spacer(Modifier.height(6.dp))
+        Text(
+            selectedIntensity.subtitle,
+            color = VibeColors.TextSecondary,
+            fontSize = 12.sp
+        )
         Spacer(Modifier.height(18.dp))
 
         Text(
