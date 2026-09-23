@@ -52,6 +52,57 @@ class ChallengeLinkCodecTest {
     }
 
     @Test
+    fun rejects_malformed_percent_encoding() {
+        assertNull(
+            ChallengeLinkCodec.decode(
+                "vibecheck://challenge?mode=WHO_OF_US&target=%ZZ"
+            )
+        )
+    }
+
+    @Test
+    fun rejects_duplicate_parameters() {
+        assertNull(
+            ChallengeLinkCodec.decode(
+                "vibecheck://challenge?mode=WHO_OF_US&mode=RED_GREEN&target=63"
+            )
+        )
+    }
+
+    @Test
+    fun rejects_unexpected_path_or_fragment() {
+        assertNull(
+            ChallengeLinkCodec.decode(
+                "vibecheck://challenge/extra?mode=WHO_OF_US&target=63"
+            )
+        )
+        assertNull(
+            ChallengeLinkCodec.decode(
+                "vibecheck://challenge?mode=WHO_OF_US&target=63#extra"
+            )
+        )
+    }
+
+    @Test
+    fun rejects_oversized_link() {
+        val padding = "x".repeat(600)
+        assertNull(
+            ChallengeLinkCodec.decode(
+                "vibecheck://challenge?mode=WHO_OF_US&target=63&padding=$padding"
+            )
+        )
+    }
+
+    @Test
+    fun accepts_scheme_and_host_case_insensitively() {
+        val decoded = ChallengeLinkCodec.decode(
+            "VIBECHECK://CHALLENGE?mode=WHO_OF_US&target=63"
+        )
+        assertEquals(GameMode.WHO_OF_US, decoded?.mode)
+        assertEquals(63, decoded?.targetPercent)
+    }
+
+    @Test
     fun clamps_target_when_encoding() {
         val decoded = ChallengeLinkCodec.decode(
             ChallengeLinkCodec.encode(Challenge(GameMode.RED_GREEN, 150))
