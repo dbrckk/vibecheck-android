@@ -33,7 +33,9 @@ object ResultCardSharer {
         intensity: GameIntensity,
         pack: GamePack,
         localWins: Int = 0,
-        bestScorePercent: Int = 0
+        bestScorePercent: Int = 0,
+        ranking: List<Pair<String, Int>> = emptyList(),
+        totalVotes: Int = 0
     ) {
         val safeWinner = sanitizeWinner(winner)
         val safePercent = percent.coerceIn(0, 100)
@@ -45,7 +47,9 @@ object ResultCardSharer {
                 intensity = intensity,
                 pack = pack,
                 localWins = localWins.coerceAtLeast(0),
-                bestScorePercent = bestScorePercent.coerceIn(0, 100)
+                bestScorePercent = bestScorePercent.coerceIn(0, 100),
+                ranking = ranking.take(3).map { sanitizeWinner(it.first) to it.second.coerceAtLeast(0) },
+                totalVotes = totalVotes.coerceAtLeast(0)
             )
             try {
                 val directory = File(context.cacheDir, "shared_results")
@@ -99,7 +103,9 @@ object ResultCardSharer {
         intensity: GameIntensity,
         pack: GamePack,
         localWins: Int,
-        bestScorePercent: Int
+        bestScorePercent: Int,
+        ranking: List<Pair<String, Int>>,
+        totalVotes: Int
     ): Bitmap {
         val bitmap = Bitmap.createBitmap(WIDTH, HEIGHT, Bitmap.Config.ARGB_8888)
         val canvas = Canvas(bitmap)
@@ -155,7 +161,7 @@ object ResultCardSharer {
         val cardPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
             color = Color.argb(225, 28, 24, 36)
         }
-        canvas.drawRoundRect(64f, 420f, 1016f, 1540f, 72f, 72f, cardPaint)
+        canvas.drawRoundRect(64f, 420f, 1016f, 1620f, 72f, 72f, cardPaint)
 
         val modePaint = textPaint(46f, accent.highlight, true)
         drawCenteredWrappedText(
@@ -185,6 +191,24 @@ object ResultCardSharer {
             subtitlePaint
         )
 
+        if (ranking.isNotEmpty() && totalVotes > 0) {
+            val rankPaint = textPaint(34f, Color.rgb(220, 214, 230), true)
+            val rankPercentPaint = textPaint(32f, accent.highlight, true)
+            ranking.take(3).forEachIndexed { index, entry ->
+                val y = 1410f + index * 52f
+                val label = (index + 1).toString() + ". " + entry.first
+                val rankPercent = (entry.second * 100 / totalVotes).coerceIn(0, 100)
+                canvas.drawText(label, 150f, y, rankPaint)
+                val pct = rankPercent.toString() + "%"
+                canvas.drawText(
+                    pct,
+                    930f - rankPercentPaint.measureText(pct),
+                    y,
+                    rankPercentPaint
+                )
+            }
+        }
+
         if (localWins > 0) {
             val historyPaint = textPaint(34f, Color.rgb(201, 193, 214), true)
             val history = localWins.toString() +
@@ -192,7 +216,7 @@ object ResultCardSharer {
             canvas.drawText(
                 history,
                 WIDTH / 2f - historyPaint.measureText(history) / 2f,
-                1435f,
+                if (ranking.isNotEmpty()) 1570f else 1435f,
                 historyPaint
             )
             if (bestScorePercent > 0) {
@@ -201,7 +225,7 @@ object ResultCardSharer {
                 canvas.drawText(
                     best,
                     WIDTH / 2f - bestPaint.measureText(best) / 2f,
-                    1485f,
+                    if (ranking.isNotEmpty()) 1610f else 1485f,
                     bestPaint
                 )
             }
@@ -212,7 +236,7 @@ object ResultCardSharer {
         canvas.drawText(
             cta,
             WIDTH / 2f - ctaPaint.measureText(cta) / 2f,
-            1700f,
+            1740f,
             ctaPaint
         )
 
@@ -221,7 +245,7 @@ object ResultCardSharer {
         canvas.drawText(
             footer,
             WIDTH / 2f - footerPaint.measureText(footer) / 2f,
-            1810f,
+            1845f,
             footerPaint
         )
 
