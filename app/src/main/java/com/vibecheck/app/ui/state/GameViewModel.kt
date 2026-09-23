@@ -38,7 +38,7 @@ class GameViewModel(
         savedStateHandle[KEY_SESSION_SEED] = challenge.seed
         savedStateHandle[KEY_INTENSITY] = (challenge.intensity ?: GameIntensity.NORMAL).name
         savedStateHandle[KEY_PACK] = (challenge.pack ?: GamePack.MIX).name
-        savedStateHandle[KEY_LEGACY_CHALLENGE] = challenge.intensity == null || challenge.pack == null
+        savedStateHandle[KEY_LEGACY_CHALLENGE] = challenge.intensity == null
         resetKnowMeState()
         savedStateHandle[KEY_SCREEN] = initialScreenFor(challenge.mode).name
     }
