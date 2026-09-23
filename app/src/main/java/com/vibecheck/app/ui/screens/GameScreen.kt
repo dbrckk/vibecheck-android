@@ -4,7 +4,9 @@ import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -12,14 +14,17 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.LinearProgressIndicator
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
@@ -40,6 +45,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.vibecheck.app.domain.model.GameMode
+import com.vibecheck.app.ui.theme.VibeColors
 
 @Composable
 fun GameScreen(
@@ -58,6 +64,12 @@ fun GameScreen(
         label = "questionProgress"
     )
     val reveal = remember { Animatable(1f) }
+    val accent = when (mode) {
+        GameMode.WHO_OF_US -> VibeColors.Purple
+        GameMode.MOST_LIKELY -> VibeColors.Orange
+        GameMode.RED_GREEN -> VibeColors.Green
+        GameMode.KNOWS_ME -> VibeColors.Blue
+    }
     val haptic = LocalHapticFeedback.current
     var answering by remember(progress) { mutableStateOf(false) }
 
@@ -87,12 +99,21 @@ fun GameScreen(
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 Column {
-                    Text(
-                        mode.title,
-                        color = Color(0xFFC9A7FF),
-                        fontWeight = FontWeight.Bold,
-                        fontSize = 17.sp
-                    )
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.spacedBy(8.dp)
+                    ) {
+                        Box(
+                            modifier = Modifier
+                                .size(8.dp)
+                                .background(accent, CircleShape)
+                        )
+                        Text(
+                            mode.title,
+                            color = accent,
+                            style = MaterialTheme.typography.titleMedium
+                        )
+                    }
                     Text(
                         "Question " + progress + " sur " + total,
                         color = Color(0xFF8B8494),
@@ -109,14 +130,16 @@ fun GameScreen(
             LinearProgressIndicator(
                 progress = { animatedProgress },
                 modifier = Modifier.fillMaxWidth().height(8.dp),
-                color = Color(0xFFC9A7FF),
-                trackColor = Color(0xFF302A39)
+                color = accent,
+                trackColor = accent.copy(alpha = 0.14f)
             )
         }
 
         Card(
-            colors = CardDefaults.cardColors(containerColor = Color(0xE6211E29)),
-            shape = RoundedCornerShape(28.dp),
+            colors = CardDefaults.cardColors(containerColor = Color(0xEE1B1721)),
+            border = BorderStroke(1.dp, accent.copy(alpha = 0.28f)),
+            elevation = CardDefaults.cardElevation(defaultElevation = 12.dp),
+            shape = RoundedCornerShape(30.dp),
             modifier = Modifier
                 .fillMaxWidth()
                 .graphicsLayer {
@@ -130,24 +153,32 @@ fun GameScreen(
                 modifier = Modifier.padding(horizontal = 22.dp, vertical = 30.dp),
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
-                Text(
-                    "CHOISIS SANS TROP RÉFLÉCHIR",
-                    color = Color(0xFF9E91AE),
-                    fontSize = 12.sp,
-                    fontWeight = FontWeight.Bold,
-                    letterSpacing = 1.1.sp
-                )
+                Box(
+                    modifier = Modifier
+                        .background(accent.copy(alpha = 0.12f), RoundedCornerShape(999.dp))
+                        .padding(horizontal = 12.dp, vertical = 7.dp)
+                ) {
+                    Text(
+                        "CHOISIS SANS TROP RÉFLÉCHIR",
+                        color = accent,
+                        fontSize = 11.sp,
+                        fontWeight = FontWeight.Black,
+                        letterSpacing = 1.05.sp
+                    )
+                }
                 Spacer(Modifier.height(18.dp))
                 Text(
                     questionText,
-                    color = Color.White,
-                    fontSize = 29.sp,
-                    lineHeight = 35.sp,
+                    color = VibeColors.TextPrimary,
+                    fontSize = 30.sp,
+                    lineHeight = 36.sp,
                     fontWeight = FontWeight.Black,
                     textAlign = TextAlign.Center
                 )
             }
         }
+
+        Spacer(Modifier.height(20.dp))
 
         LazyColumn(
             modifier = Modifier
@@ -163,15 +194,16 @@ fun GameScreen(
                 if (mode == GameMode.RED_GREEN) {
                     OutlinedButton(
                         onClick = { submit(answer) },
-                        modifier = Modifier.fillMaxWidth().height(60.dp),
+                        enabled = !answering,
+                        modifier = Modifier.fillMaxWidth().height(62.dp),
                         shape = RoundedCornerShape(18.dp),
                         border = BorderStroke(
-                            1.dp,
-                            if (index == 0) Color(0xFF9BE6C1) else Color(0xFFFFA3B1)
+                            1.5.dp,
+                            if (index == 0) VibeColors.Green else VibeColors.Rose
                         ),
                         colors = ButtonDefaults.outlinedButtonColors(
-                            contentColor = Color.White,
-                            containerColor = Color(0x33211E29)
+                            contentColor = VibeColors.TextPrimary,
+                            containerColor = if (index == 0) VibeColors.Green.copy(alpha = 0.08f) else VibeColors.Rose.copy(alpha = 0.08f)
                         )
                     ) {
                         Text(answer, fontSize = 17.sp, fontWeight = FontWeight.Bold)
@@ -179,11 +211,14 @@ fun GameScreen(
                 } else {
                     Button(
                         onClick = { submit(answer) },
-                        modifier = Modifier.fillMaxWidth().height(60.dp),
-                        shape = RoundedCornerShape(18.dp),
+                        enabled = !answering,
+                        modifier = Modifier.fillMaxWidth().height(62.dp),
+                        shape = RoundedCornerShape(20.dp),
                         colors = ButtonDefaults.buttonColors(
-                            containerColor = Color(0xFFEEE6FF),
-                            contentColor = Color(0xFF18121F)
+                            containerColor = accent.copy(alpha = 0.16f),
+                            contentColor = VibeColors.TextPrimary,
+                            disabledContainerColor = accent.copy(alpha = 0.08f),
+                            disabledContentColor = VibeColors.TextPrimary.copy(alpha = 0.5f)
                         )
                     ) {
                         Text(answer, fontSize = 17.sp, fontWeight = FontWeight.Bold)
