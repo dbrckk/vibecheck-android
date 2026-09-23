@@ -173,6 +173,7 @@ fun VibeCheckApp(
                     )
 
                     AppScreen.PLAYERS -> PlayerSetupScreen(
+                        mode = selectedMode,
                         players = players,
                         challengeTarget = challengeTarget,
                         onBack = gameViewModel::goBackHome,
