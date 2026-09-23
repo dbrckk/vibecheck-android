@@ -105,6 +105,7 @@ fun VibeCheckApp(
                 var savedVotes by rememberSaveable { mutableStateOf(arrayListOf<String>()) }
                 var players by rememberSaveable { mutableStateOf(arrayListOf<String>()) }
                 var challengeTarget by rememberSaveable { mutableStateOf<Int?>(null) }
+                var sessionSeed by rememberSaveable { mutableStateOf(System.currentTimeMillis()) }
 
                 val screen = runCatching { Screen.valueOf(screenName) }.getOrDefault(Screen.HOME)
                 val selectedMode = runCatching { GameMode.valueOf(modeName) }.getOrDefault(GameMode.WHO_OF_US)
@@ -143,12 +144,16 @@ fun VibeCheckApp(
                         onStart = {
                             savedVotes = arrayListOf()
                             questionIndex = 0
+                            sessionSeed = System.currentTimeMillis()
                             screenName = Screen.GAME.name
                         }
                     )
 
                     Screen.GAME -> {
-                        val questions = QuestionRepository.forMode(selectedMode)
+                        val questions = QuestionRepository.forMode(
+                            mode = selectedMode,
+                            seed = sessionSeed
+                        )
                         val question = questions[questionIndex]
                         GameScreen(
                             mode = selectedMode,
@@ -179,6 +184,7 @@ fun VibeCheckApp(
                         onReplay = {
                             savedVotes = arrayListOf()
                             questionIndex = 0
+                            sessionSeed = System.currentTimeMillis()
                             screenName = Screen.GAME.name
                         },
                         onHome = {
