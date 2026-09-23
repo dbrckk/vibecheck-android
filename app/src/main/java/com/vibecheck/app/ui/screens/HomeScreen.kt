@@ -57,6 +57,7 @@ fun HomeScreen(
     purchaseStatus: PurchaseStatus,
     selectedIntensity: GameIntensity,
     selectedPack: GamePack,
+    savedPlayerCount: Int,
     onBuyPremium: () -> Unit,
     onIntensity: (GameIntensity) -> Unit,
     onPack: (GamePack) -> Unit,
@@ -92,6 +93,26 @@ fun HomeScreen(
             color = Color(0xFFAAA2B5),
             style = MaterialTheme.typography.bodyLarge
         )
+
+        if (savedPlayerCount >= 2) {
+            Spacer(Modifier.height(10.dp))
+            Card(
+                colors = CardDefaults.cardColors(
+                    containerColor = VibeColors.Green.copy(alpha = 0.10f)
+                ),
+                border = BorderStroke(1.dp, VibeColors.Green.copy(alpha = 0.28f)),
+                shape = RoundedCornerShape(16.dp),
+                modifier = Modifier.fillMaxWidth()
+            ) {
+                Text(
+                    "$savedPlayerCount joueurs mémorisés • ton groupe est prêt",
+                    color = VibeColors.TextPrimary,
+                    fontSize = 13.sp,
+                    fontWeight = FontWeight.Bold,
+                    modifier = Modifier.padding(horizontal = 14.dp, vertical = 10.dp)
+                )
+            }
+        }
 
         Spacer(Modifier.height(18.dp))
 
