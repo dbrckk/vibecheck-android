@@ -138,6 +138,7 @@ fun VibeCheckApp(
                         mode = selectedMode,
                         votes = votes,
                         challengeTarget = challengeTarget,
+                        sessionSeed = sessionSeed,
                         onReplay = gameViewModel::replay,
                         onHome = gameViewModel::goHome
                     )
