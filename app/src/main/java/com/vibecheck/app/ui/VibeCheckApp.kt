@@ -1,5 +1,6 @@
 package com.vibecheck.app.ui
 
+import android.app.Activity
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
@@ -7,14 +8,18 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
+import com.vibecheck.app.billing.PremiumBillingManager
 import com.vibecheck.app.data.QuestionRepository
 import com.vibecheck.app.domain.Challenge
 import com.vibecheck.app.domain.SessionCodec
@@ -32,6 +37,19 @@ fun VibeCheckApp(
     onChallengeConsumed: () -> Unit = {},
     gameViewModel: GameViewModel = viewModel()
 ) {
+    val context = LocalContext.current
+    val billingManager = remember(context.applicationContext) {
+        PremiumBillingManager(context.applicationContext)
+    }
+
+    DisposableEffect(billingManager) {
+        billingManager.start()
+        onDispose { billingManager.close() }
+    }
+
+    val isPremium by billingManager.isPremium.collectAsState()
+    val premiumReady by billingManager.isPurchaseReady.collectAsState()
+
     val background = Brush.verticalGradient(
         listOf(Color(0xFF101014), Color(0xFF24153A), Color(0xFF101014))
     )
@@ -66,6 +84,13 @@ fun VibeCheckApp(
             ) {
                 when (screen) {
                     AppScreen.HOME -> HomeScreen(
+                        isPremium = isPremium,
+                        premiumReady = premiumReady,
+                        onBuyPremium = {
+                            (context as? Activity)?.let { activity ->
+                                billingManager.launchPurchase(activity)
+                            }
+                        },
                         onMode = gameViewModel::selectMode
                     )
 
