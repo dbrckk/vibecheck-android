@@ -10,7 +10,7 @@ import com.vibecheck.app.domain.model.GameMode
 import com.vibecheck.app.domain.model.GamePack
 import com.vibecheck.app.domain.model.Vote
 
-enum class AppScreen { HOME, PLAYERS, GAME, RESULT }
+enum class AppScreen { HOME, PLAYERS, GAME, RESULT, LEADERBOARD }
 
 class GameViewModel(
     private val savedStateHandle: SavedStateHandle
@@ -75,6 +75,10 @@ class GameViewModel(
         } else {
             savedStateHandle[KEY_SCREEN] = AppScreen.PLAYERS.name
         }
+    }
+
+    fun openLeaderboard() {
+        savedStateHandle[KEY_SCREEN] = AppScreen.LEADERBOARD.name
     }
 
     fun editPlayers() {
