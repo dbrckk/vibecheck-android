@@ -29,16 +29,20 @@ object ResultCardSharer {
         val file = withContext(Dispatchers.IO) {
             val bitmap = createCard(mode, safeWinner, safePercent)
             try {
-                val directory = File(context.cacheDir, "shared_results").apply { mkdirs() }
-                pruneOldCards(directory)
-                val outputFile = File(
-                    directory,
-                    "vibecheck-result-" + System.currentTimeMillis() + ".png"
+                val directory = File(context.cacheDir, "shared_results")
+                check(directory.exists() || directory.mkdirs()) {
+                    "Unable to create shared results cache directory"
+                }
+                val outputFile = File.createTempFile(
+                    "vibecheck-result-",
+                    ".png",
+                    directory
                 )
 
                 FileOutputStream(outputFile).use { output ->
                     check(bitmap.compress(Bitmap.CompressFormat.PNG, 100, output))
                 }
+                pruneOldCards(directory)
                 outputFile
             } finally {
                 bitmap.recycle()
