@@ -66,6 +66,11 @@ class GameViewModel(
         savedStateHandle[KEY_PACK] = pack.name
     }
 
+    fun restorePlayers(restoredPlayers: List<String>) {
+        if (players.value.isNotEmpty()) return
+        savedStateHandle[KEY_PLAYERS] = ArrayList(restoredPlayers)
+    }
+
     fun addPlayer(player: String) {
         savedStateHandle[KEY_PLAYERS] = ArrayList(players.value + player)
     }
