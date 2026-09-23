@@ -31,4 +31,30 @@ class GameEngineTest {
         assertEquals(0, result.score)
         assertEquals(0, result.total)
     }
+    @Test
+    fun ranking_orders_by_votes_then_name() {
+        val votes = listOf(
+            Vote("q1", "Sam"),
+            Vote("q2", "Alex"),
+            Vote("q3", "Sam"),
+            Vote("q4", "Chloe"),
+            Vote("q5", "Alex"),
+            Vote("q6", "Bob")
+        )
+
+        assertEquals(
+            listOf(
+                "Alex" to 2,
+                "Sam" to 2,
+                "Bob" to 1,
+                "Chloe" to 1
+            ),
+            GameEngine.ranking(votes)
+        )
+    }
+
+    @Test
+    fun ranking_is_empty_when_there_are_no_votes() {
+        assertEquals(emptyList<Pair<String, Int>>(), GameEngine.ranking(emptyList()))
+    }
 }
