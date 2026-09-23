@@ -127,7 +127,8 @@ fun VibeCheckApp(
                                     answer = answer,
                                     isLastQuestion = safeIndex == questions.lastIndex
                                 )
-                            }
+                            },
+                            onExit = gameViewModel::abandonGame
                         )
                     }
 
