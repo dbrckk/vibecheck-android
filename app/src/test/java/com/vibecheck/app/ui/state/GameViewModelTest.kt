@@ -100,4 +100,64 @@ class GameViewModelTest {
         assertEquals(1, viewModel.questionIndex.value)
         assertTrue(viewModel.savedVotes.value.isNotEmpty())
     }
+    @Test
+    fun full_group_session_reaches_result_after_eight_answers() {
+        val viewModel = GameViewModel(SavedStateHandle())
+
+        viewModel.selectMode(GameMode.WHO_OF_US)
+        viewModel.addPlayer("Alice")
+        viewModel.addPlayer("Bob")
+        viewModel.startGame()
+
+        assertEquals(AppScreen.GAME.name, viewModel.screenName.value)
+        assertEquals(listOf("Alice", "Bob"), viewModel.players.value)
+
+        repeat(7) { index ->
+            viewModel.answer("q" + (index + 1), "Alice", isLastQuestion = false)
+            assertEquals(index + 1, viewModel.questionIndex.value)
+            assertEquals(AppScreen.GAME.name, viewModel.screenName.value)
+        }
+
+        viewModel.answer("q8", "Bob", isLastQuestion = true)
+
+        assertEquals(AppScreen.RESULT.name, viewModel.screenName.value)
+        assertEquals(8, SessionCodec.decodeVotes(viewModel.savedVotes.value).size)
+    }
+
+    @Test
+    fun replay_resets_votes_and_question_but_keeps_players() {
+        val viewModel = GameViewModel(SavedStateHandle())
+
+        viewModel.selectMode(GameMode.WHO_OF_US)
+        viewModel.addPlayer("Alice")
+        viewModel.addPlayer("Bob")
+        viewModel.startGame()
+        viewModel.answer("q1", "Alice", isLastQuestion = true)
+
+        viewModel.replay()
+
+        assertEquals(AppScreen.GAME.name, viewModel.screenName.value)
+        assertEquals(0, viewModel.questionIndex.value)
+        assertTrue(viewModel.savedVotes.value.isEmpty())
+        assertEquals(listOf("Alice", "Bob"), viewModel.players.value)
+    }
+
+    @Test
+    fun returning_home_from_result_clears_session_but_keeps_group() {
+        val viewModel = GameViewModel(SavedStateHandle())
+
+        viewModel.selectMode(GameMode.WHO_OF_US)
+        viewModel.addPlayer("Alice")
+        viewModel.addPlayer("Bob")
+        viewModel.startGame()
+        viewModel.answer("q1", "Alice", isLastQuestion = true)
+
+        viewModel.goHome()
+
+        assertEquals(AppScreen.HOME.name, viewModel.screenName.value)
+        assertTrue(viewModel.savedVotes.value.isEmpty())
+        assertEquals(GameViewModel.NO_CHALLENGE, viewModel.challengeTarget.value)
+        assertEquals(listOf("Alice", "Bob"), viewModel.players.value)
+    }
+
 }
