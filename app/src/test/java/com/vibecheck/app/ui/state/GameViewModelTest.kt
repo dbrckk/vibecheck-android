@@ -352,4 +352,48 @@ class GameViewModelTest {
         assertEquals(GamePack.MIX.name, viewModel.packName.value)
         assertFalse(viewModel.legacyChallenge.value)
     }
+    @Test
+    fun quick_start_with_valid_group_opens_game_immediately() {
+        val viewModel = GameViewModel(SavedStateHandle())
+        viewModel.restorePlayers(listOf("Alice", "Bob"))
+
+        viewModel.quickStartMode(GameMode.WHO_OF_US)
+
+        assertEquals(GameMode.WHO_OF_US.name, viewModel.modeName.value)
+        assertEquals(AppScreen.GAME.name, viewModel.screenName.value)
+        assertEquals(0, viewModel.questionIndex.value)
+        assertTrue(viewModel.savedVotes.value.isEmpty())
+    }
+
+    @Test
+    fun quick_start_without_enough_players_falls_back_to_setup() {
+        val viewModel = GameViewModel(SavedStateHandle())
+        viewModel.restorePlayers(listOf("Alice"))
+
+        viewModel.quickStartMode(GameMode.MOST_LIKELY)
+
+        assertEquals(AppScreen.PLAYERS.name, viewModel.screenName.value)
+    }
+
+    @Test
+    fun red_green_quick_start_does_not_require_players() {
+        val viewModel = GameViewModel(SavedStateHandle())
+
+        viewModel.quickStartMode(GameMode.RED_GREEN)
+
+        assertEquals(AppScreen.GAME.name, viewModel.screenName.value)
+    }
+
+    @Test
+    fun edit_players_keeps_pack_and_intensity_configuration() {
+        val viewModel = GameViewModel(SavedStateHandle())
+        viewModel.selectPack(GamePack.DEEP)
+        viewModel.selectIntensity(GameIntensity.SAVAGE)
+
+        viewModel.editPlayers()
+
+        assertEquals(AppScreen.PLAYERS.name, viewModel.screenName.value)
+        assertEquals(GamePack.DEEP.name, viewModel.packName.value)
+        assertEquals(GameIntensity.SAVAGE.name, viewModel.intensityName.value)
+    }
 }
