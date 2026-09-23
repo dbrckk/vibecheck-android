@@ -4,6 +4,7 @@ import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import com.vibecheck.app.domain.Challenge
 import com.vibecheck.app.domain.SessionCodec
+import com.vibecheck.app.domain.PlayerRules
 import com.vibecheck.app.domain.model.GameIntensity
 import com.vibecheck.app.domain.model.GameMode
 import com.vibecheck.app.domain.model.GamePack
@@ -54,6 +55,32 @@ class GameViewModel(
         if (mode == GameMode.RED_GREEN) {
             savedStateHandle[KEY_SESSION_SEED] = System.currentTimeMillis()
         }
+    }
+
+    fun quickStartMode(mode: GameMode) {
+        savedStateHandle[KEY_MODE] = mode.name
+        savedStateHandle[KEY_CHALLENGE_TARGET] = NO_CHALLENGE
+        savedStateHandle[KEY_QUESTION_INDEX] = 0
+        savedStateHandle[KEY_VOTES] = arrayListOf<String>()
+        savedStateHandle[KEY_LEGACY_CHALLENGE] = false
+        resetKnowMeState()
+
+        val canStartImmediately = mode == GameMode.RED_GREEN || PlayerRules.canStart(players.value)
+        if (canStartImmediately) {
+            savedStateHandle[KEY_SESSION_SEED] = System.currentTimeMillis()
+            savedStateHandle[KEY_SCREEN] = AppScreen.GAME.name
+        } else {
+            savedStateHandle[KEY_SCREEN] = AppScreen.PLAYERS.name
+        }
+    }
+
+    fun editPlayers() {
+        savedStateHandle[KEY_CHALLENGE_TARGET] = NO_CHALLENGE
+        savedStateHandle[KEY_QUESTION_INDEX] = 0
+        savedStateHandle[KEY_VOTES] = arrayListOf<String>()
+        savedStateHandle[KEY_LEGACY_CHALLENGE] = false
+        resetKnowMeState()
+        savedStateHandle[KEY_SCREEN] = AppScreen.PLAYERS.name
     }
 
     fun selectIntensity(intensity: GameIntensity) {
