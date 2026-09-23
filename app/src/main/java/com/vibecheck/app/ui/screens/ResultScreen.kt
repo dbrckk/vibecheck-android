@@ -81,6 +81,13 @@ fun ResultScreen(
     }
     val percent = if (result.total == 0) 0 else (result.score * 100 / result.total)
     val challengeWon = challengeTarget != null && percent >= challengeTarget
+    val shareRanking = if (
+        mode == GameMode.WHO_OF_US || mode == GameMode.MOST_LIKELY
+    ) {
+        GameEngine.ranking(votes).take(3)
+    } else {
+        emptyList()
+    }
     val winnerFontSize = when {
         result.winner.length > 18 -> 30.sp
         result.winner.length > 12 -> 36.sp
@@ -340,7 +347,9 @@ fun ResultScreen(
                                     intensity = intensity,
                                     pack = pack,
                                     localWins = playerStat?.wins ?: 0,
-                                    bestScorePercent = playerStat?.bestScorePercent ?: 0
+                                    bestScorePercent = playerStat?.bestScorePercent ?: 0,
+                                    ranking = shareRanking,
+                                    totalVotes = votes.size
                                 )
                             } catch (_: Exception) {
                                 shareError = true
