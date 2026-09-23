@@ -1,5 +1,6 @@
 package com.vibecheck.app.data
 
+import com.vibecheck.app.domain.model.GameIntensity
 import com.vibecheck.app.domain.model.GameMode
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNotEquals
@@ -71,5 +72,19 @@ class QuestionRepositoryTest {
 
         assertEquals(8, next.size)
         assertEquals(3, next.take(3).count { it.id !in all.dropLast(3).map { q -> q.id }.toSet() })
+    }
+    @Test
+    fun every_intensity_keeps_sixteen_questions_per_mode() {
+        GameMode.entries.forEach { mode ->
+            GameIntensity.entries.forEach { intensity ->
+                val questions = QuestionRepository.forMode(
+                    mode = mode,
+                    seed = 3L,
+                    limit = 24,
+                    intensity = intensity
+                )
+                assertEquals(16, questions.size)
+            }
+        }
     }
 }
