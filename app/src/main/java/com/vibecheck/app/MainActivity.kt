@@ -31,6 +31,7 @@ import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateListOf
@@ -103,22 +104,27 @@ fun VibeCheckApp(
                 var questionIndex by rememberSaveable { mutableIntStateOf(0) }
                 var savedVotes by rememberSaveable { mutableStateOf(arrayListOf<String>()) }
                 var players by rememberSaveable { mutableStateOf(arrayListOf<String>()) }
+                var challengeTarget by rememberSaveable { mutableStateOf<Int?>(null) }
 
                 val screen = runCatching { Screen.valueOf(screenName) }.getOrDefault(Screen.HOME)
                 val selectedMode = runCatching { GameMode.valueOf(modeName) }.getOrDefault(GameMode.WHO_OF_US)
                 val votes = SessionCodec.decodeVotes(savedVotes)
 
-                if (incomingChallenge != null) {
-                    modeName = incomingChallenge.mode.name
-                    questionIndex = 0
-                    savedVotes = arrayListOf()
-                    screenName = Screen.PLAYERS.name
-                    onChallengeConsumed()
+                LaunchedEffect(incomingChallenge) {
+                    incomingChallenge?.let { challenge ->
+                        modeName = challenge.mode.name
+                        challengeTarget = challenge.targetPercent
+                        questionIndex = 0
+                        savedVotes = arrayListOf()
+                        screenName = Screen.PLAYERS.name
+                        onChallengeConsumed()
+                    }
                 }
 
                 when (screen) {
                     Screen.HOME -> HomeScreen { mode ->
                         modeName = mode.name
+                        challengeTarget = null
                         questionIndex = 0
                         savedVotes = arrayListOf()
                         screenName = Screen.PLAYERS.name
@@ -126,6 +132,7 @@ fun VibeCheckApp(
 
                     Screen.PLAYERS -> PlayerSetupScreen(
                         players = players,
+                        challengeTarget = challengeTarget,
                         onBack = { screenName = Screen.HOME.name },
                         onAddPlayer = { player ->
                             players = ArrayList(players + player)
@@ -168,6 +175,7 @@ fun VibeCheckApp(
                     Screen.RESULT -> ResultScreen(
                         mode = selectedMode,
                         votes = votes,
+                        challengeTarget = challengeTarget,
                         onReplay = {
                             savedVotes = arrayListOf()
                             questionIndex = 0
@@ -213,6 +221,7 @@ private fun HomeScreen(onMode: (GameMode) -> Unit) {
 @Composable
 private fun PlayerSetupScreen(
     players: List<String>,
+    challengeTarget: Int?,
     onBack: () -> Unit,
     onAddPlayer: (String) -> Unit,
     onRemovePlayer: (String) -> Unit,
@@ -233,6 +242,21 @@ private fun PlayerSetupScreen(
                 "Ajoute entre " + PlayerRules.MIN_PLAYERS + " et " + PlayerRules.MAX_PLAYERS + " joueurs.",
                 color = Color(0xFFBEB7C9)
             )
+            if (challengeTarget != null) {
+                Spacer(Modifier.height(10.dp))
+                Card(
+                    colors = CardDefaults.cardColors(containerColor = Color(0xFF4B2E6B)),
+                    shape = RoundedCornerShape(16.dp),
+                    modifier = Modifier.fillMaxWidth()
+                ) {
+                    Text(
+                        "Défi reçu • score à battre : " + challengeTarget + "%",
+                        color = Color.White,
+                        fontWeight = FontWeight.Bold,
+                        modifier = Modifier.padding(14.dp)
+                    )
+                }
+            }
             Spacer(Modifier.height(20.dp))
 
             OutlinedTextField(
@@ -361,6 +385,7 @@ private fun GameScreen(
 private fun ResultScreen(
     mode: GameMode,
     votes: List<Vote>,
+    challengeTarget: Int?,
     onReplay: () -> Unit,
     onHome: () -> Unit
 ) {
@@ -390,6 +415,19 @@ private fun ResultScreen(
                 fontWeight = FontWeight.Black
             )
             Text("sur " + mode.title, color = Color(0xFFA9A3B3), textAlign = TextAlign.Center)
+            if (challengeTarget != null) {
+                Spacer(Modifier.height(14.dp))
+                Text(
+                    if (percent > challengeTarget) {
+                        "Défi réussi • " + challengeTarget + "% à battre"
+                    } else {
+                        "Défi à battre • objectif " + challengeTarget + "%"
+                    },
+                    color = if (percent > challengeTarget) Color(0xFFC9A7FF) else Color(0xFFBEB7C9),
+                    fontWeight = FontWeight.Bold,
+                    textAlign = TextAlign.Center
+                )
+            }
         }
 
         Column(modifier = Modifier.fillMaxWidth(), verticalArrangement = Arrangement.spacedBy(10.dp)) {
