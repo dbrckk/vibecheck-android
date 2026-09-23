@@ -47,6 +47,8 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.vibecheck.app.data.LocalStatsStore
+import com.vibecheck.app.data.PlayerStat
 import com.vibecheck.app.domain.Challenge
 import com.vibecheck.app.domain.GameEngine
 import com.vibecheck.app.domain.model.GameIntensity
@@ -66,6 +68,7 @@ fun ResultScreen(
     resultOverride: GameResult? = null,
     challengeTarget: Int?,
     sessionSeed: Long,
+    sessionInstanceId: Long,
     intensity: GameIntensity,
     pack: GamePack,
     onReplay: () -> Unit,
@@ -73,6 +76,9 @@ fun ResultScreen(
 ) {
     val result = resultOverride ?: GameEngine.result(votes)
     val context = LocalContext.current
+    val statsStore = remember(context.applicationContext) {
+        LocalStatsStore(context.applicationContext)
+    }
     val percent = if (result.total == 0) 0 else (result.score * 100 / result.total)
     val challengeWon = challengeTarget != null && percent >= challengeTarget
     val winnerFontSize = when {
@@ -99,6 +105,9 @@ fun ResultScreen(
     var isSharing by remember { mutableStateOf(false) }
     var shareError by remember { mutableStateOf(false) }
     var challengeShareError by remember { mutableStateOf(false) }
+    var playerStat by remember(result.winner) {
+        mutableStateOf<PlayerStat?>(null)
+    }
     val shareInteraction = remember { MutableInteractionSource() }
     val challengeInteraction = remember { MutableInteractionSource() }
     val replayInteraction = remember { MutableInteractionSource() }
@@ -127,6 +136,17 @@ fun ResultScreen(
         animationSpec = tween(durationMillis = if (homePressed) 80 else 130),
         label = "homeScale"
     )
+
+    LaunchedEffect(sessionInstanceId, result.winner, percent, mode) {
+        if (mode != GameMode.RED_GREEN && result.winner.isNotBlank() && result.winner != "Personne") {
+            playerStat = statsStore.recordResult(
+                sessionKey = mode.name + "_" + sessionInstanceId,
+                mode = mode,
+                winner = result.winner,
+                scorePercent = percent
+            )
+        }
+    }
 
     LaunchedEffect(percent) {
         reveal.snapTo(0f)
@@ -231,6 +251,24 @@ fun ResultScreen(
                         color = Color(0xFFA9A3B3),
                         textAlign = TextAlign.Center
                     )
+                    if (playerStat != null) {
+                        Spacer(Modifier.height(10.dp))
+                        Text(
+                            playerStat!!.wins.toString() +
+                                if (playerStat!!.wins == 1) " victoire locale" else " victoires locales",
+                            color = accent,
+                            fontSize = 13.sp,
+                            fontWeight = FontWeight.Bold
+                        )
+                        if (playerStat!!.bestScorePercent > 0) {
+                            Text(
+                                "Meilleur score : " + playerStat!!.bestScorePercent + "%",
+                                color = Color(0xFF9D96A7),
+                                fontSize = 12.sp
+                            )
+                        }
+                    }
+
                     Spacer(Modifier.height(18.dp))
                     LinearProgressIndicator(
                         progress = { (score.value / 100f).coerceIn(0f, 1f) },
