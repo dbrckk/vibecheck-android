@@ -2,6 +2,12 @@ package com.vibecheck.app.ui
 
 import android.app.Activity
 import androidx.activity.compose.BackHandler
+import androidx.compose.animation.AnimatedContent
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.scaleIn
+import androidx.compose.animation.togetherWith
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
@@ -92,7 +98,16 @@ fun VibeCheckApp(
                         .fillMaxSize()
                         .padding(horizontal = 20.dp, vertical = 24.dp)
                 ) {
-                when (screen) {
+                AnimatedContent(
+                    targetState = screen,
+                    transitionSpec = {
+                        (fadeIn(animationSpec = tween(220)) +
+                            scaleIn(initialScale = 0.985f, animationSpec = tween(220)))
+                            .togetherWith(fadeOut(animationSpec = tween(150)))
+                    },
+                    label = "screenTransition"
+                ) { animatedScreen ->
+                    when (animatedScreen) {
                     AppScreen.HOME -> HomeScreen(
                         isPremium = isPremium,
                         premiumReady = premiumReady,
@@ -179,6 +194,7 @@ fun VibeCheckApp(
                         onReplay = gameViewModel::replay,
                         onHome = gameViewModel::goHome
                     )
+                    }
                 }
                 }
             }
