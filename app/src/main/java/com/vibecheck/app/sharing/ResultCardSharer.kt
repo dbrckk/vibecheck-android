@@ -61,7 +61,11 @@ object ResultCardSharer {
             clipData = ClipData.newUri(context.contentResolver, "VibeCheck result", uri)
             putExtra(
                 Intent.EXTRA_TEXT,
-                "Mon VibeCheck : $safeWinner arrive en tête avec $safePercent% — ${mode.title}."
+                if (mode == GameMode.KNOWS_ME) {
+                    "Mon VibeCheck : $safeWinner connaît le mieux le groupe avec $safePercent% — ${mode.title}."
+                } else {
+                    "Mon VibeCheck : $safeWinner arrive en tête avec $safePercent% — ${mode.title}."
+                }
             )
             addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
         }
@@ -135,7 +139,7 @@ object ResultCardSharer {
         )
 
         val subtitlePaint = textPaint(48f, Color.rgb(184, 176, 196), false)
-        val subtitle = "des réponses"
+        val subtitle = if (mode == GameMode.KNOWS_ME) "de bonnes réponses" else "des réponses"
         canvas.drawText(
             subtitle,
             WIDTH / 2f - subtitlePaint.measureText(subtitle) / 2f,
