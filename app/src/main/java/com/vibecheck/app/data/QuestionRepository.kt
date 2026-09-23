@@ -2,6 +2,7 @@ package com.vibecheck.app.data
 
 import com.vibecheck.app.domain.model.GameIntensity
 import com.vibecheck.app.domain.model.GameMode
+import com.vibecheck.app.domain.model.GamePack
 import com.vibecheck.app.domain.model.Question
 import kotlin.random.Random
 
@@ -113,11 +114,13 @@ object QuestionRepository {
         seed: Long = 0L,
         limit: Int = 8,
         avoidIds: Set<String> = emptySet(),
-        intensity: GameIntensity? = null
+        intensity: GameIntensity? = null,
+        pack: GamePack = GamePack.MIX
     ): List<Question> {
         val shuffled = questions
             .filter { it.mode == mode }
             .filter { intensity == null || matchesIntensity(it.id, intensity) }
+            .filter { matchesPack(it.id, pack) }
             .shuffled(Random(seed))
         val preferred = shuffled.filterNot { it.id in avoidIds }
         val fallback = shuffled.filter { it.id in avoidIds }
@@ -130,5 +133,16 @@ object QuestionRepository {
             GameIntensity.NORMAL -> index in 5..20
             GameIntensity.SAVAGE -> index in 9..24
         }
+    }
+    private fun matchesPack(id: String, pack: GamePack): Boolean {
+        if (pack == GamePack.MIX) return true
+        val index = id.substringAfterLast("_").toIntOrNull() ?: return false
+        val allowed = when (pack) {
+            GamePack.MIX -> return true
+            GamePack.FRIENDS -> setOf(1,2,3,4,6,7,8,10,11,12,13,16,17,18,20,23)
+            GamePack.DEEP -> setOf(4,5,7,9,11,12,14,15,16,18,19,20,21,22,23,24)
+            GamePack.CHAOS -> setOf(1,3,5,6,8,9,10,11,12,13,14,15,17,19,21,24)
+        }
+        return index in allowed
     }
 }
