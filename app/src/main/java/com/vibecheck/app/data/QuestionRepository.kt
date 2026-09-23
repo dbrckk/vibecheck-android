@@ -107,9 +107,17 @@ object QuestionRepository {
         Question("know_24", GameMode.KNOWS_ME, "Qui connaît le mieux les habitudes que chacun essaie de changer ?")
     )
 
-    fun forMode(mode: GameMode, seed: Long = 0L, limit: Int = 8): List<Question> =
-        questions
+    fun forMode(
+        mode: GameMode,
+        seed: Long = 0L,
+        limit: Int = 8,
+        avoidIds: Set<String> = emptySet()
+    ): List<Question> {
+        val shuffled = questions
             .filter { it.mode == mode }
             .shuffled(Random(seed))
-            .take(limit.coerceAtLeast(0))
+        val preferred = shuffled.filterNot { it.id in avoidIds }
+        val fallback = shuffled.filter { it.id in avoidIds }
+        return (preferred + fallback).take(limit.coerceAtLeast(0))
+    }
 }
