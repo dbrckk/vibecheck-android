@@ -14,21 +14,32 @@ import androidx.core.content.FileProvider
 import com.vibecheck.app.domain.model.GameMode
 import java.io.File
 import java.io.FileOutputStream
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
 
 object ResultCardSharer {
     private const val WIDTH = 1080
     private const val HEIGHT = 1920
 
-    fun share(context: Context, mode: GameMode, winner: String, percent: Int) {
-        val bitmap = createCard(mode, winner, percent)
-        val directory = File(context.cacheDir, "shared_results").apply { mkdirs() }
-        pruneOldCards(directory)
-        val file = File(directory, "vibecheck-result-" + System.currentTimeMillis() + ".png")
+    suspend fun share(context: Context, mode: GameMode, winner: String, percent: Int) {
+        val file = withContext(Dispatchers.IO) {
+            val bitmap = createCard(mode, winner, percent)
+            try {
+                val directory = File(context.cacheDir, "shared_results").apply { mkdirs() }
+                pruneOldCards(directory)
+                val outputFile = File(
+                    directory,
+                    "vibecheck-result-" + System.currentTimeMillis() + ".png"
+                )
 
-        FileOutputStream(file).use { output ->
-            check(bitmap.compress(Bitmap.CompressFormat.PNG, 100, output))
+                FileOutputStream(outputFile).use { output ->
+                    check(bitmap.compress(Bitmap.CompressFormat.PNG, 100, output))
+                }
+                outputFile
+            } finally {
+                bitmap.recycle()
+            }
         }
-        bitmap.recycle()
 
         val uri = FileProvider.getUriForFile(
             context,
