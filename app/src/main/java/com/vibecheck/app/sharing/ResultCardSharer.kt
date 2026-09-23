@@ -53,6 +53,7 @@ object ResultCardSharer {
     private fun createCard(mode: GameMode, winner: String, percent: Int): Bitmap {
         val bitmap = Bitmap.createBitmap(WIDTH, HEIGHT, Bitmap.Config.ARGB_8888)
         val canvas = Canvas(bitmap)
+        val accent = accentFor(mode)
 
         val background = Paint(Paint.ANTI_ALIAS_FLAG).apply {
             shader = LinearGradient(
@@ -62,7 +63,7 @@ object ResultCardSharer {
                 HEIGHT.toFloat(),
                 intArrayOf(
                     Color.rgb(16, 16, 20),
-                    Color.rgb(63, 34, 91),
+                    accent.background,
                     Color.rgb(20, 14, 29)
                 ),
                 null,
@@ -72,12 +73,17 @@ object ResultCardSharer {
         canvas.drawRect(0f, 0f, WIDTH.toFloat(), HEIGHT.toFloat(), background)
 
         val glow = Paint(Paint.ANTI_ALIAS_FLAG).apply {
-            color = Color.argb(46, 214, 177, 255)
+            color = Color.argb(
+                54,
+                Color.red(accent.highlight),
+                Color.green(accent.highlight),
+                Color.blue(accent.highlight)
+            )
         }
         canvas.drawCircle(880f, 260f, 330f, glow)
         canvas.drawCircle(180f, 1580f, 420f, glow)
 
-        val brandPaint = textPaint(62f, Color.rgb(210, 178, 255), true).apply {
+        val brandPaint = textPaint(62f, accent.highlight, true).apply {
             textScaleX = 1.08f
         }
         canvas.drawText("VIBECHECK", 86f, 150f, brandPaint)
@@ -90,7 +96,7 @@ object ResultCardSharer {
         }
         canvas.drawRoundRect(64f, 400f, 1016f, 1510f, 72f, 72f, cardPaint)
 
-        val modePaint = textPaint(46f, Color.rgb(207, 171, 255), true)
+        val modePaint = textPaint(46f, accent.highlight, true)
         drawCenteredWrappedText(
             canvas, mode.title.uppercase(), modePaint, WIDTH / 2f, 540f, 820f, 58f
         )
@@ -100,7 +106,7 @@ object ResultCardSharer {
             canvas, winner, winnerPaint, WIDTH / 2f, 820f, 820f, 126f
         )
 
-        val percentPaint = textPaint(250f, Color.rgb(239, 225, 255), true)
+        val percentPaint = textPaint(250f, accent.soft, true)
         val percentText = "$percent%"
         canvas.drawText(
             percentText,
@@ -138,6 +144,36 @@ object ResultCardSharer {
 
         return bitmap
     }
+
+    private data class Accent(
+        val background: Int,
+        val highlight: Int,
+        val soft: Int
+    )
+
+    private fun accentFor(mode: GameMode): Accent =
+        when (mode) {
+            GameMode.WHO_OF_US -> Accent(
+                background = Color.rgb(63, 34, 91),
+                highlight = Color.rgb(207, 171, 255),
+                soft = Color.rgb(239, 225, 255)
+            )
+            GameMode.MOST_LIKELY -> Accent(
+                background = Color.rgb(92, 49, 30),
+                highlight = Color.rgb(255, 184, 138),
+                soft = Color.rgb(255, 229, 211)
+            )
+            GameMode.RED_GREEN -> Accent(
+                background = Color.rgb(30, 74, 55),
+                highlight = Color.rgb(155, 230, 193),
+                soft = Color.rgb(220, 250, 235)
+            )
+            GameMode.KNOWS_ME -> Accent(
+                background = Color.rgb(29, 58, 92),
+                highlight = Color.rgb(149, 200, 255),
+                soft = Color.rgb(220, 237, 255)
+            )
+        }
 
     private fun pruneOldCards(directory: File) {
         directory.listFiles()
