@@ -50,6 +50,7 @@ import androidx.compose.ui.unit.sp
 import com.vibecheck.app.domain.Challenge
 import com.vibecheck.app.domain.GameEngine
 import com.vibecheck.app.domain.model.GameMode
+import com.vibecheck.app.domain.model.GameResult
 import com.vibecheck.app.domain.model.Vote
 import com.vibecheck.app.sharing.ChallengeSharer
 import com.vibecheck.app.sharing.ResultCardSharer
@@ -60,12 +61,13 @@ import kotlinx.coroutines.launch
 fun ResultScreen(
     mode: GameMode,
     votes: List<Vote>,
+    resultOverride: GameResult? = null,
     challengeTarget: Int?,
     sessionSeed: Long,
     onReplay: () -> Unit,
     onHome: () -> Unit
 ) {
-    val result = GameEngine.result(votes)
+    val result = resultOverride ?: GameEngine.result(votes)
     val context = LocalContext.current
     val percent = if (result.total == 0) 0 else (result.score * 100 / result.total)
     val challengeWon = challengeTarget != null && percent >= challengeTarget
@@ -188,7 +190,7 @@ fun ResultScreen(
                             .padding(horizontal = 13.dp, vertical = 7.dp)
                     ) {
                         Text(
-                            "LE GROUPE A PARLÉ",
+                            if (mode == GameMode.KNOWS_ME) "QUI CONNAÎT LE MIEUX ?" else "LE GROUPE A PARLÉ",
                             color = accent,
                             fontSize = 11.sp,
                             fontWeight = FontWeight.Black,
@@ -217,7 +219,11 @@ fun ResultScreen(
                         fontWeight = FontWeight.Black
                     )
                     Text(
-                        "des réponses • " + mode.title,
+                        if (mode == GameMode.KNOWS_ME) {
+                            "de bonnes réponses • " + mode.title
+                        } else {
+                            "des réponses • " + mode.title
+                        },
                         color = Color(0xFFA9A3B3),
                         textAlign = TextAlign.Center
                     )
@@ -248,9 +254,17 @@ fun ResultScreen(
                         ) {
                             Text(
                                 if (challengeWon) {
-                                    "Défi réussi • consensus " + challengeTarget + "% atteint"
+                                    if (mode == GameMode.KNOWS_ME) {
+                                        "Défi réussi • score cible " + challengeTarget + "% atteint"
+                                    } else {
+                                        "Défi réussi • consensus " + challengeTarget + "% atteint"
+                                    }
                                 } else {
-                                    "Encore " + (challengeTarget - percent).coerceAtLeast(0) + " points pour atteindre le consensus cible"
+                                    if (mode == GameMode.KNOWS_ME) {
+                                        "Encore " + (challengeTarget - percent).coerceAtLeast(0) + " points pour atteindre le score cible"
+                                    } else {
+                                        "Encore " + (challengeTarget - percent).coerceAtLeast(0) + " points pour atteindre le consensus cible"
+                                    }
                                 },
                                 color = Color.White,
                                 fontWeight = FontWeight.Bold,
