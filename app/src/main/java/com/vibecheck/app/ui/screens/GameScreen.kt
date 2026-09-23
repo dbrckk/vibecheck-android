@@ -122,8 +122,17 @@ fun GameScreen(
                         fontSize = 13.sp
                     )
                 }
-                TextButton(onClick = onExit) {
-                    Text("Quitter", color = Color(0xFFBEB7C9))
+                TextButton(
+                    onClick = onExit,
+                    shape = RoundedCornerShape(14.dp),
+                    colors = ButtonDefaults.textButtonColors(
+                        contentColor = VibeColors.TextSecondary
+                    )
+                ) {
+                    Text(
+                        "Quitter",
+                        fontWeight = FontWeight.Bold
+                    )
                 }
             }
 
