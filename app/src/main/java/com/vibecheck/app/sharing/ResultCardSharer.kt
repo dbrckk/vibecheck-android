@@ -1,5 +1,6 @@
 package com.vibecheck.app.sharing
 
+import android.content.ClipData
 import android.content.Context
 import android.content.Intent
 import android.graphics.Bitmap
@@ -21,7 +22,8 @@ object ResultCardSharer {
     fun share(context: Context, mode: GameMode, winner: String, percent: Int) {
         val bitmap = createCard(mode, winner, percent)
         val directory = File(context.cacheDir, "shared_results").apply { mkdirs() }
-        val file = File(directory, "vibecheck-result.png")
+        pruneOldCards(directory)
+        val file = File(directory, "vibecheck-result-" + System.currentTimeMillis() + ".png")
 
         FileOutputStream(file).use { output ->
             check(bitmap.compress(Bitmap.CompressFormat.PNG, 100, output))
@@ -37,6 +39,7 @@ object ResultCardSharer {
         val shareIntent = Intent(Intent.ACTION_SEND).apply {
             type = "image/png"
             putExtra(Intent.EXTRA_STREAM, uri)
+            clipData = ClipData.newUri(context.contentResolver, "VibeCheck result", uri)
             putExtra(
                 Intent.EXTRA_TEXT,
                 "Mon VibeCheck : $winner arrive en tête avec $percent% — ${mode.title}."
@@ -134,6 +137,14 @@ object ResultCardSharer {
         )
 
         return bitmap
+    }
+
+    private fun pruneOldCards(directory: File) {
+        directory.listFiles()
+            ?.filter { it.isFile && it.name.startsWith("vibecheck-result-") }
+            ?.sortedByDescending { it.lastModified() }
+            ?.drop(5)
+            ?.forEach { it.delete() }
     }
 
     private fun textPaint(size: Float, color: Int, bold: Boolean): Paint =
