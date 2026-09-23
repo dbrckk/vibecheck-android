@@ -50,6 +50,9 @@ class GameViewModel(
     }
 
     fun goBackHome() {
+        savedStateHandle[KEY_QUESTION_INDEX] = 0
+        savedStateHandle[KEY_VOTES] = arrayListOf<String>()
+        savedStateHandle[KEY_CHALLENGE_TARGET] = NO_CHALLENGE
         savedStateHandle[KEY_SCREEN] = AppScreen.HOME.name
     }
 
@@ -92,6 +95,7 @@ class GameViewModel(
 
     fun goHome() {
         savedStateHandle[KEY_VOTES] = arrayListOf<String>()
+        savedStateHandle[KEY_QUESTION_INDEX] = 0
         savedStateHandle[KEY_CHALLENGE_TARGET] = NO_CHALLENGE
         savedStateHandle[KEY_SCREEN] = AppScreen.HOME.name
     }
