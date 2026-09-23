@@ -22,6 +22,8 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.graphics.Color
@@ -32,6 +34,7 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import com.vibecheck.app.billing.PremiumBillingManager
 import com.vibecheck.app.billing.PurchaseStatus
 import com.vibecheck.app.data.KnowMeRepository
+import com.vibecheck.app.data.PlayerGroupStore
 import com.vibecheck.app.data.QuestionHistoryStore
 import com.vibecheck.app.data.QuestionRepository
 import com.vibecheck.app.domain.Challenge
@@ -64,6 +67,10 @@ fun VibeCheckApp(
     val questionHistory = remember(context.applicationContext) {
         QuestionHistoryStore(context.applicationContext)
     }
+    val playerGroupStore = remember(context.applicationContext) {
+        PlayerGroupStore(context.applicationContext)
+    }
+    var groupHydrated by remember { mutableStateOf(false) }
 
     DisposableEffect(billingManager) {
         billingManager.start()
@@ -107,6 +114,20 @@ fun VibeCheckApp(
     }
     val sessionIntensity = if (legacyChallenge) null else selectedIntensity
     val sessionPack = if (legacyChallenge) GamePack.MIX else selectedPack
+
+    LaunchedEffect(Unit) {
+        val restored = playerGroupStore.load()
+        if (restored.isNotEmpty()) {
+            gameViewModel.restorePlayers(restored)
+        }
+        groupHydrated = true
+    }
+
+    LaunchedEffect(players, groupHydrated) {
+        if (groupHydrated) {
+            playerGroupStore.save(players)
+        }
+    }
 
     LaunchedEffect(incomingChallenge) {
         incomingChallenge?.let { challenge ->
@@ -172,6 +193,7 @@ fun VibeCheckApp(
                         purchaseStatus = purchaseStatus,
                         selectedIntensity = selectedIntensity,
                         selectedPack = selectedPack,
+                        savedPlayerCount = players.size,
                         onBuyPremium = {
                             (context as? Activity)?.let { activity ->
                                 billingManager.launchPurchase(activity)
