@@ -33,6 +33,19 @@ class GameViewModelTest {
     }
 
     @Test
+    fun challenge_seed_survives_start_and_replay() {
+        val viewModel = GameViewModel(SavedStateHandle())
+        val seed = 123456789L
+
+        viewModel.acceptChallenge(Challenge(GameMode.WHO_OF_US, 64, seed = seed))
+        viewModel.startGame()
+        assertEquals(seed, viewModel.sessionSeed.value)
+
+        viewModel.replay()
+        assertEquals(seed, viewModel.sessionSeed.value)
+    }
+
+    @Test
     fun red_green_starts_immediately_without_player_setup() {
         val viewModel = GameViewModel(SavedStateHandle())
 
