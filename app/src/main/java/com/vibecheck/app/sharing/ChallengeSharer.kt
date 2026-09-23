@@ -8,7 +8,12 @@ import com.vibecheck.app.domain.ChallengeLinkCodec
 object ChallengeSharer {
     fun share(context: Context, challenge: Challenge) {
         val link = ChallengeLinkCodec.encode(challenge)
-        val text = "Je te défie sur VibeCheck 😈 Notre groupe a atteint ${challenge.targetPercent}% de consensus. À vous de faire mieux : $link"
+        val metric = if (challenge.mode == com.vibecheck.app.domain.model.GameMode.KNOWS_ME) {
+            "un score de ${challenge.targetPercent}%"
+        } else {
+            "${challenge.targetPercent}% de consensus"
+        }
+        val text = "Je te défie sur VibeCheck 😈 Notre groupe a atteint $metric. À vous de faire mieux : $link"
 
         val intent = Intent(Intent.ACTION_SEND).apply {
             type = "text/plain"
