@@ -43,18 +43,18 @@ object KnowMeRepository {
         avoidIds: Set<String> = emptySet(),
         intensity: GameIntensity? = null
     ): List<KnowMePrompt> {
-        val filtered = prompts.filter { intensity == null || intensityForId(it.id) == intensity }
+        val filtered = prompts.filter { intensity == null || matchesIntensity(it.id, intensity) }
         val shuffled = filtered.shuffled(Random(seed))
         val preferred = shuffled.filterNot { it.id in avoidIds }
         val fallback = shuffled.filter { it.id in avoidIds }
         return (preferred + fallback).take(limit.coerceAtLeast(0))
     }
-    private fun intensityForId(id: String): GameIntensity {
-        val index = id.substringAfterLast("_").toIntOrNull() ?: return GameIntensity.NORMAL
-        return when (index) {
-            in 1..8 -> GameIntensity.CHILL
-            in 9..16 -> GameIntensity.NORMAL
-            else -> GameIntensity.SAVAGE
+    private fun matchesIntensity(id: String, intensity: GameIntensity): Boolean {
+        val index = id.substringAfterLast("_").toIntOrNull() ?: return intensity == GameIntensity.NORMAL
+        return when (intensity) {
+            GameIntensity.CHILL -> index in 1..16
+            GameIntensity.NORMAL -> index in 5..20
+            GameIntensity.SAVAGE -> index in 9..24
         }
     }
 }
