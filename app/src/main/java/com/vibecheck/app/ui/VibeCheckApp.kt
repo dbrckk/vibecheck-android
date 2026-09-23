@@ -10,7 +10,9 @@ import androidx.compose.animation.togetherWith
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.safeDrawingPadding
 import androidx.compose.material3.Button
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
@@ -96,7 +98,8 @@ fun VibeCheckApp(
                 Box(
                     modifier = Modifier
                         .fillMaxSize()
-                        .padding(horizontal = 20.dp, vertical = 24.dp)
+                        .safeDrawingPadding()
+                        .padding(horizontal = 20.dp, vertical = 16.dp)
                 ) {
                 AnimatedContent(
                     targetState = screen,
@@ -153,7 +156,7 @@ fun VibeCheckApp(
                                         color = Color(0xFFAAA2B5)
                                     )
                                     androidx.compose.foundation.layout.Spacer(
-                                        Modifier.padding(top = 8.dp)
+                                        Modifier.height(12.dp)
                                     )
                                     Button(onClick = gameViewModel::abandonGame) {
                                         Text("Retour aux modes")
