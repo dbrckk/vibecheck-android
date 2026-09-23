@@ -43,6 +43,7 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.vibecheck.app.billing.PurchaseStatus
 import com.vibecheck.app.domain.model.GameMode
 import com.vibecheck.app.ui.theme.VibeColors
 
@@ -51,6 +52,8 @@ fun HomeScreen(
     isPremium: Boolean,
     premiumReady: Boolean,
     premiumPrice: String?,
+    purchaseStatus: PurchaseStatus,
+    purchaseStatus: PurchaseStatus,
     onBuyPremium: () -> Unit,
     onMode: (GameMode) -> Unit
 ) {
@@ -91,6 +94,7 @@ fun HomeScreen(
             isPremium = isPremium,
             premiumReady = premiumReady,
             premiumPrice = premiumPrice,
+            purchaseStatus = purchaseStatus,
             onBuyPremium = onBuyPremium
         )
 
@@ -160,10 +164,13 @@ private fun PremiumCard(
                     style = MaterialTheme.typography.titleMedium
                 )
                 Text(
-                    if (isPremium) {
-                        "Expérience sans publicité."
-                    } else {
-                        "Supprime les pubs définitivement."
+                    when {
+                        isPremium -> "Expérience sans publicité."
+                        purchaseStatus == PurchaseStatus.PENDING -> "Achat en attente de validation Google Play."
+                        purchaseStatus == PurchaseStatus.CANCELLED -> "Achat annulé. Tu peux réessayer quand tu veux."
+                        purchaseStatus == PurchaseStatus.ERROR -> "Google Play est temporairement indisponible."
+                        purchaseStatus == PurchaseStatus.LOADING -> "Connexion à Google Play…"
+                        else -> "Supprime les pubs définitivement."
                     },
                     color = Color(0xFFAAA2B5),
                     style = MaterialTheme.typography.bodyMedium
@@ -173,7 +180,9 @@ private fun PremiumCard(
             if (!isPremium) {
                 Button(
                     onClick = onBuyPremium,
-                    enabled = premiumReady,
+                    enabled = premiumReady &&
+                        purchaseStatus != PurchaseStatus.PENDING &&
+                        purchaseStatus != PurchaseStatus.LOADING,
                     shape = RoundedCornerShape(14.dp),
                     colors = ButtonDefaults.buttonColors(
                         containerColor = Color(0xFFEEE6FF),
@@ -181,7 +190,11 @@ private fun PremiumCard(
                     )
                 ) {
                     Text(
-                        premiumPrice ?: if (premiumReady) "Premium" else "—",
+                        when (purchaseStatus) {
+                            PurchaseStatus.PENDING -> "En attente"
+                            PurchaseStatus.LOADING -> "…"
+                            else -> premiumPrice ?: if (premiumReady) "Premium" else "—"
+                        },
                         fontWeight = FontWeight.Bold
                     )
                 }
