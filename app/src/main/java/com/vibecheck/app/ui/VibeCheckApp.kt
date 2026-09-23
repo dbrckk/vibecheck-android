@@ -2,12 +2,10 @@ package com.vibecheck.app.ui
 
 import android.app.Activity
 import androidx.activity.compose.BackHandler
-import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Button
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -18,7 +16,6 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.text.font.FontWeight
@@ -35,6 +32,8 @@ import com.vibecheck.app.ui.screens.PlayerSetupScreen
 import com.vibecheck.app.ui.screens.ResultScreen
 import com.vibecheck.app.ui.state.AppScreen
 import com.vibecheck.app.ui.state.GameViewModel
+import com.vibecheck.app.ui.theme.VibeBackdrop
+import com.vibecheck.app.ui.theme.VibeCheckTheme
 
 @Composable
 fun VibeCheckApp(
@@ -55,10 +54,6 @@ fun VibeCheckApp(
     val isPremium by billingManager.isPremium.collectAsState()
     val premiumReady by billingManager.isPurchaseReady.collectAsState()
     val premiumPrice by billingManager.formattedPrice.collectAsState()
-
-    val background = Brush.verticalGradient(
-        listOf(Color(0xFF101014), Color(0xFF24153A), Color(0xFF101014))
-    )
 
     val screenName by gameViewModel.screenName.collectAsState()
     val modeName by gameViewModel.modeName.collectAsState()
@@ -89,14 +84,14 @@ fun VibeCheckApp(
         }
     }
 
-    MaterialTheme {
+    VibeCheckTheme {
         Surface(modifier = Modifier.fillMaxSize(), color = Color.Transparent) {
-            Box(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .background(background)
-                    .padding(horizontal = 20.dp, vertical = 24.dp)
-            ) {
+            VibeBackdrop {
+                Box(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .padding(horizontal = 20.dp, vertical = 24.dp)
+                ) {
                 when (screen) {
                     AppScreen.HOME -> HomeScreen(
                         isPremium = isPremium,
@@ -184,6 +179,7 @@ fun VibeCheckApp(
                         onReplay = gameViewModel::replay,
                         onHome = gameViewModel::goHome
                     )
+                }
                 }
             }
         }
