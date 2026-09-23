@@ -20,6 +20,8 @@ import kotlinx.coroutines.withContext
 object ResultCardSharer {
     private const val WIDTH = 1080
     private const val HEIGHT = 1920
+    private const val MAX_WINNER_LENGTH = 48
+    private const val MAX_CACHED_CARDS = 5
 
     suspend fun share(context: Context, mode: GameMode, winner: String, percent: Int) {
         val file = withContext(Dispatchers.IO) {
@@ -62,6 +64,13 @@ object ResultCardSharer {
     }
 
     private fun createCard(mode: GameMode, winner: String, percent: Int): Bitmap {
+        val safeWinner = winner
+            .replace(Regex("[\\p{Cntrl}&&[^\\n\\t]]"), "")
+            .replace(Regex("\\s+"), " ")
+            .trim()
+            .take(MAX_WINNER_LENGTH)
+            .ifBlank { "Le groupe" }
+        val safePercent = percent.coerceIn(0, 100)
         val bitmap = Bitmap.createBitmap(WIDTH, HEIGHT, Bitmap.Config.ARGB_8888)
         val canvas = Canvas(bitmap)
         val accent = accentFor(mode)
@@ -114,11 +123,11 @@ object ResultCardSharer {
 
         val winnerPaint = textPaint(112f, Color.WHITE, true)
         drawCenteredWrappedText(
-            canvas, winner, winnerPaint, WIDTH / 2f, 820f, 820f, 126f
+            canvas, safeWinner, winnerPaint, WIDTH / 2f, 820f, 820f, 126f
         )
 
         val percentPaint = textPaint(250f, accent.soft, true)
-        val percentText = "$percent%"
+        val percentText = "$safePercent%"
         canvas.drawText(
             percentText,
             WIDTH / 2f - percentPaint.measureText(percentText) / 2f,
@@ -190,7 +199,7 @@ object ResultCardSharer {
         directory.listFiles()
             ?.filter { it.isFile && it.name.startsWith("vibecheck-result-") }
             ?.sortedByDescending { it.lastModified() }
-            ?.drop(5)
+            ?.drop(MAX_CACHED_CARDS)
             ?.forEach { it.delete() }
     }
 
@@ -210,13 +219,22 @@ object ResultCardSharer {
         maxWidth: Float,
         lineHeight: Float
     ) {
+        if (text.isBlank()) return
+
+        val fittedPaint = Paint(paint)
+        while (fittedPaint.textSize > 32f &&
+            text.split(Regex("\\s+")).any { fittedPaint.measureText(it) > maxWidth }
+        ) {
+            fittedPaint.textSize -= 4f
+        }
+
         val words = text.trim().split(Regex("\\s+"))
         val lines = mutableListOf<String>()
         var current = ""
 
         for (word in words) {
             val candidate = if (current.isBlank()) word else "$current $word"
-            if (paint.measureText(candidate) <= maxWidth || current.isBlank()) {
+            if (fittedPaint.measureText(candidate) <= maxWidth || current.isBlank()) {
                 current = candidate
             } else {
                 lines += current
@@ -228,9 +246,9 @@ object ResultCardSharer {
         lines.take(3).forEachIndexed { index, line ->
             canvas.drawText(
                 line,
-                centerX - paint.measureText(line) / 2f,
+                centerX - fittedPaint.measureText(line) / 2f,
                 startY + index * lineHeight,
-                paint
+                fittedPaint
             )
         }
     }
