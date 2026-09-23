@@ -5,11 +5,11 @@ plugins {
 }
 android {
     namespace = "com.vibecheck.app"
-    compileSdk = 35
+    compileSdk = 36
     defaultConfig {
         applicationId = "com.vibecheck.app"
         minSdk = 24
-        targetSdk = 35
+        targetSdk = 36
         versionCode = 1
         versionName = "0.1.0"
     }
