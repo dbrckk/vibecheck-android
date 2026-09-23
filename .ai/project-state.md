@@ -24,13 +24,16 @@ M0 — runnable offline vertical slice with real group setup.
 - Duplicate, blank and oversized-name validation.
 - Unit tests for result calculation and player rules.
 - GitHub Actions verification: unit tests, lint and debug APK.
+- UI split into dedicated Home, PlayerSetup, Game and Result screen files.
+- Activity reduced to Android lifecycle/deep-link responsibilities.
+- Game session state centralized in GameViewModel with SavedStateHandle.
 
 ## Next
 1. Keep CI green after player-flow changes.
 2. Refine challenge UX and prepare verified HTTPS App Links when a public domain exists.
 3. Refine result-card visual quality and variants.
-4. Split the growing UI into feature files/ViewModel before adding monetization.
-5. Only then add lifetime remove-ads billing and ad placements.
+4. Keep architecture/CI green after the ViewModel refactor.
+5. Add lifetime remove-ads billing and carefully placed ads only after core UX is stable.
 
 ## Constraints
 - Offline-first.
