@@ -92,6 +92,7 @@ fun ResultScreen(
     val scope = rememberCoroutineScope()
     var isSharing by remember { mutableStateOf(false) }
     var shareError by remember { mutableStateOf(false) }
+    var challengeShareError by remember { mutableStateOf(false) }
     val shareInteraction = remember { MutableInteractionSource() }
     val challengeInteraction = remember { MutableInteractionSource() }
     val replayInteraction = remember { MutableInteractionSource() }
@@ -330,10 +331,19 @@ fun ResultScreen(
 
             Button(
                 onClick = {
-                    ChallengeSharer.share(
-                        context = context,
-                        challenge = Challenge(mode = mode, targetPercent = percent, seed = sessionSeed)
-                    )
+                    challengeShareError = false
+                    try {
+                        ChallengeSharer.share(
+                            context = context,
+                            challenge = Challenge(
+                                mode = mode,
+                                targetPercent = percent,
+                                seed = sessionSeed
+                            )
+                        )
+                    } catch (_: Exception) {
+                        challengeShareError = true
+                    }
                 },
                 interactionSource = challengeInteraction,
                 modifier = Modifier
@@ -350,6 +360,16 @@ fun ResultScreen(
                 )
             ) {
                 Text("Défier un ami", fontWeight = FontWeight.Bold)
+            }
+
+            if (challengeShareError) {
+                Text(
+                    "Impossible d'ouvrir le partage du défi. Réessaie.",
+                    color = VibeColors.Rose,
+                    fontSize = 13.sp,
+                    textAlign = TextAlign.Center,
+                    modifier = Modifier.fillMaxWidth()
+                )
             }
 
             Row(
