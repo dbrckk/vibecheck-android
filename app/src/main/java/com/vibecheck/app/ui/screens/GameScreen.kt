@@ -12,6 +12,8 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
@@ -57,9 +59,9 @@ fun GameScreen(
     )
     val reveal = remember { Animatable(1f) }
     val haptic = LocalHapticFeedback.current
-    var answering by remember(questionText) { mutableStateOf(false) }
+    var answering by remember(progress) { mutableStateOf(false) }
 
-    LaunchedEffect(questionText) {
+    LaunchedEffect(progress) {
         reveal.snapTo(0f)
         reveal.animateTo(
             targetValue = 1f,
@@ -147,14 +149,17 @@ fun GameScreen(
             }
         }
 
-        Column(
-            modifier = Modifier.graphicsLayer {
-                alpha = reveal.value
-                translationY = (1f - reveal.value) * 32f
-            },
+        LazyColumn(
+            modifier = Modifier
+                .fillMaxWidth()
+                .weight(1f)
+                .graphicsLayer {
+                    alpha = reveal.value
+                    translationY = (1f - reveal.value) * 32f
+                },
             verticalArrangement = Arrangement.spacedBy(10.dp)
         ) {
-            answers.forEachIndexed { index, answer ->
+            itemsIndexed(answers, key = { index, answer -> index.toString() + ":" + answer }) { index, answer ->
                 if (mode == GameMode.RED_GREEN) {
                     OutlinedButton(
                         onClick = { submit(answer) },
