@@ -19,8 +19,14 @@ import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.hapticfeedback.HapticFeedbackType
+import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
@@ -39,6 +45,15 @@ fun GameScreen(
     onExit: () -> Unit
 ) {
     val progressFraction = if (total <= 0) 0f else progress.toFloat() / total.toFloat()
+    val haptic = LocalHapticFeedback.current
+    var answering by remember(questionText) { mutableStateOf(false) }
+
+    fun submit(answer: String) {
+        if (answering) return
+        answering = true
+        haptic.performHapticFeedback(HapticFeedbackType.LongPress)
+        onAnswer(answer)
+    }
 
     Column(
         modifier = Modifier.fillMaxSize(),
@@ -110,7 +125,7 @@ fun GameScreen(
             answers.forEachIndexed { index, answer ->
                 if (mode == GameMode.RED_GREEN) {
                     OutlinedButton(
-                        onClick = { onAnswer(answer) },
+                        onClick = { submit(answer) },
                         modifier = Modifier.fillMaxWidth().height(60.dp),
                         shape = RoundedCornerShape(18.dp),
                         border = BorderStroke(
@@ -126,7 +141,7 @@ fun GameScreen(
                     }
                 } else {
                     Button(
-                        onClick = { onAnswer(answer) },
+                        onClick = { submit(answer) },
                         modifier = Modifier.fillMaxWidth().height(60.dp),
                         shape = RoundedCornerShape(18.dp),
                         colors = ButtonDefaults.buttonColors(
