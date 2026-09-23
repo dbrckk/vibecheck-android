@@ -15,6 +15,9 @@ M0 — runnable offline vertical slice with real group setup.
 - Native Android result sharing.
 - Generated 1080x1920 PNG result cards.
 - Secure FileProvider-based image sharing from app cache.
+- Backend-free challenge links with vibecheck://challenge.
+- Incoming challenges open directly into the selected mode.
+- Native challenge sharing with a score-to-beat link.
 - Real player setup flow.
 - 2 to 8 players with normalized names.
 - Duplicate, blank and oversized-name validation.
@@ -23,8 +26,8 @@ M0 — runnable offline vertical slice with real group setup.
 
 ## Next
 1. Keep CI green after player-flow changes.
-2. Add deep-link challenge format.
-3. Expand question content and randomized sessions.
+2. Expand question content and randomized sessions.
+3. Refine challenge UX and prepare verified HTTPS App Links when a public domain exists.
 4. Refine result-card visual quality and variants.
 5. Only then add lifetime remove-ads billing and ad placements.
 
