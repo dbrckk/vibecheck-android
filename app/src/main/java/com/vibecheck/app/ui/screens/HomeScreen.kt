@@ -58,6 +58,8 @@ fun HomeScreen(
     selectedIntensity: GameIntensity,
     selectedPack: GamePack,
     savedPlayerCount: Int,
+    groupLeaderName: String?,
+    groupLeaderWins: Int,
     onEditGroup: () -> Unit,
     onBuyPremium: () -> Unit,
     onIntensity: (GameIntensity) -> Unit,
@@ -130,6 +132,17 @@ fun HomeScreen(
                         Text("Modifier", fontSize = 12.sp, fontWeight = FontWeight.Bold)
                     }
                 }
+            }
+
+            if (groupLeaderName != null && groupLeaderWins > 0) {
+                Spacer(Modifier.height(8.dp))
+                Text(
+                    "Leader local : " + groupLeaderName + " • " + groupLeaderWins +
+                        if (groupLeaderWins == 1) " victoire" else " victoires",
+                    color = VibeColors.TextSecondary,
+                    fontSize = 12.sp,
+                    fontWeight = FontWeight.Bold
+                )
             }
         }
 
