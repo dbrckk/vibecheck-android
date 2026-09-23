@@ -26,6 +26,7 @@ import com.vibecheck.app.domain.model.GameMode
 fun HomeScreen(
     isPremium: Boolean,
     premiumReady: Boolean,
+    premiumPrice: String?,
     onBuyPremium: () -> Unit,
     onMode: (GameMode) -> Unit
 ) {
@@ -68,7 +69,11 @@ fun HomeScreen(
                         shape = RoundedCornerShape(14.dp)
                     ) {
                         Text(
-                            if (premiumReady) "Supprimer les pubs à vie" else "Produit Play non disponible"
+                            if (premiumReady) {
+                                "Supprimer les pubs à vie" + (premiumPrice?.let { " • " + it } ?: "")
+                            } else {
+                                "Produit Play non disponible"
+                            }
                         )
                     }
                 }
