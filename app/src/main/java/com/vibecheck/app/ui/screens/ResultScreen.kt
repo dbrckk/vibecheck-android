@@ -276,6 +276,73 @@ fun ResultScreen(
                         }
                     }
 
+                    Spacer(Modifier.height(14.dp))
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.Center
+                    ) {
+                        Card(
+                            colors = CardDefaults.cardColors(
+                                containerColor = accent.copy(alpha = 0.12f)
+                            ),
+                            border = BorderStroke(1.dp, accent.copy(alpha = 0.26f)),
+                            shape = RoundedCornerShape(999.dp)
+                        ) {
+                            Text(
+                                "PACK " + pack.title.uppercase() + " • " + intensity.title.uppercase(),
+                                color = accent,
+                                fontSize = 11.sp,
+                                fontWeight = FontWeight.Black,
+                                modifier = Modifier.padding(horizontal = 13.dp, vertical = 7.dp)
+                            )
+                        }
+                    }
+
+                    if (shareRanking.isNotEmpty() && votes.isNotEmpty()) {
+                        Spacer(Modifier.height(14.dp))
+                        Card(
+                            colors = CardDefaults.cardColors(
+                                containerColor = Color.White.copy(alpha = 0.035f)
+                            ),
+                            border = BorderStroke(1.dp, Color.White.copy(alpha = 0.07f)),
+                            shape = RoundedCornerShape(18.dp),
+                            modifier = Modifier.fillMaxWidth()
+                        ) {
+                            Column(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .padding(horizontal = 16.dp, vertical = 12.dp),
+                                verticalArrangement = Arrangement.spacedBy(7.dp)
+                            ) {
+                                Text(
+                                    "TOP 3",
+                                    color = VibeColors.TextSecondary,
+                                    fontSize = 10.sp,
+                                    fontWeight = FontWeight.Black,
+                                    letterSpacing = 1.sp
+                                )
+                                shareRanking.forEachIndexed { index, entry ->
+                                    val rankPercent = (entry.second * 100 / votes.size).coerceIn(0, 100)
+                                    Row(
+                                        modifier = Modifier.fillMaxWidth(),
+                                        horizontalArrangement = Arrangement.SpaceBetween
+                                    ) {
+                                        Text(
+                                            (index + 1).toString() + ". " + entry.first,
+                                            color = VibeColors.TextPrimary,
+                                            fontWeight = if (index == 0) FontWeight.Black else FontWeight.Bold
+                                        )
+                                        Text(
+                                            rankPercent.toString() + "%",
+                                            color = if (index == 0) accent else VibeColors.TextSecondary,
+                                            fontWeight = FontWeight.Black
+                                        )
+                                    }
+                                }
+                            }
+                        }
+                    }
+
                     Spacer(Modifier.height(18.dp))
                     LinearProgressIndicator(
                         progress = { (score.value / 100f).coerceIn(0f, 1f) },
