@@ -2,6 +2,7 @@ package com.vibecheck.app.domain
 
 import com.vibecheck.app.domain.model.GameIntensity
 import com.vibecheck.app.domain.model.GameMode
+import com.vibecheck.app.domain.model.GamePack
 import java.net.URI
 import java.net.URLDecoder
 import java.net.URLEncoder
@@ -11,13 +12,14 @@ data class Challenge(
     val mode: GameMode,
     val targetPercent: Int,
     val seed: Long = 0L,
-    val intensity: GameIntensity? = null
+    val intensity: GameIntensity? = null,
+    val pack: GamePack? = null
 )
 
 object ChallengeLinkCodec {
     private const val SCHEME = "vibecheck"
     private const val HOST = "challenge"
-    private const val VERSION = 2
+    private const val VERSION = 3
     private const val MAX_LINK_LENGTH = 512
     private const val MAX_QUERY_PARTS = 8
 
@@ -25,10 +27,11 @@ object ChallengeLinkCodec {
         val mode = URLEncoder.encode(challenge.mode.name, StandardCharsets.UTF_8.name())
         val target = challenge.targetPercent.coerceIn(0, 100)
         val intensity = challenge.intensity
-        return if (intensity == null) {
-            "$SCHEME://$HOST?v=1&mode=$mode&target=$target&seed=${challenge.seed}"
-        } else {
-            "$SCHEME://$HOST?v=$VERSION&mode=$mode&target=$target&seed=${challenge.seed}&intensity=${intensity.name}"
+        val pack = challenge.pack
+        return when {
+            intensity == null -> "$SCHEME://$HOST?v=1&mode=$mode&target=$target&seed=${challenge.seed}"
+            pack == null -> "$SCHEME://$HOST?v=2&mode=$mode&target=$target&seed=${challenge.seed}&intensity=${intensity.name}"
+            else -> "$SCHEME://$HOST?v=$VERSION&mode=$mode&target=$target&seed=${challenge.seed}&intensity=${intensity.name}&pack=${pack.name}"
         }
     }
 
@@ -76,12 +79,20 @@ object ChallengeLinkCodec {
         } else {
             null
         }
+        val pack = if (version >= 3) {
+            runCatching {
+                GamePack.valueOf(params["pack"].orEmpty())
+            }.getOrNull() ?: return null
+        } else {
+            null
+        }
 
         return Challenge(
             mode = mode,
             targetPercent = target,
             seed = seed,
-            intensity = intensity
+            intensity = intensity,
+            pack = pack
         )
     }
 }
