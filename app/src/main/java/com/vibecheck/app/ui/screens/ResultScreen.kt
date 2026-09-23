@@ -336,7 +336,11 @@ fun ResultScreen(
                                     context = context,
                                     mode = mode,
                                     winner = result.winner,
-                                    percent = percent
+                                    percent = percent,
+                                    intensity = intensity,
+                                    pack = pack,
+                                    localWins = playerStat?.wins ?: 0,
+                                    bestScorePercent = playerStat?.bestScorePercent ?: 0
                                 )
                             } catch (_: Exception) {
                                 shareError = true
