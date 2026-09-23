@@ -59,12 +59,19 @@ class PremiumBillingManager(
                     }
                 }
 
-                override fun onBillingServiceDisconnected() = Unit
+                override fun onBillingServiceDisconnected() {
+                    _isPurchaseReady.value = false
+                }
             }
         )
     }
 
     fun launchPurchase(activity: Activity): Boolean {
+        if (!billingClient.isReady) {
+            _isPurchaseReady.value = false
+            start()
+            return false
+        }
         val details = productDetails ?: return false
         val offerToken = selectedOfferToken ?: return false
 
@@ -82,6 +89,7 @@ class PremiumBillingManager(
     }
 
     fun close() {
+        _isPurchaseReady.value = false
         billingClient.endConnection()
     }
 
@@ -89,8 +97,11 @@ class PremiumBillingManager(
         billingResult: BillingResult,
         purchases: MutableList<Purchase>?
     ) {
-        if (billingResult.responseCode == BillingClient.BillingResponseCode.OK && purchases != null) {
-            processPurchases(purchases)
+        when (billingResult.responseCode) {
+            BillingClient.BillingResponseCode.OK -> {
+                if (purchases != null) processPurchases(purchases)
+            }
+            BillingClient.BillingResponseCode.ITEM_ALREADY_OWNED -> queryExistingPurchases()
         }
     }
 
