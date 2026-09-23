@@ -74,6 +74,13 @@ class GameViewModel(
         }
     }
 
+    fun abandonGame() {
+        savedStateHandle[KEY_VOTES] = arrayListOf<String>()
+        savedStateHandle[KEY_QUESTION_INDEX] = 0
+        savedStateHandle[KEY_CHALLENGE_TARGET] = NO_CHALLENGE
+        savedStateHandle[KEY_SCREEN] = AppScreen.HOME.name
+    }
+
     fun replay() {
         savedStateHandle[KEY_VOTES] = arrayListOf<String>()
         savedStateHandle[KEY_QUESTION_INDEX] = 0
