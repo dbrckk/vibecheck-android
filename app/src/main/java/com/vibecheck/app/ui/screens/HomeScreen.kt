@@ -53,7 +53,6 @@ fun HomeScreen(
     premiumReady: Boolean,
     premiumPrice: String?,
     purchaseStatus: PurchaseStatus,
-    purchaseStatus: PurchaseStatus,
     onBuyPremium: () -> Unit,
     onMode: (GameMode) -> Unit
 ) {
@@ -125,6 +124,7 @@ private fun PremiumCard(
     isPremium: Boolean,
     premiumReady: Boolean,
     premiumPrice: String?,
+    purchaseStatus: PurchaseStatus,
     onBuyPremium: () -> Unit
 ) {
     Card(
