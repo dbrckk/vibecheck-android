@@ -19,6 +19,7 @@ import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -50,6 +51,7 @@ fun PlayerSetupScreen(
     val normalized = PlayerRules.normalize(input)
     val canAdd = PlayerRules.canAdd(players, input)
     val canStart = PlayerRules.canStart(players)
+    val capacityProgress = players.size.toFloat() / PlayerRules.MAX_PLAYERS.toFloat()
 
     Column(
         modifier = Modifier.fillMaxSize(),
@@ -57,9 +59,27 @@ fun PlayerSetupScreen(
     ) {
         Column(modifier = Modifier.weight(1f)) {
             Text("Crée ton groupe", color = Color.White, fontSize = 32.sp, fontWeight = FontWeight.Black)
-            Text(
-                "Ajoute entre " + PlayerRules.MIN_PLAYERS + " et " + PlayerRules.MAX_PLAYERS + " joueurs.",
-                color = Color(0xFFBEB7C9)
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Text(
+                    "Ajoute entre " + PlayerRules.MIN_PLAYERS + " et " + PlayerRules.MAX_PLAYERS + " joueurs.",
+                    color = Color(0xFFBEB7C9)
+                )
+                Text(
+                    players.size.toString() + "/" + PlayerRules.MAX_PLAYERS,
+                    color = Color(0xFFC9A7FF),
+                    fontWeight = FontWeight.Bold
+                )
+            }
+            Spacer(Modifier.height(8.dp))
+            LinearProgressIndicator(
+                progress = { capacityProgress.coerceIn(0f, 1f) },
+                modifier = Modifier.fillMaxWidth(),
+                color = Color(0xFFC9A7FF),
+                trackColor = Color(0xFF302A39)
             )
             if (challengeTarget != null) {
                 Spacer(Modifier.height(10.dp))
@@ -102,7 +122,7 @@ fun PlayerSetupScreen(
                     onAddPlayer(normalized)
                     input = ""
                 },
-                enabled = canAdd,
+                enabled = canAdd && players.size < PlayerRules.MAX_PLAYERS,
                 modifier = Modifier.fillMaxWidth(),
                 shape = RoundedCornerShape(16.dp)
             ) {
@@ -112,7 +132,23 @@ fun PlayerSetupScreen(
             Spacer(Modifier.height(18.dp))
 
             if (players.isEmpty()) {
-                Text("Aucun joueur ajouté pour le moment.", color = Color(0xFF8B8494))
+                Card(
+                    colors = CardDefaults.cardColors(containerColor = Color(0xFF1B1821)),
+                    shape = RoundedCornerShape(18.dp),
+                    modifier = Modifier.fillMaxWidth()
+                ) {
+                    Column(modifier = Modifier.padding(16.dp)) {
+                        Text(
+                            "Ton groupe est vide",
+                            color = Color.White,
+                            fontWeight = FontWeight.Bold
+                        )
+                        Text(
+                            "Ajoute " + PlayerRules.MIN_PLAYERS + " joueurs minimum pour commencer.",
+                            color = Color(0xFF8B8494)
+                        )
+                    }
+                }
             } else {
                 LazyColumn(
                     modifier = Modifier.fillMaxWidth().weight(1f),
