@@ -60,6 +60,7 @@ fun HomeScreen(
     savedPlayerCount: Int,
     groupLeaderName: String?,
     groupLeaderWins: Int,
+    onOpenLeaderboard: () -> Unit,
     onEditGroup: () -> Unit,
     onBuyPremium: () -> Unit,
     onIntensity: (GameIntensity) -> Unit,
@@ -136,13 +137,30 @@ fun HomeScreen(
 
             if (groupLeaderName != null && groupLeaderWins > 0) {
                 Spacer(Modifier.height(8.dp))
-                Text(
-                    "Leader local : " + groupLeaderName + " • " + groupLeaderWins +
-                        if (groupLeaderWins == 1) " victoire" else " victoires",
-                    color = VibeColors.TextSecondary,
-                    fontSize = 12.sp,
-                    fontWeight = FontWeight.Bold
-                )
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.SpaceBetween
+                ) {
+                    Text(
+                        "Leader local : " + groupLeaderName + " • " + groupLeaderWins +
+                            if (groupLeaderWins == 1) " victoire" else " victoires",
+                        color = VibeColors.TextSecondary,
+                        fontSize = 12.sp,
+                        fontWeight = FontWeight.Bold,
+                        modifier = Modifier.weight(1f)
+                    )
+                    Button(
+                        onClick = onOpenLeaderboard,
+                        shape = RoundedCornerShape(12.dp),
+                        colors = ButtonDefaults.buttonColors(
+                            containerColor = VibeColors.Purple.copy(alpha = 0.16f),
+                            contentColor = VibeColors.TextPrimary
+                        )
+                    ) {
+                        Text("Classement", fontSize = 11.sp, fontWeight = FontWeight.Bold)
+                    }
+                }
             }
         }
 
