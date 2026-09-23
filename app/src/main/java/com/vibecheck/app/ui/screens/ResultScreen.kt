@@ -51,6 +51,7 @@ import com.vibecheck.app.domain.Challenge
 import com.vibecheck.app.domain.GameEngine
 import com.vibecheck.app.domain.model.GameIntensity
 import com.vibecheck.app.domain.model.GameMode
+import com.vibecheck.app.domain.model.GamePack
 import com.vibecheck.app.domain.model.GameResult
 import com.vibecheck.app.domain.model.Vote
 import com.vibecheck.app.sharing.ChallengeSharer
@@ -66,6 +67,7 @@ fun ResultScreen(
     challengeTarget: Int?,
     sessionSeed: Long,
     intensity: GameIntensity,
+    pack: GamePack,
     onReplay: () -> Unit,
     onHome: () -> Unit
 ) {
@@ -355,7 +357,8 @@ fun ResultScreen(
                                 mode = mode,
                                 targetPercent = percent,
                                 seed = sessionSeed,
-                                intensity = intensity
+                                intensity = intensity,
+                                pack = pack
                             )
                         )
                     } catch (_: Exception) {
