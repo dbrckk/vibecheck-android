@@ -3,6 +3,7 @@ package com.vibecheck.app.ui.state
 import androidx.lifecycle.SavedStateHandle
 import com.vibecheck.app.domain.Challenge
 import com.vibecheck.app.domain.SessionCodec
+import com.vibecheck.app.domain.model.GameIntensity
 import com.vibecheck.app.domain.model.GameMode
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
@@ -265,5 +266,40 @@ class GameViewModelTest {
         assertTrue(viewModel.knowScores.value.isEmpty())
         assertEquals(0, viewModel.knowGuesserIndex.value)
         assertFalse(viewModel.knowHandoffPending.value)
+    }
+    @Test
+    fun intensity_is_persisted_and_challenge_can_lock_it() {
+        val state = SavedStateHandle()
+        val viewModel = GameViewModel(state)
+
+        viewModel.selectIntensity(GameIntensity.SAVAGE)
+        assertEquals(GameIntensity.SAVAGE.name, viewModel.intensityName.value)
+
+        viewModel.acceptChallenge(
+            Challenge(
+                mode = GameMode.WHO_OF_US,
+                targetPercent = 70,
+                seed = 99L,
+                intensity = GameIntensity.CHILL
+            )
+        )
+
+        assertEquals(GameIntensity.CHILL.name, viewModel.intensityName.value)
+        assertFalse(viewModel.legacyChallenge.value)
+
+        viewModel.selectIntensity(GameIntensity.SAVAGE)
+        assertEquals(GameIntensity.CHILL.name, viewModel.intensityName.value)
+    }
+
+    @Test
+    fun legacy_challenge_is_marked_for_full_pool_replay() {
+        val viewModel = GameViewModel(SavedStateHandle())
+
+        viewModel.acceptChallenge(
+            Challenge(GameMode.WHO_OF_US, targetPercent = 60, seed = 1L)
+        )
+
+        assertTrue(viewModel.legacyChallenge.value)
+        assertEquals(GameIntensity.NORMAL.name, viewModel.intensityName.value)
     }
 }
