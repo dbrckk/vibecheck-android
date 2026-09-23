@@ -44,6 +44,7 @@ fun ResultScreen(
     mode: GameMode,
     votes: List<Vote>,
     challengeTarget: Int?,
+    sessionSeed: Long,
     onReplay: () -> Unit,
     onHome: () -> Unit
 ) {
@@ -184,7 +185,7 @@ fun ResultScreen(
                 onClick = {
                     ChallengeSharer.share(
                         context = context,
-                        challenge = Challenge(mode = mode, targetPercent = percent)
+                        challenge = Challenge(mode = mode, targetPercent = percent, seed = sessionSeed)
                     )
                 },
                 modifier = Modifier.fillMaxWidth().height(54.dp),
