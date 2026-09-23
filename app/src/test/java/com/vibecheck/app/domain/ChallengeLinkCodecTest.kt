@@ -1,5 +1,6 @@
 package com.vibecheck.app.domain
 
+import com.vibecheck.app.domain.model.GameIntensity
 import com.vibecheck.app.domain.model.GameMode
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNull
@@ -108,5 +109,36 @@ class ChallengeLinkCodecTest {
             ChallengeLinkCodec.encode(Challenge(GameMode.RED_GREEN, 150))
         )
         assertEquals(100, decoded?.targetPercent)
+    }
+    @Test
+    fun v2_round_trip_preserves_intensity() {
+        val challenge = Challenge(
+            mode = GameMode.MOST_LIKELY,
+            targetPercent = 75,
+            seed = 4242L,
+            intensity = GameIntensity.SAVAGE
+        )
+
+        val decoded = ChallengeLinkCodec.decode(ChallengeLinkCodec.encode(challenge))
+
+        assertEquals(challenge, decoded)
+    }
+
+    @Test
+    fun legacy_v1_link_keeps_null_intensity() {
+        val decoded = ChallengeLinkCodec.decode(
+            "vibecheck://challenge?v=1&mode=WHO_OF_US&target=63&seed=12"
+        )
+
+        assertNull(decoded?.intensity)
+    }
+
+    @Test
+    fun v2_requires_valid_intensity() {
+        assertNull(
+            ChallengeLinkCodec.decode(
+                "vibecheck://challenge?v=2&mode=WHO_OF_US&target=63&seed=12&intensity=EXTREME"
+            )
+        )
     }
 }
