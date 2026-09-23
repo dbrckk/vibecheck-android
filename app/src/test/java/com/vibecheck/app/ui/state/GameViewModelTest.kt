@@ -431,4 +431,14 @@ class GameViewModelTest {
         assertEquals(123L, viewModel.sessionSeed.value)
         assertNotEquals(firstInstance, viewModel.sessionInstanceId.value)
     }
+    @Test
+    fun leaderboard_opens_and_returns_home() {
+        val viewModel = GameViewModel(SavedStateHandle())
+
+        viewModel.openLeaderboard()
+        assertEquals(AppScreen.LEADERBOARD.name, viewModel.screenName.value)
+
+        viewModel.goHome()
+        assertEquals(AppScreen.HOME.name, viewModel.screenName.value)
+    }
 }
