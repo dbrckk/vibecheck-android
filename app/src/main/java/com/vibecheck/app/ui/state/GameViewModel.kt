@@ -6,6 +6,7 @@ import com.vibecheck.app.domain.Challenge
 import com.vibecheck.app.domain.SessionCodec
 import com.vibecheck.app.domain.model.GameIntensity
 import com.vibecheck.app.domain.model.GameMode
+import com.vibecheck.app.domain.model.GamePack
 import com.vibecheck.app.domain.model.Vote
 
 enum class AppScreen { HOME, PLAYERS, GAME, RESULT }
@@ -22,6 +23,7 @@ class GameViewModel(
     val challengeTarget = savedStateHandle.getStateFlow(KEY_CHALLENGE_TARGET, NO_CHALLENGE)
     val sessionSeed = savedStateHandle.getStateFlow(KEY_SESSION_SEED, System.currentTimeMillis())
     val intensityName = savedStateHandle.getStateFlow(KEY_INTENSITY, GameIntensity.NORMAL.name)
+    val packName = savedStateHandle.getStateFlow(KEY_PACK, GamePack.MIX.name)
     val legacyChallenge = savedStateHandle.getStateFlow(KEY_LEGACY_CHALLENGE, false)
     val knowSecretAnswer = savedStateHandle.getStateFlow(KEY_KNOW_SECRET, "")
     val knowGuesserIndex = savedStateHandle.getStateFlow(KEY_KNOW_GUESSER_INDEX, 0)
@@ -35,7 +37,8 @@ class GameViewModel(
         savedStateHandle[KEY_VOTES] = arrayListOf<String>()
         savedStateHandle[KEY_SESSION_SEED] = challenge.seed
         savedStateHandle[KEY_INTENSITY] = (challenge.intensity ?: GameIntensity.NORMAL).name
-        savedStateHandle[KEY_LEGACY_CHALLENGE] = challenge.intensity == null
+        savedStateHandle[KEY_PACK] = (challenge.pack ?: GamePack.MIX).name
+        savedStateHandle[KEY_LEGACY_CHALLENGE] = challenge.intensity == null || challenge.pack == null
         resetKnowMeState()
         savedStateHandle[KEY_SCREEN] = initialScreenFor(challenge.mode).name
     }
@@ -56,6 +59,11 @@ class GameViewModel(
     fun selectIntensity(intensity: GameIntensity) {
         if (challengeTarget.value != NO_CHALLENGE) return
         savedStateHandle[KEY_INTENSITY] = intensity.name
+    }
+
+    fun selectPack(pack: GamePack) {
+        if (challengeTarget.value != NO_CHALLENGE) return
+        savedStateHandle[KEY_PACK] = pack.name
     }
 
     fun addPlayer(player: String) {
@@ -192,6 +200,7 @@ class GameViewModel(
         private const val KEY_CHALLENGE_TARGET = "challenge_target"
         private const val KEY_SESSION_SEED = "session_seed"
         private const val KEY_INTENSITY = "intensity"
+        private const val KEY_PACK = "pack"
         private const val KEY_LEGACY_CHALLENGE = "legacy_challenge"
         private const val KEY_KNOW_SECRET = "know_secret"
         private const val KEY_KNOW_GUESSER_INDEX = "know_guesser_index"
