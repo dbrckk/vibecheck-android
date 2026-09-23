@@ -53,6 +53,7 @@ import com.vibecheck.app.domain.PlayerRules
 import com.vibecheck.app.domain.SessionCodec
 import com.vibecheck.app.domain.model.GameMode
 import com.vibecheck.app.domain.model.Vote
+import com.vibecheck.app.sharing.ResultCardSharer
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -366,13 +367,12 @@ private fun ResultScreen(
         Column(modifier = Modifier.fillMaxWidth(), verticalArrangement = Arrangement.spacedBy(10.dp)) {
             Button(
                 onClick = {
-                    val shareText = "Mon VibeCheck : " + result.winner + " arrive en tête avec " +
-                        percent + "% — " + mode.title + "."
-                    val intent = Intent(Intent.ACTION_SEND).apply {
-                        type = "text/plain"
-                        putExtra(Intent.EXTRA_TEXT, shareText)
-                    }
-                    context.startActivity(Intent.createChooser(intent, "Partager le VibeCheck"))
+                    ResultCardSharer.share(
+                        context = context,
+                        mode = mode,
+                        winner = result.winner,
+                        percent = percent
+                    )
                 },
                 modifier = Modifier.fillMaxWidth().height(58.dp),
                 shape = RoundedCornerShape(18.dp)
