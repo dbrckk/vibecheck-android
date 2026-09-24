@@ -25,4 +25,31 @@ class SoloNavigationTest {
         assertEquals(AppScreen.HOME.name, vm.screenName.value)
         assertTrue(!vm.isSoloSession.value)
     }
+
+    @Test
+    fun valid_solo_party_can_start_game_and_survive_recreation() {
+        val state = SavedStateHandle()
+        val vm = GameViewModel(state)
+        vm.openSoloParty()
+        vm.setSoloParty(listOf("public_taylor_swift", "original_nova"))
+        vm.startSoloGame()
+
+        assertEquals(AppScreen.GAME.name, vm.screenName.value)
+        assertTrue(vm.isSoloSession.value)
+        assertEquals(GameViewModel.DEFAULT_SOLO_MODE.name, vm.modeName.value)
+
+        val restored = GameViewModel(state)
+        assertEquals(AppScreen.GAME.name, restored.screenName.value)
+        assertTrue(restored.isSoloSession.value)
+        assertEquals(listOf("public_taylor_swift", "original_nova"), restored.soloPersonaIds.value)
+    }
+
+    @Test
+    fun solo_game_does_not_start_with_fewer_than_two_personas() {
+        val vm = GameViewModel(SavedStateHandle())
+        vm.openSoloParty()
+        vm.setSoloParty(listOf("public_taylor_swift"))
+        vm.startSoloGame()
+        assertEquals(AppScreen.SOLO_PARTY.name, vm.screenName.value)
+    }
 }
