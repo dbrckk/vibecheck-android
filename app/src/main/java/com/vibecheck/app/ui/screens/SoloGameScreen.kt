@@ -1,1 +1,124 @@
-package com.vibecheck.app.ui.screens\n\nimport androidx.compose.animation.AnimatedVisibility\nimport androidx.compose.foundation.BorderStroke\nimport androidx.compose.foundation.layout.Arrangement\nimport androidx.compose.foundation.layout.Column\nimport androidx.compose.foundation.layout.Row\nimport androidx.compose.foundation.layout.Spacer\nimport androidx.compose.foundation.layout.fillMaxSize\nimport androidx.compose.foundation.layout.fillMaxWidth\nimport androidx.compose.foundation.layout.height\nimport androidx.compose.foundation.layout.padding\nimport androidx.compose.foundation.layout.weight\nimport androidx.compose.foundation.lazy.LazyColumn\nimport androidx.compose.foundation.lazy.items\nimport androidx.compose.foundation.shape.CircleShape\nimport androidx.compose.foundation.shape.RoundedCornerShape\nimport androidx.compose.material3.Button\nimport androidx.compose.material3.Card\nimport androidx.compose.material3.CardDefaults\nimport androidx.compose.material3.MaterialTheme\nimport androidx.compose.material3.OutlinedButton\nimport androidx.compose.material3.Surface\nimport androidx.compose.material3.Text\nimport androidx.compose.runtime.Composable\nimport androidx.compose.runtime.getValue\nimport androidx.compose.runtime.mutableStateOf\nimport androidx.compose.runtime.remember\nimport androidx.compose.runtime.setValue\nimport androidx.compose.ui.Alignment\nimport androidx.compose.ui.Modifier\nimport androidx.compose.ui.text.font.FontWeight\nimport androidx.compose.ui.unit.dp\nimport com.vibecheck.app.domain.solo.Persona\nimport com.vibecheck.app.domain.solo.SoloRoundResult\n\n@Composable\nfun SoloGameScreen(\n    questionText: String,\n    progress: Int,\n    total: Int,\n    cast: List<Persona>,\n    round: SoloRoundResult,\n    onNext: () -> Unit,\n    onExit: () -> Unit\n) {\n    var revealed by remember(progress, questionText) { mutableStateOf(false) }\n    val byId = remember(cast) { cast.associateBy { it.id } }\n\n    Column(Modifier.fillMaxSize()) {\n        Row(\n            modifier = Modifier.fillMaxWidth(),\n            horizontalArrangement = Arrangement.SpaceBetween,\n            verticalAlignment = Alignment.CenterVertically\n        ) {\n            Text("$progress / $total", color = MaterialTheme.colorScheme.primary, style = MaterialTheme.typography.labelLarge, fontWeight = FontWeight.Bold)\n            Text("Quitter", modifier = Modifier.padding(8.dp), color = MaterialTheme.colorScheme.onSurfaceVariant, style = MaterialTheme.typography.labelLarge)\n        }\n\n        Spacer(Modifier.height(12.dp))\n        Text(questionText, color = MaterialTheme.colorScheme.onBackground, style = MaterialTheme.typography.headlineMedium)\n        Spacer(Modifier.height(8.dp))\n        Text("Le casting répond selon sa personnalité simulée.", color = MaterialTheme.colorScheme.onSurfaceVariant, style = MaterialTheme.typography.bodyLarge)\n        Spacer(Modifier.height(18.dp))\n\n        if (!revealed) {\n            Card(\n                modifier = Modifier.fillMaxWidth(),\n                shape = RoundedCornerShape(22.dp),\n                colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.primary.copy(alpha = .10f)),\n                border = BorderStroke(1.dp, MaterialTheme.colorScheme.primary.copy(alpha = .24f))\n            ) {\n                Column(Modifier.padding(18.dp)) {\n                    Text("Réponses masquées", color = MaterialTheme.colorScheme.onSurface, style = MaterialTheme.typography.titleMedium)\n                    Text("Révèle les choix du groupe simulé quand tu es prêt.", color = MaterialTheme.colorScheme.onSurfaceVariant, style = MaterialTheme.typography.bodyMedium)\n                    Spacer(Modifier.height(14.dp))\n                    Button(onClick = { revealed = true }, modifier = Modifier.fillMaxWidth()) {\n                        Text("Révéler les réponses")\n                    }\n                }\n            }\n        }\n\n        AnimatedVisibility(visible = revealed) {\n            Column {\n                Surface(\n                    shape = RoundedCornerShape(14.dp),\n                    color = MaterialTheme.colorScheme.tertiary.copy(alpha = .10f),\n                    border = BorderStroke(1.dp, MaterialTheme.colorScheme.tertiary.copy(alpha = .22f))\n                ) {\n                    Text("Simulation fictive : ces réponses sont générées pour le jeu.", modifier = Modifier.padding(12.dp), color = MaterialTheme.colorScheme.onSurface, style = MaterialTheme.typography.bodyMedium)\n                }\n                Spacer(Modifier.height(10.dp))\n                LazyColumn(verticalArrangement = Arrangement.spacedBy(8.dp), modifier = Modifier.weight(1f, fill = false)) {\n                    items(round.votes, key = { it.voterId }) { vote ->\n                        val voter = byId[vote.voterId]\n                        val target = byId[vote.targetPersonaId]\n                        Card(colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface), shape = RoundedCornerShape(16.dp)) {\n                            Row(modifier = Modifier.fillMaxWidth().padding(13.dp), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(10.dp)) {\n                                Surface(shape = CircleShape, color = MaterialTheme.colorScheme.secondary.copy(alpha = .14f)) {\n                                    Text(voter?.displayName?.take(1)?.uppercase() ?: "?", modifier = Modifier.padding(horizontal = 12.dp, vertical = 8.dp), color = MaterialTheme.colorScheme.secondary, fontWeight = FontWeight.Bold)\n                                }\n                                Column(Modifier.weight(1f)) {\n                                    Text(voter?.displayName ?: "Persona", color = MaterialTheme.colorScheme.onSurface, style = MaterialTheme.typography.titleMedium)\n                                    Text("vote pour " + (target?.displayName ?: "—"), color = MaterialTheme.colorScheme.primary, style = MaterialTheme.typography.labelLarge)\n                                    Text(vote.reaction, color = MaterialTheme.colorScheme.onSurfaceVariant, style = MaterialTheme.typography.bodyMedium)\n                                }\n                            }\n                        }\n                    }\n                }\n                Spacer(Modifier.height(10.dp))\n                Button(onClick = onNext, modifier = Modifier.fillMaxWidth()) {\n                    Text(if (progress >= total) "Voir le résultat" else "Question suivante")\n                }\n            }\n        }\n\n        Spacer(Modifier.height(10.dp))\n        OutlinedButton(onClick = onExit, modifier = Modifier.fillMaxWidth()) {\n            Text("Quitter la partie")\n        }\n    }\n}\n
+package com.vibecheck.app.ui.screens
+
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.weight
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.Button
+import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedButton
+import androidx.compose.material3.Surface
+import androidx.compose.material3.Text
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.unit.dp
+import com.vibecheck.app.domain.solo.Persona
+import com.vibecheck.app.domain.solo.SoloRoundResult
+
+@Composable
+fun SoloGameScreen(
+    questionText: String,
+    progress: Int,
+    total: Int,
+    cast: List<Persona>,
+    round: SoloRoundResult,
+    onNext: () -> Unit,
+    onExit: () -> Unit
+) {
+    var revealed by remember(progress, questionText) { mutableStateOf(false) }
+    val byId = remember(cast) { cast.associateBy { it.id } }
+
+    Column(Modifier.fillMaxSize()) {
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Text("$progress / $total", color = MaterialTheme.colorScheme.primary, style = MaterialTheme.typography.labelLarge, fontWeight = FontWeight.Bold)
+            Text("Quitter", modifier = Modifier.padding(8.dp), color = MaterialTheme.colorScheme.onSurfaceVariant, style = MaterialTheme.typography.labelLarge)
+        }
+
+        Spacer(Modifier.height(12.dp))
+        Text(questionText, color = MaterialTheme.colorScheme.onBackground, style = MaterialTheme.typography.headlineMedium)
+        Spacer(Modifier.height(8.dp))
+        Text("Le casting répond selon sa personnalité simulée.", color = MaterialTheme.colorScheme.onSurfaceVariant, style = MaterialTheme.typography.bodyLarge)
+        Spacer(Modifier.height(18.dp))
+
+        if (!revealed) {
+            Card(
+                modifier = Modifier.fillMaxWidth(),
+                shape = RoundedCornerShape(22.dp),
+                colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.primary.copy(alpha = .10f)),
+                border = BorderStroke(1.dp, MaterialTheme.colorScheme.primary.copy(alpha = .24f))
+            ) {
+                Column(Modifier.padding(18.dp)) {
+                    Text("Réponses masquées", color = MaterialTheme.colorScheme.onSurface, style = MaterialTheme.typography.titleMedium)
+                    Text("Révèle les choix du groupe simulé quand tu es prêt.", color = MaterialTheme.colorScheme.onSurfaceVariant, style = MaterialTheme.typography.bodyMedium)
+                    Spacer(Modifier.height(14.dp))
+                    Button(onClick = { revealed = true }, modifier = Modifier.fillMaxWidth()) {
+                        Text("Révéler les réponses")
+                    }
+                }
+            }
+        }
+
+        AnimatedVisibility(visible = revealed) {
+            Column {
+                Surface(
+                    shape = RoundedCornerShape(14.dp),
+                    color = MaterialTheme.colorScheme.tertiary.copy(alpha = .10f),
+                    border = BorderStroke(1.dp, MaterialTheme.colorScheme.tertiary.copy(alpha = .22f))
+                ) {
+                    Text("Simulation fictive : ces réponses sont générées pour le jeu.", modifier = Modifier.padding(12.dp), color = MaterialTheme.colorScheme.onSurface, style = MaterialTheme.typography.bodyMedium)
+                }
+                Spacer(Modifier.height(10.dp))
+                LazyColumn(verticalArrangement = Arrangement.spacedBy(8.dp), modifier = Modifier.weight(1f, fill = false)) {
+                    items(round.votes, key = { it.voterId }) { vote ->
+                        val voter = byId[vote.voterId]
+                        val target = byId[vote.targetPersonaId]
+                        Card(colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface), shape = RoundedCornerShape(16.dp)) {
+                            Row(modifier = Modifier.fillMaxWidth().padding(13.dp), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(10.dp)) {
+                                Surface(shape = CircleShape, color = MaterialTheme.colorScheme.secondary.copy(alpha = .14f)) {
+                                    Text(voter?.displayName?.take(1)?.uppercase() ?: "?", modifier = Modifier.padding(horizontal = 12.dp, vertical = 8.dp), color = MaterialTheme.colorScheme.secondary, fontWeight = FontWeight.Bold)
+                                }
+                                Column(Modifier.weight(1f)) {
+                                    Text(voter?.displayName ?: "Persona", color = MaterialTheme.colorScheme.onSurface, style = MaterialTheme.typography.titleMedium)
+                                    Text("vote pour " + (target?.displayName ?: "—"), color = MaterialTheme.colorScheme.primary, style = MaterialTheme.typography.labelLarge)
+                                    Text(vote.reaction, color = MaterialTheme.colorScheme.onSurfaceVariant, style = MaterialTheme.typography.bodyMedium)
+                                }
+                            }
+                        }
+                    }
+                }
+                Spacer(Modifier.height(10.dp))
+                Button(onClick = onNext, modifier = Modifier.fillMaxWidth()) {
+                    Text(if (progress >= total) "Voir le résultat" else "Question suivante")
+                }
+            }
+        }
+
+        Spacer(Modifier.height(10.dp))
+        OutlinedButton(onClick = onExit, modifier = Modifier.fillMaxWidth()) {
+            Text("Quitter la partie")
+        }
+    }
+}
