@@ -54,6 +54,7 @@ import com.vibecheck.app.ui.screens.OnboardingScreen
 import com.vibecheck.app.ui.screens.PassPhoneScreen
 import com.vibecheck.app.ui.screens.PlayerSetupScreen
 import com.vibecheck.app.ui.screens.ResultScreen
+import com.vibecheck.app.ui.screens.SettingsScreen
 import com.vibecheck.app.ui.screens.SoloGameScreen
 import com.vibecheck.app.ui.screens.SoloPartyScreen
 import com.vibecheck.app.ui.state.AppScreen
@@ -62,11 +63,14 @@ import com.vibecheck.app.ui.state.SoloPartyState
 import com.vibecheck.app.ui.theme.VibeBackdrop
 import com.vibecheck.app.ui.theme.VibeCheckTheme
 import com.vibecheck.app.ui.theme.VibeColors
+import com.vibecheck.app.ui.theme.VibeThemeStyle
 
 @Composable
 fun VibeCheckApp(
     incomingChallenge: Challenge? = null,
     onChallengeConsumed: () -> Unit = {},
+    selectedTheme: VibeThemeStyle = VibeThemeStyle.PREMIUM_DARK,
+    onThemeSelected: (VibeThemeStyle) -> Unit = {},
     gameViewModel: GameViewModel = viewModel()
 ) {
     val context = LocalContext.current
@@ -196,6 +200,7 @@ fun VibeCheckApp(
         when (screen) {
             AppScreen.PLAYERS -> gameViewModel.goBackHome()
             AppScreen.SOLO_PARTY -> gameViewModel.goBackHome()
+            AppScreen.SETTINGS -> gameViewModel.goBackHome()
             AppScreen.GAME -> gameViewModel.abandonGame()
             AppScreen.RESULT -> gameViewModel.goHome()
             AppScreen.LEADERBOARD -> gameViewModel.goHome()
@@ -242,6 +247,7 @@ fun VibeCheckApp(
                         groupLeaderWins = groupLeader?.wins ?: 0,
                         onOpenLeaderboard = gameViewModel::openLeaderboard,
                         onEditGroup = gameViewModel::editPlayers,
+                        onOpenSettings = gameViewModel::openSettings,
                         onPlayTogether = gameViewModel::editPlayers,
                         onPlaySolo = gameViewModel::openSoloParty,
                         onBuyPremium = {
@@ -252,6 +258,12 @@ fun VibeCheckApp(
                         onIntensity = gameViewModel::selectIntensity,
                         onPack = gameViewModel::selectPack,
                         onMode = gameViewModel::quickStartMode
+                    )
+
+                    AppScreen.SETTINGS -> SettingsScreen(
+                        selectedTheme = selectedTheme,
+                        onThemeSelected = onThemeSelected,
+                        onBack = gameViewModel::goBackHome
                     )
 
                     AppScreen.SOLO_PARTY -> {
