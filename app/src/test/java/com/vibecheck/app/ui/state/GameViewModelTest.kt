@@ -276,6 +276,22 @@ class GameViewModelTest {
     }
 
     @Test
+    fun know_me_guess_after_result_is_ignored() {
+        val viewModel = GameViewModel(SavedStateHandle())
+        viewModel.selectMode(GameMode.KNOWS_ME)
+        viewModel.addPlayer("Alice")
+        viewModel.addPlayer("Bob")
+        viewModel.startGame()
+        viewModel.setKnowMeSecret("Mer")
+        viewModel.submitKnowMeGuess("Mer", isLastQuestion = true)
+
+        viewModel.submitKnowMeGuess("Mer", isLastQuestion = true)
+
+        assertEquals(AppScreen.RESULT.name, viewModel.screenName.value)
+        assertEquals(listOf(1), viewModel.knowScores.value)
+    }
+
+    @Test
     fun abandoning_know_me_clears_private_answer_and_scores() {
         val viewModel = GameViewModel(SavedStateHandle())
         viewModel.selectMode(GameMode.KNOWS_ME)
