@@ -1,5 +1,6 @@
 package com.vibecheck.app.domain
 
+import java.util.Locale
 import org.junit.Assert.assertFalse
 import org.junit.Assert.assertTrue
 import org.junit.Test
@@ -25,5 +26,18 @@ class PlayerRulesTest {
     @Test
     fun rejects_too_long_names() {
         assertFalse(PlayerRules.canAdd(emptyList(), "ABCDEFGHIJKLMNOPQRS"))
+    }
+
+    @Test
+    fun duplicate_detection_does_not_depend_on_device_locale() {
+        val previous = Locale.getDefault()
+        try {
+            Locale.setDefault(Locale.forLanguageTag("tr-TR"))
+
+            assertFalse(PlayerRules.canAdd(listOf("I"), "i"))
+            assertFalse(PlayerRules.canStart(listOf("I", "i")))
+        } finally {
+            Locale.setDefault(previous)
+        }
     }
 }
