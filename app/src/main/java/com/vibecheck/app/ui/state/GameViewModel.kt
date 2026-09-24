@@ -97,6 +97,20 @@ class GameViewModel(
         savedStateHandle[KEY_IS_SOLO_SESSION] = true
     }
 
+    fun startSoloGame() {
+        if (soloPersonaIds.value.size !in 2..7) return
+        savedStateHandle[KEY_MODE] = DEFAULT_SOLO_MODE.name
+        savedStateHandle[KEY_CHALLENGE_TARGET] = NO_CHALLENGE
+        savedStateHandle[KEY_QUESTION_INDEX] = 0
+        savedStateHandle[KEY_VOTES] = arrayListOf<String>()
+        savedStateHandle[KEY_LEGACY_CHALLENGE] = false
+        savedStateHandle[KEY_IS_SOLO_SESSION] = true
+        savedStateHandle[KEY_SESSION_SEED] = System.currentTimeMillis()
+        savedStateHandle[KEY_SESSION_INSTANCE_ID] = System.nanoTime()
+        resetKnowMeState()
+        savedStateHandle[KEY_SCREEN] = AppScreen.GAME.name
+    }
+
     fun openLeaderboard() {
         savedStateHandle[KEY_SCREEN] = AppScreen.LEADERBOARD.name
     }
@@ -261,6 +275,7 @@ class GameViewModel(
 
     companion object {
         const val NO_CHALLENGE = -1
+        val DEFAULT_SOLO_MODE = GameMode.WHO_OF_US
 
         private const val KEY_SCREEN = "screen"
         private const val KEY_MODE = "mode"
