@@ -62,11 +62,13 @@ private val VibeShapes = Shapes(
 
 @Composable
 fun VibeCheckTheme(
-    style: VibeThemeStyle = VibeThemeStyle.PREMIUM_DARK,
+    style: VibeThemeStyle? = null,
     content: @Composable () -> Unit
 ) {
-    val token = themeTokens(style)
-    val schemeFactory = if (style == VibeThemeStyle.KAWAII || style == VibeThemeStyle.MINIMAL) {
+    val inheritedStyle = LocalVibeThemeStyle.current
+    val resolvedStyle = style ?: inheritedStyle
+    val token = themeTokens(resolvedStyle)
+    val schemeFactory = if (resolvedStyle == VibeThemeStyle.KAWAII || resolvedStyle == VibeThemeStyle.MINIMAL) {
         ::lightColorScheme
     } else {
         ::darkColorScheme
@@ -87,7 +89,7 @@ fun VibeCheckTheme(
         error = Color(token.error)
     )
 
-    CompositionLocalProvider(LocalVibeThemeStyle provides style) {
+    CompositionLocalProvider(LocalVibeThemeStyle provides resolvedStyle) {
         MaterialTheme(
             colorScheme = scheme,
             typography = VibeTypography,
