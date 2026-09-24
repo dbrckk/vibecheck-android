@@ -1,21 +1,20 @@
 package com.vibecheck.app.data
 
 import android.content.Context
+import android.util.Base64
 import com.vibecheck.app.domain.PlayerRules
 import java.nio.charset.StandardCharsets
-import java.util.Base64
 
 object PlayerGroupCodec {
     private const val LEGACY_SEPARATOR = "\u001F"
     private const val V2_PREFIX = "v2:"
     private const val ITEM_SEPARATOR = "."
+    private const val BASE64_FLAGS = Base64.URL_SAFE or Base64.NO_WRAP or Base64.NO_PADDING
 
-    fun encode(players: List<String>): String {
-        val encoder = Base64.getUrlEncoder().withoutPadding()
-        return V2_PREFIX + sanitize(players).joinToString(ITEM_SEPARATOR) { player ->
-            encoder.encodeToString(player.toByteArray(StandardCharsets.UTF_8))
+    fun encode(players: List<String>): String =
+        V2_PREFIX + sanitize(players).joinToString(ITEM_SEPARATOR) { player ->
+            Base64.encodeToString(player.toByteArray(StandardCharsets.UTF_8), BASE64_FLAGS)
         }
-    }
 
     fun decode(raw: String?): List<String> {
         val value = raw.orEmpty()
@@ -31,10 +30,9 @@ object PlayerGroupCodec {
 
     private fun decodeV2(payload: String): List<String> {
         if (payload.isBlank()) return emptyList()
-        val decoder = Base64.getUrlDecoder()
         return payload.split(ITEM_SEPARATOR).mapNotNull { encoded ->
             runCatching {
-                String(decoder.decode(encoded), StandardCharsets.UTF_8)
+                String(Base64.decode(encoded, BASE64_FLAGS), StandardCharsets.UTF_8)
             }.getOrNull()
         }
     }
