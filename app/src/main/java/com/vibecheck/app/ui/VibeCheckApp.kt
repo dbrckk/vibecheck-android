@@ -46,6 +46,7 @@ import com.vibecheck.app.domain.model.GameIntensity
 import com.vibecheck.app.domain.model.GameMode
 import com.vibecheck.app.domain.model.GameResult
 import com.vibecheck.app.domain.model.GamePack
+import com.vibecheck.app.domain.solo.SoloRoundResolver
 import com.vibecheck.app.ui.screens.GameScreen
 import com.vibecheck.app.ui.screens.HomeScreen
 import com.vibecheck.app.ui.screens.LeaderboardScreen
@@ -53,6 +54,7 @@ import com.vibecheck.app.ui.screens.OnboardingScreen
 import com.vibecheck.app.ui.screens.PassPhoneScreen
 import com.vibecheck.app.ui.screens.PlayerSetupScreen
 import com.vibecheck.app.ui.screens.ResultScreen
+import com.vibecheck.app.ui.screens.SoloGameScreen
 import com.vibecheck.app.ui.screens.SoloPartyScreen
 import com.vibecheck.app.ui.state.AppScreen
 import com.vibecheck.app.ui.state.GameViewModel
@@ -285,7 +287,63 @@ fun VibeCheckApp(
                     )
 
                     AppScreen.GAME -> {
-                        if (selectedMode == GameMode.KNOWS_ME) {
+                        if (isSoloSession) {
+                            val castById = PersonaCatalog.all.associateBy { it.id }
+                            val cast = soloPersonaIds.mapNotNull(castById::get)
+                            val questions = QuestionRepository.forMode(
+                                mode = selectedMode,
+                                seed = sessionSeed,
+                                avoidIds = avoidedIds,
+                                intensity = sessionIntensity,
+                                pack = sessionPack
+                            )
+
+                            if (cast.size < 2 || questions.isEmpty()) {
+                                Box(
+                                    modifier = Modifier.fillMaxSize(),
+                                    contentAlignment = Alignment.Center
+                                ) {
+                                    Text(
+                                        "Casting Solo indisponible. Reviens au casting.",
+                                        color = VibeColors.TextPrimary,
+                                        fontWeight = FontWeight.Bold
+                                    )
+                                }
+                            } else {
+                                val safeIndex = questionIndex.coerceIn(0, questions.lastIndex)
+                                val question = questions[safeIndex]
+                                val round = remember(
+                                    question.id,
+                                    sessionSeed,
+                                    soloPersonaIds
+                                ) {
+                                    SoloRoundResolver().resolve(
+                                        question = question,
+                                        cast = cast,
+                                        sessionSeed = sessionSeed + safeIndex
+                                    )
+                                }
+                                SoloGameScreen(
+                                    questionText = question.text,
+                                    progress = safeIndex + 1,
+                                    total = questions.size,
+                                    cast = cast,
+                                    round = round,
+                                    onNext = {
+                                        val winnerName = round.winnerPersonaId
+                                            ?.let(castById::get)
+                                            ?.displayName
+                                            ?: "Personne"
+                                        gameViewModel.answer(
+                                            questionId = question.id,
+                                            answer = winnerName,
+                                            isLastQuestion = safeIndex == questions.lastIndex
+                                        )
+                                    },
+                                    onExit = gameViewModel::abandonGame
+                                )
+                            }
+                        } else if (selectedMode == GameMode.KNOWS_ME) {
                             val prompts = KnowMeRepository.forSeed(
                                 seed = sessionSeed,
                                 avoidIds = avoidedIds,
