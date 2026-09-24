@@ -43,4 +43,18 @@ class PlayerStatKeyCodecTest {
         assertTrue(key.matches(Regex("[a-z0-9à-ÿ_]+")))
         assertTrue(key.length <= 41)
     }
+
+    @Test
+    fun persisted_stats_are_clamped_to_valid_ranges() {
+        assertEquals(0, PlayerStatSanitizer.wins(-5))
+        assertEquals(7, PlayerStatSanitizer.wins(7))
+        assertEquals(0, PlayerStatSanitizer.bestScore(-1))
+        assertEquals(100, PlayerStatSanitizer.bestScore(250))
+    }
+
+    @Test
+    fun increment_saturates_instead_of_overflowing() {
+        assertEquals(Int.MAX_VALUE, PlayerStatSanitizer.increment(Int.MAX_VALUE))
+        assertEquals(1, PlayerStatSanitizer.increment(-50))
+    }
 }
