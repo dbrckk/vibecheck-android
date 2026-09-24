@@ -15,6 +15,18 @@ class PlayerGroupCodecTest {
     }
 
     @Test
+    fun v2_wire_format_stays_compatible_with_existing_saves() {
+        assertEquals(
+            "v2:QWxpY2U.w4lsb2RpZQ.QR9C.RG90Lk5hbWU",
+            PlayerGroupCodec.encode(listOf("Alice", "Élodie", "A\u001FB", "Dot.Name"))
+        )
+        assertEquals(
+            listOf("Alice", "Élodie", "A\u001FB", "Dot.Name"),
+            PlayerGroupCodec.decode("v2:QWxpY2U.w4lsb2RpZQ.QR9C.RG90Lk5hbWU")
+        )
+    }
+
+    @Test
     fun separator_characters_inside_names_round_trip_safely() {
         val players = listOf("A\u001FB", "Dot.Name", "Élodie")
 
