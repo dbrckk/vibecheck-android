@@ -22,7 +22,7 @@ class HomeEntryActionsTest {
                     isPremium = false,
                     premiumReady = false,
                     premiumPrice = null,
-                    purchaseStatus = PurchaseStatus.Idle,
+                    purchaseStatus = PurchaseStatus.IDLE,
                     selectedIntensity = GameIntensity.NORMAL,
                     selectedPack = GamePack.MIX,
                     savedPlayerCount = 0,
