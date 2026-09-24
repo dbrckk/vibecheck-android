@@ -3,6 +3,26 @@ package com.vibecheck.app.data
 import android.content.Context
 import com.vibecheck.app.domain.model.GameMode
 
+object QuestionHistoryCodec {
+    private const val SEPARATOR = "\u001F"
+
+    fun encode(ids: List<String>, maxIds: Int): String =
+        sanitize(ids, maxIds).joinToString(SEPARATOR)
+
+    fun decode(raw: String?, maxIds: Int): List<String> =
+        sanitize(raw?.split(SEPARATOR).orEmpty(), maxIds)
+
+    private fun sanitize(ids: List<String>, maxIds: Int): List<String> {
+        if (maxIds <= 0) return emptyList()
+        return ids.asSequence()
+            .map(String::trim)
+            .filter(String::isNotEmpty)
+            .distinct()
+            .takeLast(maxIds)
+            .toList()
+    }
+}
+
 class QuestionHistoryStore(context: Context) {
     private val preferences = context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
 
@@ -11,11 +31,12 @@ class QuestionHistoryStore(context: Context) {
 
     fun remember(mode: GameMode, ids: List<String>) {
         if (ids.isEmpty()) return
-        val updated = (recentList(mode) + ids)
-            .distinct()
-            .takeLast(MAX_RECENT_IDS)
+        val updated = QuestionHistoryCodec.encode(
+            recentList(mode) + ids,
+            MAX_RECENT_IDS
+        )
         preferences.edit()
-            .putString(key(mode), updated.joinToString(SEPARATOR))
+            .putString(key(mode), updated)
             .apply()
     }
 
@@ -24,16 +45,15 @@ class QuestionHistoryStore(context: Context) {
     }
 
     private fun recentList(mode: GameMode): List<String> =
-        preferences.getString(key(mode), null)
-            ?.split(SEPARATOR)
-            ?.filter { it.isNotBlank() }
-            .orEmpty()
+        QuestionHistoryCodec.decode(
+            preferences.getString(key(mode), null),
+            MAX_RECENT_IDS
+        )
 
     private fun key(mode: GameMode) = "recent_" + mode.name
 
     companion object {
         private const val PREFS_NAME = "vibecheck_question_history"
         private const val MAX_RECENT_IDS = 16
-        private const val SEPARATOR = "\u001F"
     }
 }
