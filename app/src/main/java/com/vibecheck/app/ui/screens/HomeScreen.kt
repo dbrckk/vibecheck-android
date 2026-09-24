@@ -240,9 +240,9 @@ private fun PremiumCard(isPremium: Boolean, premiumReady: Boolean, premiumPrice:
                     Text(premiumPrice?.let { "Passer Premium • $it" } ?: "Passer Premium")
                 }
                 val status = when (purchaseStatus) {
-                    PurchaseStatus.Pending -> "Achat en attente"
-                    PurchaseStatus.Cancelled -> "Achat annulé"
-                    is PurchaseStatus.Error -> "Achat indisponible"
+                    PurchaseStatus.PENDING -> "Achat en attente"
+                    PurchaseStatus.CANCELLED -> "Achat annulé"
+                    PurchaseStatus.ERROR -> "Achat indisponible"
                     else -> null
                 }
                 status?.let { Text(it, color = MaterialTheme.colorScheme.onSurfaceVariant, style = MaterialTheme.typography.bodyMedium) }
@@ -254,11 +254,12 @@ private fun PremiumCard(isPremium: Boolean, premiumReady: Boolean, premiumPrice:
 private fun intensityLabel(value: GameIntensity) = when (value) {
     GameIntensity.CHILL -> "Chill"
     GameIntensity.NORMAL -> "Normal"
-    GameIntensity.SPICY -> "Spicy"
+    GameIntensity.SAVAGE -> "Savage"
 }
 
 private fun packLabel(value: GamePack) = when (value) {
     GamePack.MIX -> "Mix"
-    GamePack.FUN -> "Fun"
+    GamePack.FRIENDS -> "Friends"
     GamePack.DEEP -> "Deep"
+    GamePack.CHAOS -> "Chaos"
 }
