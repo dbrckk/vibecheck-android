@@ -159,6 +159,7 @@ class GameViewModel(
 
     fun submitKnowMeGuess(answer: String, isLastQuestion: Boolean) {
         if (modeName.value != GameMode.KNOWS_ME.name) return
+        if (screenName.value == AppScreen.RESULT.name) return
         val secret = knowSecretAnswer.value
         val guessers = players.value.drop(1)
         if (secret.isBlank() || guessers.isEmpty()) return
