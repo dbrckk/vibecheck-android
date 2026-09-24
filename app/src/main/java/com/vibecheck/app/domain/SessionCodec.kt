@@ -27,8 +27,8 @@ object SessionCodec {
             ?.takeIf { it > 0 }
             ?: return null
         val questionStart = lengthEnd + 1
+        if (questionLength >= value.length - questionStart) return null
         val questionEnd = questionStart + questionLength
-        if (questionEnd > value.length || questionEnd == value.length) return null
 
         val questionId = value.substring(questionStart, questionEnd)
         val answer = value.substring(questionEnd)
