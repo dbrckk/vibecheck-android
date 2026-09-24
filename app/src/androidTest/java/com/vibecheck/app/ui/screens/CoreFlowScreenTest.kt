@@ -4,14 +4,16 @@ import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.assertIsEnabled
 import androidx.compose.ui.test.assertIsNotEnabled
-import androidx.compose.ui.test.assertTextEquals
 import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.onNodeWithContentDescription
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performImeAction
 import androidx.compose.ui.test.performTextInput
+import com.vibecheck.app.domain.model.GameIntensity
 import com.vibecheck.app.domain.model.GameMode
+import com.vibecheck.app.domain.model.GamePack
+import com.vibecheck.app.domain.model.Vote
 import com.vibecheck.app.ui.theme.VibeCheckTheme
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertTrue
@@ -172,5 +174,66 @@ class CoreFlowScreenTest {
 
         composeRule.onNodeWithText("Retour").performClick()
         composeRule.runOnIdle { assertTrue(backed) }
+    }
+
+    @Test
+    fun result_screen_exposes_viable_replay_and_home_actions() {
+        var replayed = false
+        var wentHome = false
+
+        composeRule.setContent {
+            VibeCheckTheme {
+                ResultScreen(
+                    mode = GameMode.WHO_OF_US,
+                    votes = listOf(
+                        Vote("q1", "Alex"),
+                        Vote("q2", "Alex"),
+                        Vote("q3", "Sam")
+                    ),
+                    challengeTarget = null,
+                    sessionSeed = 42L,
+                    sessionInstanceId = 4242L,
+                    intensity = GameIntensity.NORMAL,
+                    pack = GamePack.MIX,
+                    onReplay = { replayed = true },
+                    onHome = { wentHome = true }
+                )
+            }
+        }
+
+        composeRule.onNodeWithText("Alex").assertIsDisplayed()
+        composeRule.onNodeWithText("Rejouer").assertIsDisplayed().performClick()
+        composeRule.runOnIdle { assertTrue(replayed) }
+
+        composeRule.onNodeWithText("Accueil").assertIsDisplayed().performClick()
+        composeRule.runOnIdle { assertTrue(wentHome) }
+    }
+
+    @Test
+    fun result_screen_marks_challenge_success_as_a_signature_moment() {
+        composeRule.setContent {
+            VibeCheckTheme {
+                ResultScreen(
+                    mode = GameMode.WHO_OF_US,
+                    votes = listOf(
+                        Vote("q1", "Alex"),
+                        Vote("q2", "Alex"),
+                        Vote("q3", "Alex"),
+                        Vote("q4", "Sam")
+                    ),
+                    challengeTarget = 70,
+                    sessionSeed = 42L,
+                    sessionInstanceId = 4343L,
+                    intensity = GameIntensity.NORMAL,
+                    pack = GamePack.MIX,
+                    onReplay = {},
+                    onHome = {}
+                )
+            }
+        }
+
+        composeRule.onNodeWithText("CHALLENGE RÉUSSI").assertIsDisplayed()
+        composeRule.onNodeWithText("75% • objectif 70%").assertIsDisplayed()
+        composeRule.onNodeWithContentDescription("Moment fort du résultat").assertIsDisplayed()
     }
 }
