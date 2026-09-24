@@ -40,6 +40,7 @@ class SessionCodecTest {
         assertNull(SessionCodec.decodeVote("invalid"))
         assertNull(SessionCodec.decodeVote("v2:not-a-length:q1Alice"))
         assertNull(SessionCodec.decodeVote("v2:99:q1Alice"))
+        assertNull(SessionCodec.decodeVote("v2:2147483647:q1Alice"))
         assertNull(SessionCodec.decodeVote("v2:2:q1"))
     }
 
