@@ -18,8 +18,8 @@ object QuestionHistoryCodec {
             .map(String::trim)
             .filter(String::isNotEmpty)
             .distinct()
-            .takeLast(maxIds)
             .toList()
+            .takeLast(maxIds)
     }
 }
 
