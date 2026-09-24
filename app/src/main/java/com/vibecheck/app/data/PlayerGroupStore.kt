@@ -2,6 +2,9 @@ package com.vibecheck.app.data
 
 import android.content.Context
 import com.vibecheck.app.domain.PlayerRules
+import java.nio.ByteBuffer
+import java.nio.charset.CharacterCodingException
+import java.nio.charset.CodingErrorAction
 import java.nio.charset.StandardCharsets
 
 private object Base64UrlCodec {
@@ -76,11 +79,20 @@ object PlayerGroupCodec {
     private fun decodeV2(payload: String): List<String> {
         if (payload.isBlank()) return emptyList()
         return payload.split(ITEM_SEPARATOR).mapNotNull { encoded ->
-            Base64UrlCodec.decode(encoded)?.let { bytes ->
-                String(bytes, StandardCharsets.UTF_8)
-            }
+            Base64UrlCodec.decode(encoded)?.let(::decodeUtf8Strict)
         }
     }
+
+    private fun decodeUtf8Strict(bytes: ByteArray): String? =
+        try {
+            StandardCharsets.UTF_8.newDecoder()
+                .onMalformedInput(CodingErrorAction.REPORT)
+                .onUnmappableCharacter(CodingErrorAction.REPORT)
+                .decode(ByteBuffer.wrap(bytes))
+                .toString()
+        } catch (_: CharacterCodingException) {
+            null
+        }
 
     private fun sanitize(players: List<String>): List<String> =
         players.fold(emptyList()) { accepted, candidate ->
