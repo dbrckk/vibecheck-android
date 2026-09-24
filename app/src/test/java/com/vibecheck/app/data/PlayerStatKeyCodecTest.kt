@@ -2,6 +2,7 @@ package com.vibecheck.app.data
 
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNotEquals
+import org.junit.Assert.assertTrue
 import org.junit.Test
 
 class PlayerStatKeyCodecTest {
@@ -39,7 +40,7 @@ class PlayerStatKeyCodecTest {
     fun key_is_safe_and_bounded() {
         val key = PlayerStatKeyCodec.key(" Zoë / 👾 / Test très très long " + "x".repeat(100))
 
-        assert(key.matches(Regex("[a-z0-9à-ÿ_]+")))
-        assert(key.length <= 41)
+        assertTrue(key.matches(Regex("[a-z0-9à-ÿ_]+")))
+        assertTrue(key.length <= 41)
     }
 }
