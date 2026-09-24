@@ -1,10 +1,10 @@
 package com.vibecheck.app.ui.screens
 
 import androidx.compose.runtime.mutableStateListOf
-import androidx.compose.ui.test.assertDoesNotExist
 import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.assertIsEnabled
 import androidx.compose.ui.test.assertIsNotEnabled
+import androidx.compose.ui.test.assertTextEquals
 import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.onNodeWithContentDescription
 import androidx.compose.ui.test.onNodeWithText
@@ -122,7 +122,7 @@ class CoreFlowScreenTest {
         composeRule.onNodeWithText("Lancer la partie").assertIsEnabled()
         composeRule.onNodeWithContentDescription("Supprimer Sam").performClick()
 
-        composeRule.onNodeWithText("Sam").assertDoesNotExist()
+        composeRule.runOnIdle { assertEquals(listOf("Alex"), players.toList()) }
         composeRule.onNodeWithText("Ajoute au moins 2 joueurs").assertIsNotEnabled()
     }
 
