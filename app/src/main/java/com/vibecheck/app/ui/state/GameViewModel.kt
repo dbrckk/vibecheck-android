@@ -134,7 +134,10 @@ class GameViewModel(
     }
 
     fun answer(questionId: String, answer: String, isLastQuestion: Boolean) {
+        if (screenName.value == AppScreen.RESULT.name) return
         val currentVotes = SessionCodec.decodeVotes(savedVotes.value)
+        if (currentVotes.any { it.questionId == questionId }) return
+
         val updatedVotes = currentVotes + Vote(questionId, answer)
         savedStateHandle[KEY_VOTES] = ArrayList(SessionCodec.encodeVotes(updatedVotes))
 
