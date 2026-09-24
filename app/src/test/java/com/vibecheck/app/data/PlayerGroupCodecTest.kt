@@ -49,6 +49,14 @@ class PlayerGroupCodecTest {
     }
 
     @Test
+    fun malformed_utf8_item_is_dropped_without_inventing_a_player() {
+        assertEquals(
+            listOf("Alice", "Bob"),
+            PlayerGroupCodec.decode("v2:QWxpY2U.wA.Qm9i")
+        )
+    }
+
+    @Test
     fun invalid_and_case_insensitive_duplicates_are_dropped() {
         val tooLong = "x".repeat(30)
         val encoded = PlayerGroupCodec.encode(
