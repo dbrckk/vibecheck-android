@@ -22,6 +22,17 @@ internal object PlayerStatKeyCodec {
         player.trim().lowercase(Locale.ROOT).replace(Regex("[^a-z0-9à-ÿ]+"), "_").take(48)
 }
 
+internal object PlayerStatSanitizer {
+    fun wins(value: Int): Int = value.coerceAtLeast(0)
+
+    fun bestScore(value: Int): Int = value.coerceIn(0, 100)
+
+    fun increment(value: Int): Int {
+        val safe = wins(value)
+        return if (safe == Int.MAX_VALUE) Int.MAX_VALUE else safe + 1
+    }
+}
+
 class LocalStatsStore(context: Context) {
     private val preferences = context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
 
@@ -35,17 +46,21 @@ class LocalStatsStore(context: Context) {
         val consumedKey = "session_" + sessionKey
         if (preferences.getBoolean(consumedKey, false)) return statFor(winner)
 
-        val safePercent = scorePercent.coerceIn(0, 100)
+        val safePercent = PlayerStatSanitizer.bestScore(scorePercent)
         val winsKey = winsKey(winner)
         val bestKey = bestKey(winner)
-        val wins = readStat(winsKey, legacyWinsKey(winner)) + 1
-        val best = maxOf(readStat(bestKey, legacyBestKey(winner)), safePercent)
+        val wins = PlayerStatSanitizer.increment(readStat(winsKey, legacyWinsKey(winner)))
+        val best = maxOf(
+            PlayerStatSanitizer.bestScore(readStat(bestKey, legacyBestKey(winner))),
+            safePercent
+        )
         val modeKey = "mode_" + mode.name + "_plays"
+        val modePlays = PlayerStatSanitizer.increment(preferences.getInt(modeKey, 0))
 
         preferences.edit()
             .putInt(winsKey, wins)
             .putInt(bestKey, best)
-            .putInt(modeKey, preferences.getInt(modeKey, 0) + 1)
+            .putInt(modeKey, modePlays)
             .putBoolean(consumedKey, true)
             .apply()
 
@@ -55,8 +70,10 @@ class LocalStatsStore(context: Context) {
     fun statFor(player: String): PlayerStat =
         PlayerStat(
             name = player,
-            wins = readStat(winsKey(player), legacyWinsKey(player)),
-            bestScorePercent = readStat(bestKey(player), legacyBestKey(player))
+            wins = PlayerStatSanitizer.wins(readStat(winsKey(player), legacyWinsKey(player))),
+            bestScorePercent = PlayerStatSanitizer.bestScore(
+                readStat(bestKey(player), legacyBestKey(player))
+            )
         )
 
     private fun readStat(currentKey: String, legacyKey: String): Int =
