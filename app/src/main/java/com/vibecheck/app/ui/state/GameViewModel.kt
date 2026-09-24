@@ -10,7 +10,7 @@ import com.vibecheck.app.domain.model.GameMode
 import com.vibecheck.app.domain.model.GamePack
 import com.vibecheck.app.domain.model.Vote
 
-enum class AppScreen { HOME, PLAYERS, SOLO_PARTY, GAME, RESULT, LEADERBOARD }
+enum class AppScreen { HOME, PLAYERS, SOLO_PARTY, SETTINGS, GAME, RESULT, LEADERBOARD }
 
 class GameViewModel(
     private val savedStateHandle: SavedStateHandle
@@ -109,6 +109,10 @@ class GameViewModel(
         savedStateHandle[KEY_SESSION_INSTANCE_ID] = System.nanoTime()
         resetKnowMeState()
         savedStateHandle[KEY_SCREEN] = AppScreen.GAME.name
+    }
+
+    fun openSettings() {
+        savedStateHandle[KEY_SCREEN] = AppScreen.SETTINGS.name
     }
 
     fun openLeaderboard() {
