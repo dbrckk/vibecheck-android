@@ -471,7 +471,13 @@ fun ResultScreen(
                 ) {
                     Icon(Icons.Default.Share, contentDescription = null)
                     Text(
-                        if (isSharing) "Préparation..." else "Partager le résultat",
+                        if (isSharing) {
+                            "Préparation..."
+                        } else if (isSoloSession) {
+                            "Partager la simulation"
+                        } else {
+                            "Partager le résultat"
+                        },
                         fontWeight = FontWeight.Bold
                     )
                 }
