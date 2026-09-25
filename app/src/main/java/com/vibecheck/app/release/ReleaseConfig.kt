@@ -11,4 +11,9 @@ object ReleaseConfig {
     const val targetSdk = 36
     const val allowBackup = false
     const val usesCleartextTraffic = false
+
+    /**
+     * V1 ships without ads, so an "ad removal" purchase must not be offered or initialized.
+     */
+    const val adRemovalPurchaseEnabled = false
 }
