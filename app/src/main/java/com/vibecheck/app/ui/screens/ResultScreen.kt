@@ -212,7 +212,7 @@ fun ResultScreen(
             Spacer(Modifier.height(18.dp))
 
             Card(
-                colors = CardDefaults.cardColors(containerColor = Color(0xF21B1721)),
+                colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
                 border = BorderStroke(1.dp, accent.copy(alpha = 0.32f)),
                 elevation = CardDefaults.cardElevation(defaultElevation = 14.dp),
                 shape = RoundedCornerShape(32.dp),
@@ -238,7 +238,7 @@ fun ResultScreen(
                     Spacer(Modifier.height(18.dp))
                     Text(
                         result.winner,
-                        color = VibeColors.TextPrimary,
+                        color = MaterialTheme.colorScheme.onSurface,
                         fontSize = winnerFontSize,
                         lineHeight = winnerLineHeight,
                         fontWeight = FontWeight.Black,
@@ -258,7 +258,7 @@ fun ResultScreen(
                     )
                     Text(
                         copy.scoreLabel,
-                        color = Color(0xFFA9A3B3),
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
                         textAlign = TextAlign.Center
                     )
                     if (playerStat != null) {
@@ -273,7 +273,7 @@ fun ResultScreen(
                         if (playerStat!!.bestScorePercent > 0) {
                             Text(
                                 "Meilleur score : " + playerStat!!.bestScorePercent + "%",
-                                color = Color(0xFF9D96A7),
+                                color = MaterialTheme.colorScheme.onSurfaceVariant,
                                 fontSize = 12.sp
                             )
                         }
@@ -319,7 +319,7 @@ fun ResultScreen(
                             ) {
                                 Text(
                                     "TOP 3",
-                                    color = VibeColors.TextSecondary,
+                                    color = MaterialTheme.colorScheme.onSurfaceVariant,
                                     fontSize = 10.sp,
                                     fontWeight = FontWeight.Black,
                                     letterSpacing = 1.sp
@@ -332,12 +332,12 @@ fun ResultScreen(
                                     ) {
                                         Text(
                                             (index + 1).toString() + ". " + entry.first,
-                                            color = VibeColors.TextPrimary,
+                                            color = MaterialTheme.colorScheme.onSurface,
                                             fontWeight = if (index == 0) FontWeight.Black else FontWeight.Bold
                                         )
                                         Text(
                                             rankPercent.toString() + "%",
-                                            color = if (index == 0) accent else VibeColors.TextSecondary,
+                                            color = if (index == 0) accent else MaterialTheme.colorScheme.onSurfaceVariant,
                                             fontWeight = FontWeight.Black
                                         )
                                     }
@@ -442,9 +442,9 @@ fun ResultScreen(
                 shape = RoundedCornerShape(20.dp),
                 colors = ButtonDefaults.buttonColors(
                     containerColor = accent,
-                    contentColor = Color(0xFF161019),
+                    contentColor = MaterialTheme.colorScheme.onPrimary,
                     disabledContainerColor = accent.copy(alpha = 0.35f),
-                    disabledContentColor = Color(0xFF161019).copy(alpha = 0.6f)
+                    disabledContentColor = MaterialTheme.colorScheme.onPrimary.copy(alpha = 0.6f)
                 )
             ) {
                 Row(
@@ -462,7 +462,7 @@ fun ResultScreen(
             if (shareError) {
                 Text(
                     "Le partage n'a pas pu être préparé. Réessaie.",
-                    color = Color(0xFFFFA3B1),
+                    color = MaterialTheme.colorScheme.error,
                     fontSize = 13.sp,
                     textAlign = TextAlign.Center,
                     modifier = Modifier.fillMaxWidth()
@@ -499,7 +499,7 @@ fun ResultScreen(
                 shape = RoundedCornerShape(20.dp),
                 colors = ButtonDefaults.buttonColors(
                     containerColor = accent.copy(alpha = 0.16f),
-                    contentColor = VibeColors.TextPrimary
+                    contentColor = MaterialTheme.colorScheme.onSurface
                 )
             ) {
                 Text("Défier un ami", fontWeight = FontWeight.Bold)
@@ -508,7 +508,7 @@ fun ResultScreen(
             if (challengeShareError) {
                 Text(
                     "Impossible d'ouvrir le partage du défi. Réessaie.",
-                    color = VibeColors.Rose,
+                    color = MaterialTheme.colorScheme.error,
                     fontSize = 13.sp,
                     textAlign = TextAlign.Center,
                     modifier = Modifier.fillMaxWidth()
@@ -531,8 +531,8 @@ fun ResultScreen(
                         },
                     shape = RoundedCornerShape(18.dp),
                     colors = ButtonDefaults.buttonColors(
-                        containerColor = VibeColors.PurpleBright,
-                        contentColor = Color(0xFF18121F)
+                        containerColor = MaterialTheme.colorScheme.primary,
+                        contentColor = MaterialTheme.colorScheme.onPrimary
                     )
                 ) {
                     Text(copy.replayLabel, fontWeight = FontWeight.Bold)
@@ -548,7 +548,7 @@ fun ResultScreen(
                             scaleY = homeScale
                         },
                     shape = RoundedCornerShape(18.dp),
-                    colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF302A39))
+                    colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.surfaceVariant)
                 ) {
                     Text(copy.homeLabel)
                 }
