@@ -1,5 +1,6 @@
 package com.vibecheck.app.ui.screens
 
+import androidx.compose.ui.test.assertDoesNotExist
 import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.onNodeWithText
@@ -42,5 +43,33 @@ class SoloResultScreenTest {
         composeRule
             .onNodeWithText("Résultat de simulation fictive", substring = true)
             .assertIsDisplayed()
+    }
+
+    @Test
+    fun solo_result_does_not_offer_real_friend_challenge() {
+        composeRule.setContent {
+            VibeCheckTheme {
+                ResultScreen(
+                    mode = GameMode.WHO_OF_US,
+                    votes = emptyList(),
+                    resultOverride = GameResult(
+                        winner = "Nova",
+                        score = 4,
+                        total = 8,
+                    ),
+                    challengeTarget = null,
+                    sessionSeed = 42L,
+                    sessionInstanceId = 10L,
+                    intensity = GameIntensity.NORMAL,
+                    pack = GamePack.MIX,
+                    isSoloSession = true,
+                    onReplay = {},
+                    onHome = {},
+                )
+            }
+        }
+
+        composeRule.onNodeWithText("Défier un ami").assertDoesNotExist()
+        composeRule.onNodeWithText("Partager le résultat").assertIsDisplayed()
     }
 }
