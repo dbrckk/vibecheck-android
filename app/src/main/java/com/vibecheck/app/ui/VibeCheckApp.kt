@@ -22,6 +22,7 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
@@ -31,6 +32,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
+import kotlinx.coroutines.launch
 import com.vibecheck.app.billing.PremiumBillingManager
 import com.vibecheck.app.billing.PurchaseStatus
 import com.vibecheck.app.data.KnowMeRepository
@@ -39,7 +41,7 @@ import com.vibecheck.app.data.OnboardingStore
 import com.vibecheck.app.data.PlayerGroupStore
 import com.vibecheck.app.data.QuestionHistoryStore
 import com.vibecheck.app.data.QuestionRepository
-import com.vibecheck.app.data.ThemeStore
+import com.vibecheck.app.data.AppearanceStore
 import com.vibecheck.app.domain.Challenge
 import com.vibecheck.app.domain.SessionCodec
 import com.vibecheck.app.domain.model.GameIntensity
@@ -82,12 +84,13 @@ fun VibeCheckApp(
     val onboardingStore = remember(context.applicationContext) {
         OnboardingStore(context.applicationContext)
     }
-    val themeStore = remember(context.applicationContext) {
-        ThemeStore(context.applicationContext)
+    val appearanceStore = remember(context.applicationContext) {
+        AppearanceStore(context.applicationContext)
     }
-    var themeStyle by remember {
-        mutableStateOf(themeStore.load())
-    }
+    val themeStyle by appearanceStore.selectedStyle.collectAsState(
+        initial = VibeThemeStyle.PREMIUM_DARK
+    )
+    val appearanceScope = rememberCoroutineScope()
     var showOnboarding by remember {
         mutableStateOf(!onboardingStore.isCompleted())
     }
@@ -449,8 +452,9 @@ fun VibeCheckApp(
                         onClick = {
                             val styles = VibeThemeStyle.entries
                             val next = styles[(styles.indexOf(themeStyle) + 1) % styles.size]
-                            themeStyle = next
-                            themeStore.save(next)
+                            appearanceScope.launch {
+                                appearanceStore.save(next)
+                            }
                         },
                         modifier = Modifier.align(Alignment.BottomEnd)
                     ) {
