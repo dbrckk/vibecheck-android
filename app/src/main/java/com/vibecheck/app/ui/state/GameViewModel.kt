@@ -9,6 +9,7 @@ import com.vibecheck.app.domain.model.GameIntensity
 import com.vibecheck.app.domain.model.GameMode
 import com.vibecheck.app.domain.model.GamePack
 import com.vibecheck.app.domain.model.Vote
+import com.vibecheck.app.domain.solo.PersonaAnswer
 
 enum class AppScreen { HOME, PLAYERS, GAME, RESULT, LEADERBOARD }
 
@@ -31,8 +32,11 @@ class GameViewModel(
     val knowGuesserIndex = savedStateHandle.getStateFlow(KEY_KNOW_GUESSER_INDEX, 0)
     val knowScores = savedStateHandle.getStateFlow(KEY_KNOW_SCORES, arrayListOf<Int>())
     val knowHandoffPending = savedStateHandle.getStateFlow(KEY_KNOW_HANDOFF, false)
+    val isSoloSession = savedStateHandle.getStateFlow(KEY_IS_SOLO_SESSION, false)
+    val soloPersonaIds = savedStateHandle.getStateFlow(KEY_SOLO_PERSONA_IDS, arrayListOf<String>())
 
     fun acceptChallenge(challenge: Challenge) {
+        clearSoloSession()
         savedStateHandle[KEY_MODE] = challenge.mode.name
         savedStateHandle[KEY_CHALLENGE_TARGET] = challenge.targetPercent
         savedStateHandle[KEY_QUESTION_INDEX] = 0
@@ -47,6 +51,7 @@ class GameViewModel(
     }
 
     fun selectMode(mode: GameMode) {
+        clearSoloSession()
         savedStateHandle[KEY_MODE] = mode.name
         savedStateHandle[KEY_CHALLENGE_TARGET] = NO_CHALLENGE
         savedStateHandle[KEY_QUESTION_INDEX] = 0
@@ -60,6 +65,7 @@ class GameViewModel(
     }
 
     fun quickStartMode(mode: GameMode) {
+        clearSoloSession()
         savedStateHandle[KEY_MODE] = mode.name
         savedStateHandle[KEY_CHALLENGE_TARGET] = NO_CHALLENGE
         savedStateHandle[KEY_QUESTION_INDEX] = 0
@@ -82,6 +88,7 @@ class GameViewModel(
     }
 
     fun editPlayers() {
+        clearSoloSession()
         savedStateHandle[KEY_CHALLENGE_TARGET] = NO_CHALLENGE
         savedStateHandle[KEY_QUESTION_INDEX] = 0
         savedStateHandle[KEY_VOTES] = arrayListOf<String>()
@@ -114,6 +121,7 @@ class GameViewModel(
     }
 
     fun goBackHome() {
+        clearSoloSession()
         savedStateHandle[KEY_QUESTION_INDEX] = 0
         savedStateHandle[KEY_VOTES] = arrayListOf<String>()
         savedStateHandle[KEY_CHALLENGE_TARGET] = NO_CHALLENGE
@@ -123,6 +131,7 @@ class GameViewModel(
     }
 
     fun startGame() {
+        clearSoloSession()
         savedStateHandle[KEY_VOTES] = arrayListOf<String>()
         savedStateHandle[KEY_QUESTION_INDEX] = 0
         resetKnowMeState()
@@ -131,6 +140,56 @@ class GameViewModel(
         }
         savedStateHandle[KEY_SESSION_INSTANCE_ID] = System.nanoTime()
         savedStateHandle[KEY_SCREEN] = AppScreen.GAME.name
+    }
+
+    fun startSoloSession(
+        personaIds: List<String>,
+        mode: GameMode = GameMode.WHO_OF_US,
+        seed: Long = System.currentTimeMillis(),
+    ) {
+        val validIds = personaIds
+            .filter { it.isNotBlank() }
+            .distinct()
+        if (validIds.size !in MIN_SOLO_COMPANIONS..MAX_SOLO_COMPANIONS) return
+        if (mode == GameMode.KNOWS_ME) return
+
+        savedStateHandle[KEY_IS_SOLO_SESSION] = true
+        savedStateHandle[KEY_SOLO_PERSONA_IDS] = ArrayList(validIds)
+        savedStateHandle[KEY_MODE] = mode.name
+        savedStateHandle[KEY_CHALLENGE_TARGET] = NO_CHALLENGE
+        savedStateHandle[KEY_QUESTION_INDEX] = 0
+        savedStateHandle[KEY_VOTES] = arrayListOf<String>()
+        savedStateHandle[KEY_LEGACY_CHALLENGE] = false
+        savedStateHandle[KEY_SESSION_SEED] = seed
+        savedStateHandle[KEY_SESSION_INSTANCE_ID] = System.nanoTime()
+        resetKnowMeState()
+        savedStateHandle[KEY_SCREEN] = AppScreen.GAME.name
+    }
+
+    fun submitSoloRound(
+        questionId: String,
+        answers: List<PersonaAnswer>,
+        isLastQuestion: Boolean,
+    ) {
+        if (!isSoloSession.value || screenName.value != AppScreen.GAME.name) return
+        if (answers.isEmpty()) return
+
+        val majority = answers
+            .groupingBy { it.option }
+            .eachCount()
+            .entries
+            .sortedWith(
+                compareByDescending<Map.Entry<String, Int>> { it.value }
+                    .thenBy { it.key }
+            )
+            .first()
+            .key
+
+        answer(
+            questionId = questionId,
+            answer = majority,
+            isLastQuestion = isLastQuestion,
+        )
     }
 
     fun answer(questionId: String, answer: String, isLastQuestion: Boolean) {
@@ -191,6 +250,7 @@ class GameViewModel(
     }
 
     fun abandonGame() {
+        clearSoloSession()
         savedStateHandle[KEY_VOTES] = arrayListOf<String>()
         savedStateHandle[KEY_QUESTION_INDEX] = 0
         savedStateHandle[KEY_CHALLENGE_TARGET] = NO_CHALLENGE
@@ -210,6 +270,7 @@ class GameViewModel(
     }
 
     fun goHome() {
+        clearSoloSession()
         savedStateHandle[KEY_VOTES] = arrayListOf<String>()
         savedStateHandle[KEY_QUESTION_INDEX] = 0
         savedStateHandle[KEY_CHALLENGE_TARGET] = NO_CHALLENGE
@@ -222,6 +283,11 @@ class GameViewModel(
         if (knowScores.value.size != needed) {
             savedStateHandle[KEY_KNOW_SCORES] = ArrayList(List(needed) { 0 })
         }
+    }
+
+    private fun clearSoloSession() {
+        savedStateHandle[KEY_IS_SOLO_SESSION] = false
+        savedStateHandle[KEY_SOLO_PERSONA_IDS] = arrayListOf<String>()
     }
 
     private fun resetKnowMeState() {
@@ -252,5 +318,9 @@ class GameViewModel(
         private const val KEY_KNOW_GUESSER_INDEX = "know_guesser_index"
         private const val KEY_KNOW_SCORES = "know_scores"
         private const val KEY_KNOW_HANDOFF = "know_handoff"
+        private const val KEY_IS_SOLO_SESSION = "is_solo_session"
+        private const val KEY_SOLO_PERSONA_IDS = "solo_persona_ids"
+        private const val MIN_SOLO_COMPANIONS = 2
+        private const val MAX_SOLO_COMPANIONS = 7
     }
 }
