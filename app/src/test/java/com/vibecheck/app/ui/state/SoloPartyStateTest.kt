@@ -26,6 +26,15 @@ class SoloPartyStateTest {
     }
 
     @Test
+    fun auto_compose_of_two_still_mixes_public_and_original_when_available() {
+        val state = SoloPartyState().autoCompose(PersonaCatalog.all, size = 2, seed = 7L)
+        val chosen = PersonaCatalog.all.filter { it.id in state.selectedIds }
+        assertEquals(2, chosen.size)
+        assertEquals(2, chosen.map { it.kind }.distinct().size)
+        assertTrue(chosen.map { it.gender }.distinct().size >= 2)
+    }
+
+    @Test
     fun auto_compose_returns_balanced_valid_party() {
         val state = SoloPartyState().autoCompose(PersonaCatalog.all, size = 5, seed = 42L)
         assertEquals(5, state.selectedIds.size)
