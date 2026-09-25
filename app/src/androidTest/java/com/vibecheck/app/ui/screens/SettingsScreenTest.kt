@@ -41,6 +41,7 @@ class SettingsScreenTest {
                     onOpenLeaderboard = {},
                     onEditGroup = {},
                     onOpenSettings = { opened = true },
+                    onPlaySolo = {},
                     onBuyPremium = {},
                     onIntensity = {},
                     onPack = {},
