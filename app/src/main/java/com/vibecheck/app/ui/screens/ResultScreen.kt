@@ -59,6 +59,7 @@ import com.vibecheck.app.domain.model.Vote
 import com.vibecheck.app.sharing.ChallengeSharer
 import com.vibecheck.app.sharing.ResultCardSharer
 import com.vibecheck.app.ui.theme.VibeColors
+import com.vibecheck.app.ui.theme.MotionPolicy
 import kotlinx.coroutines.launch
 
 @Composable
@@ -72,6 +73,7 @@ fun ResultScreen(
     intensity: GameIntensity,
     pack: GamePack,
     isSoloSession: Boolean = false,
+    animatorScale: Float = 1f,
     onReplay: () -> Unit,
     onHome: () -> Unit
 ) {
@@ -126,22 +128,22 @@ fun ResultScreen(
     val homePressed by homeInteraction.collectIsPressedAsState()
     val shareScale by animateFloatAsState(
         targetValue = if (sharePressed) 0.985f else 1f,
-        animationSpec = tween(durationMillis = if (sharePressed) 80 else 130),
+        animationSpec = tween(durationMillis = MotionPolicy.durationMillis(if (sharePressed) 80 else 130, animatorScale)),
         label = "shareScale"
     )
     val challengeScale by animateFloatAsState(
         targetValue = if (challengePressed) 0.988f else 1f,
-        animationSpec = tween(durationMillis = if (challengePressed) 80 else 130),
+        animationSpec = tween(durationMillis = MotionPolicy.durationMillis(if (challengePressed) 80 else 130, animatorScale)),
         label = "challengeScale"
     )
     val replayScale by animateFloatAsState(
         targetValue = if (replayPressed) 0.985f else 1f,
-        animationSpec = tween(durationMillis = if (replayPressed) 80 else 130),
+        animationSpec = tween(durationMillis = MotionPolicy.durationMillis(if (replayPressed) 80 else 130, animatorScale)),
         label = "replayScale"
     )
     val homeScale by animateFloatAsState(
         targetValue = if (homePressed) 0.985f else 1f,
-        animationSpec = tween(durationMillis = if (homePressed) 80 else 130),
+        animationSpec = tween(durationMillis = MotionPolicy.durationMillis(if (homePressed) 80 else 130, animatorScale)),
         label = "homeScale"
     )
 
@@ -161,13 +163,13 @@ fun ResultScreen(
         score.snapTo(0f)
         winnerPulse.snapTo(0f)
         challengePulse.snapTo(0f)
-        reveal.animateTo(1f, animationSpec = tween(durationMillis = 280))
-        winnerPulse.animateTo(1f, animationSpec = tween(durationMillis = 220))
-        winnerPulse.animateTo(0f, animationSpec = tween(durationMillis = 260))
-        score.animateTo(percent.toFloat(), animationSpec = tween(durationMillis = 620))
+        reveal.animateTo(1f, animationSpec = tween(durationMillis = MotionPolicy.durationMillis(280, animatorScale)))
+        winnerPulse.animateTo(1f, animationSpec = tween(durationMillis = MotionPolicy.durationMillis(220, animatorScale)))
+        winnerPulse.animateTo(0f, animationSpec = tween(durationMillis = MotionPolicy.durationMillis(260, animatorScale)))
+        score.animateTo(percent.toFloat(), animationSpec = tween(durationMillis = MotionPolicy.durationMillis(620, animatorScale)))
         if (challengeWon) {
-            challengePulse.animateTo(1f, animationSpec = tween(durationMillis = 180))
-            challengePulse.animateTo(0f, animationSpec = tween(durationMillis = 260))
+            challengePulse.animateTo(1f, animationSpec = tween(durationMillis = MotionPolicy.durationMillis(180, animatorScale)))
+            challengePulse.animateTo(0f, animationSpec = tween(durationMillis = MotionPolicy.durationMillis(260, animatorScale)))
         }
     }
 
