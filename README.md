@@ -21,6 +21,7 @@ Android-first social party game with an offline-first core and native sharing.
 - V1 version: `1.0.0` (`versionCode 1`)
 - release builds enable code minification and resource shrinking
 - Android backup disabled for the V1 offline data model
+- cleartext HTTP traffic disabled
 
 ## Verification gate
 
