@@ -25,6 +25,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.graphics.Color
@@ -55,6 +56,7 @@ import com.vibecheck.app.ui.screens.OnboardingScreen
 import com.vibecheck.app.ui.screens.PassPhoneScreen
 import com.vibecheck.app.ui.screens.PlayerSetupScreen
 import com.vibecheck.app.ui.screens.ResultScreen
+import com.vibecheck.app.ui.screens.SettingsScreen
 import com.vibecheck.app.ui.state.AppScreen
 import com.vibecheck.app.ui.state.GameViewModel
 import com.vibecheck.app.ui.theme.VibeBackdrop
@@ -94,6 +96,7 @@ fun VibeCheckApp(
     var showOnboarding by remember {
         mutableStateOf(!onboardingStore.isCompleted())
     }
+    var settingsOpen by rememberSaveable { mutableStateOf(false) }
     var groupHydrated by remember { mutableStateOf(false) }
 
     DisposableEffect(billingManager) {
@@ -196,13 +199,23 @@ fun VibeCheckApp(
         }
     }
 
-    BackHandler(enabled = screen != AppScreen.HOME) {
-        when (screen) {
-            AppScreen.PLAYERS -> gameViewModel.goBackHome()
-            AppScreen.GAME -> gameViewModel.abandonGame()
-            AppScreen.RESULT -> gameViewModel.goHome()
-            AppScreen.LEADERBOARD -> gameViewModel.goHome()
-            AppScreen.HOME -> Unit
+    LaunchedEffect(screen) {
+        if (screen != AppScreen.HOME) {
+            settingsOpen = false
+        }
+    }
+
+    BackHandler(enabled = settingsOpen || screen != AppScreen.HOME) {
+        if (settingsOpen) {
+            settingsOpen = false
+        } else {
+            when (screen) {
+                AppScreen.PLAYERS -> gameViewModel.goBackHome()
+                AppScreen.GAME -> gameViewModel.abandonGame()
+                AppScreen.RESULT -> gameViewModel.goHome()
+                AppScreen.LEADERBOARD -> gameViewModel.goHome()
+                AppScreen.HOME -> Unit
+            }
         }
     }
 
@@ -215,7 +228,17 @@ fun VibeCheckApp(
                         .safeDrawingPadding()
                         .padding(horizontal = 20.dp, vertical = 16.dp)
                 ) {
-                if (showOnboarding && incomingChallenge == null && screen == AppScreen.HOME) {
+                if (settingsOpen && screen == AppScreen.HOME) {
+                    SettingsScreen(
+                        selectedStyle = themeStyle,
+                        onStyleSelected = { style ->
+                            appearanceScope.launch {
+                                appearanceStore.save(style)
+                            }
+                        },
+                        onBack = { settingsOpen = false },
+                    )
+                } else if (showOnboarding && incomingChallenge == null && screen == AppScreen.HOME) {
                     OnboardingScreen(
                         onStart = {
                             onboardingStore.markCompleted()
@@ -245,6 +268,7 @@ fun VibeCheckApp(
                         groupLeaderWins = groupLeader?.wins ?: 0,
                         onOpenLeaderboard = gameViewModel::openLeaderboard,
                         onEditGroup = gameViewModel::editPlayers,
+                        onOpenSettings = { settingsOpen = true },
                         onBuyPremium = {
                             (context as? Activity)?.let { activity ->
                                 billingManager.launchPurchase(activity)
@@ -446,20 +470,6 @@ fun VibeCheckApp(
                     }
                     }
                 }
-                }
-                if (!showOnboarding && screen == AppScreen.HOME) {
-                    Button(
-                        onClick = {
-                            val styles = VibeThemeStyle.entries
-                            val next = styles[(styles.indexOf(themeStyle) + 1) % styles.size]
-                            appearanceScope.launch {
-                                appearanceStore.save(next)
-                            }
-                        },
-                        modifier = Modifier.align(Alignment.BottomEnd)
-                    ) {
-                        Text(themeStyle.label)
-                    }
                 }
                 }
             }
