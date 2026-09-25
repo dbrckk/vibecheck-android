@@ -38,7 +38,7 @@ gradle :app:assembleDebug --stacktrace
 gradle :app:bundleRelease --stacktrace
 ```
 
-The workflow publishes the debug APK and an unsigned release AAB as CI artifacts. This gate is required after every release-candidate change.
+The workflow publishes the debug APK and an unsigned release AAB as CI artifacts. A release candidate is not considered verified until this complete gate has passed on its exact commit SHA.
 
 ## Play Store release gate
 Before production publication, the remaining distribution work is deliberately kept outside source control:
