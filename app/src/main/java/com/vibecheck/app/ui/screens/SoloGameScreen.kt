@@ -2,6 +2,7 @@ package com.vibecheck.app.ui.screens
 
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -54,7 +55,12 @@ fun SoloGameScreen(
             verticalAlignment = Alignment.CenterVertically
         ) {
             Text("$progress / $total", color = MaterialTheme.colorScheme.primary, style = MaterialTheme.typography.labelLarge, fontWeight = FontWeight.Bold)
-            Text("Quitter", modifier = Modifier.padding(8.dp), color = MaterialTheme.colorScheme.onSurfaceVariant, style = MaterialTheme.typography.labelLarge)
+            Text(
+                "Quitter",
+                modifier = Modifier.clickable(onClick = onExit).padding(8.dp),
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                style = MaterialTheme.typography.labelLarge
+            )
         }
 
         Spacer(Modifier.height(12.dp))
@@ -74,9 +80,7 @@ fun SoloGameScreen(
                     Text("Réponses masquées", color = MaterialTheme.colorScheme.onSurface, style = MaterialTheme.typography.titleMedium)
                     Text("Révèle les choix du groupe simulé quand tu es prêt.", color = MaterialTheme.colorScheme.onSurfaceVariant, style = MaterialTheme.typography.bodyMedium)
                     Spacer(Modifier.height(14.dp))
-                    Button(onClick = { revealed = true }, modifier = Modifier.fillMaxWidth()) {
-                        Text("Révéler les réponses")
-                    }
+                    Button(onClick = { revealed = true }, modifier = Modifier.fillMaxWidth()) { Text("Révéler les réponses") }
                 }
             }
         }
@@ -110,15 +114,11 @@ fun SoloGameScreen(
                     }
                 }
                 Spacer(Modifier.height(10.dp))
-                Button(onClick = onNext, modifier = Modifier.fillMaxWidth()) {
-                    Text(if (progress >= total) "Voir le résultat" else "Question suivante")
-                }
+                Button(onClick = onNext, modifier = Modifier.fillMaxWidth()) { Text(if (progress >= total) "Voir le résultat" else "Question suivante") }
             }
         }
 
         Spacer(Modifier.height(10.dp))
-        OutlinedButton(onClick = onExit, modifier = Modifier.fillMaxWidth()) {
-            Text("Quitter la partie")
-        }
+        OutlinedButton(onClick = onExit, modifier = Modifier.fillMaxWidth()) { Text("Quitter la partie") }
     }
 }
