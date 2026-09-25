@@ -46,7 +46,7 @@ class SoloResultScreenTest {
     }
 
     @Test
-    fun solo_result_does_not_offer_real_friend_challenge() {
+    fun solo_result_keeps_sharing_inside_simulation_context() {
         composeRule.setContent {
             VibeCheckTheme {
                 ResultScreen(
@@ -70,6 +70,6 @@ class SoloResultScreenTest {
         }
 
         composeRule.onNodeWithText("Défier un ami").assertDoesNotExist()
-        composeRule.onNodeWithText("Partager le résultat").assertIsDisplayed()
+        composeRule.onNodeWithText("Partager la simulation").assertIsDisplayed()
     }
 }
