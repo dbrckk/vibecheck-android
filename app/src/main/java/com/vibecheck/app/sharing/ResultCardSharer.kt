@@ -35,7 +35,8 @@ object ResultCardSharer {
         localWins: Int = 0,
         bestScorePercent: Int = 0,
         ranking: List<Pair<String, Int>> = emptyList(),
-        totalVotes: Int = 0
+        totalVotes: Int = 0,
+        isFictionalSimulation: Boolean = false,
     ) {
         val safeWinner = sanitizeWinner(winner)
         val safePercent = percent.coerceIn(0, 100)
@@ -49,7 +50,8 @@ object ResultCardSharer {
                 localWins = localWins.coerceAtLeast(0),
                 bestScorePercent = bestScorePercent.coerceIn(0, 100),
                 ranking = ranking.take(3).map { sanitizeWinner(it.first) to it.second.coerceAtLeast(0) },
-                totalVotes = totalVotes.coerceAtLeast(0)
+                totalVotes = totalVotes.coerceAtLeast(0),
+                isFictionalSimulation = isFictionalSimulation,
             )
             try {
                 val directory = File(context.cacheDir, "shared_results")
@@ -109,6 +111,8 @@ object ResultCardSharer {
             putExtra(
                 Intent.EXTRA_TEXT,
                 when {
+                    isFictionalSimulation ->
+                        "Ma simulation fictive VibeCheck : $safeWinner arrive en tête avec $safePercent%. Résultat simulé pour le divertissement."
                     mode == GameMode.KNOWS_ME ->
                         "Mon VibeCheck : $safeWinner connaît le mieux le groupe avec $safePercent% — ${mode.title}."
                     podiumText.isNotBlank() ->
@@ -132,7 +136,8 @@ object ResultCardSharer {
         localWins: Int,
         bestScorePercent: Int,
         ranking: List<Pair<String, Int>>,
-        totalVotes: Int
+        totalVotes: Int,
+        isFictionalSimulation: Boolean,
     ): Bitmap {
         val bitmap = Bitmap.createBitmap(WIDTH, HEIGHT, Bitmap.Config.ARGB_8888)
         val canvas = Canvas(bitmap)
@@ -172,7 +177,12 @@ object ResultCardSharer {
         canvas.drawText("VIBECHECK", 86f, 150f, brandPaint)
 
         val eyebrow = textPaint(44f, Color.rgb(186, 177, 202), false)
-        canvas.drawText("LE RÉSULTAT DU GROUPE", 86f, 270f, eyebrow)
+        canvas.drawText(
+            if (isFictionalSimulation) "SIMULATION FICTIVE • DIVERTISSEMENT" else "LE RÉSULTAT DU GROUPE",
+            86f,
+            270f,
+            eyebrow
+        )
         val badgePaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
             color = Color.argb(70, 255, 255, 255)
         }
@@ -183,7 +193,6 @@ object ResultCardSharer {
         canvas.drawText(packLabel, 110f, 352f, badgeText)
         canvas.drawRoundRect(446f, 310f, 730f, 374f, 28f, 28f, badgePaint)
         canvas.drawText(intensityLabel, 470f, 352f, badgeText)
-
 
         val cardPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
             color = Color.argb(225, 28, 24, 36)
@@ -210,7 +219,11 @@ object ResultCardSharer {
         )
 
         val subtitlePaint = textPaint(48f, Color.rgb(184, 176, 196), false)
-        val subtitle = if (mode == GameMode.KNOWS_ME) "de bonnes réponses" else "des réponses"
+        val subtitle = when {
+            isFictionalSimulation -> "résultat simulé"
+            mode == GameMode.KNOWS_ME -> "de bonnes réponses"
+            else -> "des réponses"
+        }
         canvas.drawText(
             subtitle,
             WIDTH / 2f - subtitlePaint.measureText(subtitle) / 2f,
@@ -259,7 +272,11 @@ object ResultCardSharer {
         }
 
         val ctaPaint = textPaint(45f, Color.WHITE, true)
-        val cta = "Et toi, ton groupe dirait quoi ?"
+        val cta = if (isFictionalSimulation) {
+            "Crée ta propre simulation VibeCheck"
+        } else {
+            "Et toi, ton groupe dirait quoi ?"
+        }
         canvas.drawText(
             cta,
             WIDTH / 2f - ctaPaint.measureText(cta) / 2f,
