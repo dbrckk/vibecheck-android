@@ -68,69 +68,39 @@ fun VibeCheckTheme(
     val inheritedStyle = LocalVibeThemeStyle.current
     val resolvedStyle = style ?: inheritedStyle
     val token = themeTokens(resolvedStyle)
-    val schemeFactory = if (resolvedStyle == VibeThemeStyle.KAWAII || resolvedStyle == VibeThemeStyle.MINIMAL) {
-        ::lightColorScheme
+    val scheme = if (resolvedStyle == VibeThemeStyle.KAWAII || resolvedStyle == VibeThemeStyle.MINIMAL) {
+        lightColorScheme(
+            primary = Color(token.primary), onPrimary = Color(token.onPrimary),
+            primaryContainer = Color(token.surfaceStrong), onPrimaryContainer = Color(token.textPrimary),
+            secondary = Color(token.secondary), tertiary = Color(token.tertiary),
+            background = Color(token.background), onBackground = Color(token.textPrimary),
+            surface = Color(token.surface), onSurface = Color(token.textPrimary),
+            surfaceVariant = Color(token.surfaceStrong), onSurfaceVariant = Color(token.textSecondary),
+            error = Color(token.error)
+        )
     } else {
-        ::darkColorScheme
+        darkColorScheme(
+            primary = Color(token.primary), onPrimary = Color(token.onPrimary),
+            primaryContainer = Color(token.surfaceStrong), onPrimaryContainer = Color(token.textPrimary),
+            secondary = Color(token.secondary), tertiary = Color(token.tertiary),
+            background = Color(token.background), onBackground = Color(token.textPrimary),
+            surface = Color(token.surface), onSurface = Color(token.textPrimary),
+            surfaceVariant = Color(token.surfaceStrong), onSurfaceVariant = Color(token.textSecondary),
+            error = Color(token.error)
+        )
     }
-    val scheme = schemeFactory(
-        primary = Color(token.primary),
-        onPrimary = Color(token.onPrimary),
-        primaryContainer = Color(token.surfaceStrong),
-        onPrimaryContainer = Color(token.textPrimary),
-        secondary = Color(token.secondary),
-        tertiary = Color(token.tertiary),
-        background = Color(token.background),
-        onBackground = Color(token.textPrimary),
-        surface = Color(token.surface),
-        onSurface = Color(token.textPrimary),
-        surfaceVariant = Color(token.surfaceStrong),
-        onSurfaceVariant = Color(token.textSecondary),
-        error = Color(token.error)
-    )
 
     CompositionLocalProvider(LocalVibeThemeStyle provides resolvedStyle) {
-        MaterialTheme(
-            colorScheme = scheme,
-            typography = VibeTypography,
-            shapes = VibeShapes,
-            content = content
-        )
+        MaterialTheme(colorScheme = scheme, typography = VibeTypography, shapes = VibeShapes, content = content)
     }
 }
 
 @Composable
 fun VibeBackdrop(content: @Composable () -> Unit) {
     val token = themeTokens(currentVibeThemeStyle)
-    Box(
-        modifier = Modifier
-            .fillMaxSize()
-            .background(Brush.verticalGradient(token.backdrop.map(::Color)))
-    ) {
-        Box(
-            modifier = Modifier
-                .align(Alignment.TopEnd)
-                .offset(x = 110.dp, y = (-120).dp)
-                .size(360.dp)
-                .background(
-                    Brush.radialGradient(
-                        listOf(Color(token.primary).copy(alpha = 0.22f), Color.Transparent)
-                    ),
-                    CircleShape
-                )
-        )
-        Box(
-            modifier = Modifier
-                .align(Alignment.BottomStart)
-                .offset(x = (-130).dp, y = 120.dp)
-                .size(330.dp)
-                .background(
-                    Brush.radialGradient(
-                        listOf(Color(token.secondary).copy(alpha = 0.14f), Color.Transparent)
-                    ),
-                    CircleShape
-                )
-        )
+    Box(modifier = Modifier.fillMaxSize().background(Brush.verticalGradient(token.backdrop.map(::Color)))) {
+        Box(modifier = Modifier.align(Alignment.TopEnd).offset(x = 110.dp, y = (-120).dp).size(360.dp).background(Brush.radialGradient(listOf(Color(token.primary).copy(alpha = 0.22f), Color.Transparent)), CircleShape))
+        Box(modifier = Modifier.align(Alignment.BottomStart).offset(x = (-130).dp, y = 120.dp).size(330.dp).background(Brush.radialGradient(listOf(Color(token.secondary).copy(alpha = 0.14f), Color.Transparent)), CircleShape))
         content()
     }
 }
