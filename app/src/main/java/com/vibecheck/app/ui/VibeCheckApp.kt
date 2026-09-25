@@ -1,6 +1,7 @@
 package com.vibecheck.app.ui
 
 import android.app.Activity
+import android.provider.Settings
 import androidx.activity.compose.BackHandler
 import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.fadeIn
@@ -68,6 +69,7 @@ import com.vibecheck.app.ui.theme.VibeBackdrop
 import com.vibecheck.app.ui.theme.VibeCheckTheme
 import com.vibecheck.app.ui.theme.VibeColors
 import com.vibecheck.app.ui.theme.VibeThemeStyle
+import com.vibecheck.app.ui.theme.MotionPolicy
 
 @Composable
 fun VibeCheckApp(
@@ -77,6 +79,15 @@ fun VibeCheckApp(
     soloPartyViewModel: SoloPartyViewModel = viewModel(),
 ) {
     val context = LocalContext.current
+    val animatorScale = remember(context.applicationContext) {
+        runCatching {
+            Settings.Global.getFloat(
+                context.contentResolver,
+                Settings.Global.ANIMATOR_DURATION_SCALE,
+                1f,
+            )
+        }.getOrDefault(1f).coerceAtLeast(0f)
+    }
     val billingManager = remember(context.applicationContext) {
         PremiumBillingManager(context.applicationContext)
     }
@@ -298,9 +309,18 @@ fun VibeCheckApp(
                 AnimatedContent(
                     targetState = screen,
                     transitionSpec = {
-                        (fadeIn(animationSpec = tween(220)) +
-                            scaleIn(initialScale = 0.985f, animationSpec = tween(220)))
-                            .togetherWith(fadeOut(animationSpec = tween(150)))
+                        (fadeIn(animationSpec = tween(MotionPolicy.durationMillis(220, animatorScale))) +
+                            scaleIn(
+                                initialScale = 0.985f,
+                                animationSpec = tween(MotionPolicy.durationMillis(220, animatorScale)),
+                            ))
+                            .togetherWith(
+                                fadeOut(
+                                    animationSpec = tween(
+                                        MotionPolicy.durationMillis(150, animatorScale)
+                                    )
+                                )
+                            )
                     },
                     label = "screenTransition"
                 ) { animatedScreen ->
@@ -402,7 +422,8 @@ fun VibeCheckApp(
                                                 )
                                             }
                                         },
-                                        onExit = gameViewModel::abandonGame
+                                        onExit = gameViewModel::abandonGame,
+                                        animatorScale = animatorScale,
                                     )
                                 }
                             }
@@ -502,7 +523,8 @@ fun VibeCheckApp(
                                                 isLastQuestion = safeIndex == questions.lastIndex
                                             )
                                         },
-                                        onExit = gameViewModel::abandonGame
+                                        onExit = gameViewModel::abandonGame,
+                                        animatorScale = animatorScale,
                                     )
                                 }
                             }
@@ -557,6 +579,7 @@ fun VibeCheckApp(
                             intensity = selectedIntensity,
                             pack = selectedPack,
                             isSoloSession = isSoloSession,
+                            animatorScale = animatorScale,
                             onReplay = gameViewModel::replay,
                             onHome = gameViewModel::goHome
                         )
