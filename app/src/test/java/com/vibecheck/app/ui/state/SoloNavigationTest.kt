@@ -2,6 +2,7 @@ package com.vibecheck.app.ui.state
 
 import androidx.lifecycle.SavedStateHandle
 import org.junit.Assert.assertEquals
+import org.junit.Assert.assertFalse
 import org.junit.Assert.assertTrue
 import org.junit.Test
 
@@ -18,12 +19,15 @@ class SoloNavigationTest {
     }
 
     @Test
-    fun leaving_solo_casting_returns_home_without_marking_session_active() {
+    fun leaving_solo_casting_returns_home_and_clears_solo_state() {
         val vm = GameViewModel(SavedStateHandle())
         vm.openSoloParty()
+        vm.setSoloParty(listOf("public_taylor_swift", "original_nova"))
         vm.goBackHome()
+
         assertEquals(AppScreen.HOME.name, vm.screenName.value)
-        assertTrue(!vm.isSoloSession.value)
+        assertFalse(vm.isSoloSession.value)
+        assertTrue(vm.soloPersonaIds.value.isEmpty())
     }
 
     @Test
@@ -51,5 +55,31 @@ class SoloNavigationTest {
         vm.setSoloParty(listOf("public_taylor_swift"))
         vm.startSoloGame()
         assertEquals(AppScreen.SOLO_PARTY.name, vm.screenName.value)
+    }
+
+    @Test
+    fun abandoning_solo_game_clears_cast_before_next_session() {
+        val vm = GameViewModel(SavedStateHandle())
+        vm.openSoloParty()
+        vm.setSoloParty(listOf("public_taylor_swift", "original_nova"))
+        vm.startSoloGame()
+        vm.abandonGame()
+
+        assertEquals(AppScreen.HOME.name, vm.screenName.value)
+        assertFalse(vm.isSoloSession.value)
+        assertTrue(vm.soloPersonaIds.value.isEmpty())
+    }
+
+    @Test
+    fun finishing_solo_and_going_home_clears_cast_before_next_session() {
+        val vm = GameViewModel(SavedStateHandle())
+        vm.openSoloParty()
+        vm.setSoloParty(listOf("public_taylor_swift", "original_nova"))
+        vm.startSoloGame()
+        vm.goHome()
+
+        assertEquals(AppScreen.HOME.name, vm.screenName.value)
+        assertFalse(vm.isSoloSession.value)
+        assertTrue(vm.soloPersonaIds.value.isEmpty())
     }
 }
