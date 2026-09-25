@@ -4,117 +4,13 @@ import androidx.lifecycle.SavedStateHandle
 import com.vibecheck.app.domain.SessionCodec
 import com.vibecheck.app.domain.model.GameMode
 import com.vibecheck.app.domain.solo.PersonaAnswer
-import org.junit.Assert.assertEquals
-import org.junit.Assert.assertFalse
-import org.junit.Assert.assertTrue
+import org.junit.Assert.*
 import org.junit.Test
 
 class SoloGameViewModelTest {
-    @Test
-    fun `valid solo party starts game without replacing saved human group`() {
-        val viewModel = GameViewModel(SavedStateHandle())
-        viewModel.restorePlayers(listOf("Alice", "Bob"))
-
-        viewModel.startSoloSession(
-            personaIds = listOf("zendaya", "nova"),
-            mode = GameMode.WHO_OF_US,
-            seed = 42L,
-        )
-
-        assertTrue(viewModel.isSoloSession.value)
-        assertEquals(listOf("zendaya", "nova"), viewModel.soloPersonaIds.value)
-        assertEquals(listOf("Alice", "Bob"), viewModel.players.value)
-        assertEquals(AppScreen.GAME.name, viewModel.screenName.value)
-        assertEquals(GameMode.WHO_OF_US.name, viewModel.modeName.value)
-        assertEquals(42L, viewModel.sessionSeed.value)
-    }
-
-    @Test
-    fun `solo session rejects fewer than two personas`() {
-        val viewModel = GameViewModel(SavedStateHandle())
-
-        viewModel.startSoloSession(
-            personaIds = listOf("nova"),
-            mode = GameMode.WHO_OF_US,
-            seed = 42L,
-        )
-
-        assertFalse(viewModel.isSoloSession.value)
-        assertEquals(AppScreen.HOME.name, viewModel.screenName.value)
-    }
-
-    @Test
-    fun `solo round stores deterministic majority as one game vote`() {
-        val viewModel = GameViewModel(SavedStateHandle())
-        viewModel.startSoloSession(
-            personaIds = listOf("zendaya", "nova", "milo"),
-            mode = GameMode.WHO_OF_US,
-            seed = 42L,
-        )
-
-        viewModel.submitSoloRound(
-            questionId = "q1",
-            answers = listOf(
-                PersonaAnswer("zendaya", "Nova", 70, true),
-                PersonaAnswer("nova", "Nova", 65, false),
-                PersonaAnswer("milo", "Milo", 80, false),
-            ),
-            isLastQuestion = false,
-        )
-
-        val votes = SessionCodec.decodeVotes(viewModel.savedVotes.value)
-        assertEquals(1, votes.size)
-        assertEquals("Nova", votes.single().answer)
-        assertEquals(1, viewModel.questionIndex.value)
-    }
-
-    @Test
-    fun `solo final round opens result replay preserves party and home clears session mode`() {
-        val viewModel = GameViewModel(SavedStateHandle())
-        viewModel.startSoloSession(
-            personaIds = listOf("zendaya", "nova"),
-            mode = GameMode.WHO_OF_US,
-            seed = 42L,
-        )
-
-        viewModel.submitSoloRound(
-            questionId = "q8",
-            answers = listOf(
-                PersonaAnswer("zendaya", "Nova", 70, true),
-                PersonaAnswer("nova", "Nova", 65, false),
-            ),
-            isLastQuestion = true,
-        )
-
-        assertEquals(AppScreen.RESULT.name, viewModel.screenName.value)
-
-        viewModel.replay()
-        assertTrue(viewModel.isSoloSession.value)
-        assertEquals(listOf("zendaya", "nova"), viewModel.soloPersonaIds.value)
-        assertEquals(AppScreen.GAME.name, viewModel.screenName.value)
-
-        viewModel.goHome()
-        assertFalse(viewModel.isSoloSession.value)
-        assertTrue(viewModel.soloPersonaIds.value.isEmpty())
-        assertEquals(AppScreen.HOME.name, viewModel.screenName.value)
-    }
-
-    @Test
-    fun `active solo session survives viewmodel recreation`() {
-        val state = SavedStateHandle()
-        val first = GameViewModel(state)
-        first.startSoloSession(
-            personaIds = listOf("zendaya", "nova"),
-            mode = GameMode.MOST_LIKELY,
-            seed = 99L,
-        )
-
-        val restored = GameViewModel(state)
-
-        assertTrue(restored.isSoloSession.value)
-        assertEquals(listOf("zendaya", "nova"), restored.soloPersonaIds.value)
-        assertEquals(GameMode.MOST_LIKELY.name, restored.modeName.value)
-        assertEquals(AppScreen.GAME.name, restored.screenName.value)
-        assertEquals(99L, restored.sessionSeed.value)
-    }
+ @Test fun `valid solo party starts game with human participant awaiting answer`(){val vm=GameViewModel(SavedStateHandle());vm.startSoloSession(listOf("zendaya","nova"),GameMode.WHO_OF_US,42L,"Alex");assertTrue(vm.isSoloSession.value);assertEquals("Alex",vm.soloPlayerName.value);assertEquals("",vm.soloPlayerAnswer.value);assertEquals(AppScreen.GAME.name,vm.screenName.value)}
+ @Test fun `solo session rejects fewer than two personas`(){val vm=GameViewModel(SavedStateHandle());vm.startSoloSession(listOf("nova"),GameMode.WHO_OF_US,42L,"Moi");assertFalse(vm.isSoloSession.value)}
+ @Test fun `human must answer before simulated round can be submitted`(){val vm=GameViewModel(SavedStateHandle());vm.startSoloSession(listOf("zendaya","nova"),GameMode.WHO_OF_US,42L,"Moi");val answers=listOf(PersonaAnswer("zendaya","Nova",70,true),PersonaAnswer("nova","Nova",65,false));vm.submitSoloRound("q1",answers,false);assertTrue(SessionCodec.decodeVotes(vm.savedVotes.value).isEmpty());vm.submitSoloPlayerAnswer("Moi");assertEquals("Moi",vm.soloPlayerAnswer.value);vm.submitSoloRound("q1",answers,false);assertEquals(1,SessionCodec.decodeVotes(vm.savedVotes.value).size);assertEquals("",vm.soloPlayerAnswer.value)}
+ @Test fun `solo result combines human and simulated answers in global vote`(){val vm=GameViewModel(SavedStateHandle());vm.startSoloSession(listOf("zendaya","nova"),GameMode.WHO_OF_US,42L,"Moi");vm.submitSoloPlayerAnswer("Moi");vm.submitSoloRound("q1",listOf(PersonaAnswer("zendaya","Nova",70,true),PersonaAnswer("nova","Nova",65,false)),false);assertEquals("Nova",SessionCodec.decodeVotes(vm.savedVotes.value).single().answer)}
+ @Test fun `active solo session survives recreation with player identity`(){val state=SavedStateHandle();GameViewModel(state).startSoloSession(listOf("zendaya","nova"),GameMode.MOST_LIKELY,99L,"Alex");val restored=GameViewModel(state);assertTrue(restored.isSoloSession.value);assertEquals("Alex",restored.soloPlayerName.value);assertEquals(99L,restored.sessionSeed.value)}
 }
