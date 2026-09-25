@@ -71,6 +71,7 @@ fun ResultScreen(
     sessionInstanceId: Long,
     intensity: GameIntensity,
     pack: GamePack,
+    isSoloSession: Boolean = false,
     onReplay: () -> Unit,
     onHome: () -> Unit
 ) {
@@ -145,7 +146,7 @@ fun ResultScreen(
     )
 
     LaunchedEffect(sessionInstanceId, result.winner, percent, mode) {
-        if (mode != GameMode.RED_GREEN && result.winner.isNotBlank() && result.winner != "Personne") {
+        if (!isSoloSession && mode != GameMode.RED_GREEN && result.winner.isNotBlank() && result.winner != "Personne") {
             playerStat = statsStore.recordResult(
                 sessionKey = mode.name + "_" + sessionInstanceId,
                 mode = mode,
@@ -203,6 +204,25 @@ fun ResultScreen(
                 )
             }
             Spacer(Modifier.height(18.dp))
+
+            if (isSoloSession) {
+                Card(
+                    colors = CardDefaults.cardColors(
+                        containerColor = accent.copy(alpha = 0.10f)
+                    ),
+                    border = BorderStroke(1.dp, accent.copy(alpha = 0.25f)),
+                    shape = RoundedCornerShape(999.dp),
+                ) {
+                    Text(
+                        "Résultat de simulation fictive • divertissement",
+                        color = accent,
+                        fontSize = 11.sp,
+                        fontWeight = FontWeight.Black,
+                        modifier = Modifier.padding(horizontal = 13.dp, vertical = 7.dp),
+                    )
+                }
+                Spacer(Modifier.height(12.dp))
+            }
 
             Card(
                 colors = CardDefaults.cardColors(containerColor = Color(0xF21B1721)),
