@@ -49,6 +49,12 @@ import androidx.compose.ui.unit.sp
 import com.vibecheck.app.domain.model.GameMode
 import com.vibecheck.app.ui.theme.VibeColors
 
+data class SimulatedResponseUi(
+    val personaName: String,
+    val option: String,
+    val isFictionalSimulation: Boolean,
+)
+
 @Composable
 fun GameScreen(
     mode: GameMode,
@@ -57,7 +63,9 @@ fun GameScreen(
     total: Int,
     answers: List<String>,
     onAnswer: (String) -> Unit,
-    onExit: () -> Unit
+    onExit: () -> Unit,
+    simulatedResponses: List<SimulatedResponseUi> = emptyList(),
+    onContinueSimulation: (() -> Unit)? = null,
 ) {
     val progressFraction = if (total <= 0) 0f else progress.toFloat() / total.toFloat()
     val animatedProgress by animateFloatAsState(
@@ -203,70 +211,157 @@ fun GameScreen(
 
         Spacer(Modifier.height(20.dp))
 
-        LazyColumn(
-            modifier = Modifier
-                .fillMaxWidth()
-                .weight(1f)
-                .graphicsLayer {
-                    alpha = reveal.value
-                    translationY = (1f - reveal.value) * 32f
-                },
-            verticalArrangement = Arrangement.spacedBy(10.dp)
-        ) {
-            itemsIndexed(answers, key = { index, answer -> index.toString() + ":" + answer }) { index, answer ->
-                val interactionSource = remember(answer, progress) { MutableInteractionSource() }
-                val isPressed by interactionSource.collectIsPressedAsState()
-                val answerScale by animateFloatAsState(
-                    targetValue = if (isPressed) 0.985f else 1f,
-                    animationSpec = tween(durationMillis = if (isPressed) 80 else 130),
-                    label = "answerScale"
-                )
-
-                if (mode == GameMode.RED_GREEN) {
-                    OutlinedButton(
-                        onClick = { submit(answer) },
-                        enabled = !answering,
-                        interactionSource = interactionSource,
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .height(62.dp)
-                            .graphicsLayer {
-                                scaleX = answerScale
-                                scaleY = answerScale
-                            },
-                        shape = RoundedCornerShape(18.dp),
-                        border = BorderStroke(
-                            1.5.dp,
-                            if (index == 0) VibeColors.Green else VibeColors.Rose
+        if (simulatedResponses.isNotEmpty()) {
+            LazyColumn(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .weight(1f)
+                    .graphicsLayer {
+                        alpha = reveal.value
+                        translationY = (1f - reveal.value) * 32f
+                    },
+                verticalArrangement = Arrangement.spacedBy(10.dp),
+            ) {
+                item {
+                    Card(
+                        colors = CardDefaults.cardColors(
+                            containerColor = accent.copy(alpha = 0.10f)
                         ),
-                        colors = ButtonDefaults.outlinedButtonColors(
-                            contentColor = VibeColors.TextPrimary,
-                            containerColor = if (index == 0) VibeColors.Green.copy(alpha = 0.08f) else VibeColors.Rose.copy(alpha = 0.08f)
-                        )
+                        border = BorderStroke(1.dp, accent.copy(alpha = 0.24f)),
+                        shape = RoundedCornerShape(18.dp),
+                        modifier = Modifier.fillMaxWidth(),
                     ) {
-                        Text(answer, fontSize = 17.sp, fontWeight = FontWeight.Bold)
+                        Text(
+                            "Réponses simulées hors ligne. Les profils publics sont des Simulation fictive et ne représentent pas leurs opinions réelles.",
+                            color = VibeColors.TextSecondary,
+                            fontSize = 12.sp,
+                            lineHeight = 17.sp,
+                            modifier = Modifier.padding(14.dp),
+                        )
                     }
-                } else {
+                }
+                itemsIndexed(
+                    simulatedResponses,
+                    key = { index, response -> index.toString() + ":" + response.personaName },
+                ) { _, response ->
+                    Card(
+                        colors = CardDefaults.cardColors(
+                            containerColor = Color.White.copy(alpha = 0.05f)
+                        ),
+                        border = BorderStroke(
+                            1.dp,
+                            if (response.isFictionalSimulation) {
+                                accent.copy(alpha = 0.25f)
+                            } else {
+                                Color.White.copy(alpha = 0.08f)
+                            }
+                        ),
+                        shape = RoundedCornerShape(18.dp),
+                        modifier = Modifier.fillMaxWidth(),
+                    ) {
+                        Column(modifier = Modifier.padding(15.dp)) {
+                            Text(
+                                response.personaName + " → " + response.option,
+                                color = VibeColors.TextPrimary,
+                                fontSize = 16.sp,
+                                fontWeight = FontWeight.Bold,
+                            )
+                            Text(
+                                if (response.isFictionalSimulation) {
+                                    "Simulation fictive"
+                                } else {
+                                    "Personnage original"
+                                },
+                                color = if (response.isFictionalSimulation) accent else VibeColors.TextSecondary,
+                                fontSize = 11.sp,
+                                fontWeight = FontWeight.Bold,
+                            )
+                        }
+                    }
+                }
+                item {
                     Button(
-                        onClick = { submit(answer) },
-                        enabled = !answering,
-                        interactionSource = interactionSource,
+                        onClick = { onContinueSimulation?.invoke() },
+                        enabled = onContinueSimulation != null,
                         modifier = Modifier
                             .fillMaxWidth()
-                            .height(62.dp)
-                            .graphicsLayer {
-                                scaleX = answerScale
-                                scaleY = answerScale
-                            },
-                        shape = RoundedCornerShape(20.dp),
+                            .height(58.dp),
+                        shape = RoundedCornerShape(18.dp),
                         colors = ButtonDefaults.buttonColors(
-                            containerColor = accent.copy(alpha = 0.16f),
-                            contentColor = VibeColors.TextPrimary,
-                            disabledContainerColor = accent.copy(alpha = 0.08f),
-                            disabledContentColor = VibeColors.TextPrimary.copy(alpha = 0.5f)
-                        )
+                            containerColor = accent,
+                            contentColor = Color(0xFF161019),
+                        ),
                     ) {
-                        Text(answer, fontSize = 17.sp, fontWeight = FontWeight.Bold)
+                        Text("Continuer", fontWeight = FontWeight.Black)
+                    }
+                }
+            }
+        } else {
+            LazyColumn(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .weight(1f)
+                    .graphicsLayer {
+                        alpha = reveal.value
+                        translationY = (1f - reveal.value) * 32f
+                    },
+                verticalArrangement = Arrangement.spacedBy(10.dp)
+            ) {
+                itemsIndexed(answers, key = { index, answer -> index.toString() + ":" + answer }) { index, answer ->
+                    val interactionSource = remember(answer, progress) { MutableInteractionSource() }
+                    val isPressed by interactionSource.collectIsPressedAsState()
+                    val answerScale by animateFloatAsState(
+                        targetValue = if (isPressed) 0.985f else 1f,
+                        animationSpec = tween(durationMillis = if (isPressed) 80 else 130),
+                        label = "answerScale"
+                    )
+
+                    if (mode == GameMode.RED_GREEN) {
+                        OutlinedButton(
+                            onClick = { submit(answer) },
+                            enabled = !answering,
+                            interactionSource = interactionSource,
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .height(62.dp)
+                                .graphicsLayer {
+                                    scaleX = answerScale
+                                    scaleY = answerScale
+                                },
+                            shape = RoundedCornerShape(18.dp),
+                            border = BorderStroke(
+                                1.5.dp,
+                                if (index == 0) VibeColors.Green else VibeColors.Rose
+                            ),
+                            colors = ButtonDefaults.outlinedButtonColors(
+                                contentColor = VibeColors.TextPrimary,
+                                containerColor = if (index == 0) VibeColors.Green.copy(alpha = 0.08f) else VibeColors.Rose.copy(alpha = 0.08f)
+                            )
+                        ) {
+                            Text(answer, fontSize = 17.sp, fontWeight = FontWeight.Bold)
+                        }
+                    } else {
+                        Button(
+                            onClick = { submit(answer) },
+                            enabled = !answering,
+                            interactionSource = interactionSource,
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .height(62.dp)
+                                .graphicsLayer {
+                                    scaleX = answerScale
+                                    scaleY = answerScale
+                                },
+                            shape = RoundedCornerShape(20.dp),
+                            colors = ButtonDefaults.buttonColors(
+                                containerColor = accent.copy(alpha = 0.16f),
+                                contentColor = VibeColors.TextPrimary,
+                                disabledContainerColor = accent.copy(alpha = 0.08f),
+                                disabledContentColor = VibeColors.TextPrimary.copy(alpha = 0.5f)
+                            )
+                        ) {
+                            Text(answer, fontSize = 17.sp, fontWeight = FontWeight.Bold)
+                        }
                     }
                 }
             }
