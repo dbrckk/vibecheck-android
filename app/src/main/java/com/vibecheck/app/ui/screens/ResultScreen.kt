@@ -419,7 +419,8 @@ fun ResultScreen(
                                     localWins = playerStat?.wins ?: 0,
                                     bestScorePercent = playerStat?.bestScorePercent ?: 0,
                                     ranking = shareRanking,
-                                    totalVotes = votes.size
+                                    totalVotes = votes.size,
+                                    isSoloSession = isSoloSession
                                 )
                             } catch (_: Exception) {
                                 shareError = true
