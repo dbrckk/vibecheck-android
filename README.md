@@ -51,3 +51,5 @@ Do not commit keystores, signing passwords, service-account credentials or Play 
 
 ## Monetization
 Core play remains free. Google Play Billing is available in the project for the planned non-consumable ad-removal purchase. Ads must only appear at natural session boundaries; monetization must not block the core game loop.
+
+Release-candidate source changes must keep the full verification gate green before merge to `main`.
