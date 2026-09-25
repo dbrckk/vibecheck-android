@@ -19,10 +19,8 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
-import com.vibecheck.app.ui.theme.VibeColors
 
 @Composable
 fun OnboardingScreen(
@@ -35,7 +33,7 @@ fun OnboardingScreen(
     ) {
         Text(
             "VIBECHECK",
-            color = VibeColors.Purple,
+            color = MaterialTheme.colorScheme.primary,
             style = MaterialTheme.typography.labelLarge,
             fontWeight = FontWeight.Black
         )
@@ -43,8 +41,8 @@ fun OnboardingScreen(
         Spacer(Modifier.height(12.dp))
 
         Text(
-            "Ton groupe. Vos réponses. Le verdict.",
-            color = VibeColors.TextPrimary,
+            "À plusieurs ou en solo. Le verdict tombe.",
+            color = MaterialTheme.colorScheme.onSurface,
             style = MaterialTheme.typography.headlineLarge,
             fontWeight = FontWeight.Black
         )
@@ -54,8 +52,8 @@ fun OnboardingScreen(
         Card(
             modifier = Modifier.fillMaxWidth(),
             shape = RoundedCornerShape(28.dp),
-            colors = CardDefaults.cardColors(containerColor = Color(0xF21B1721)),
-            border = BorderStroke(1.dp, Color.White.copy(alpha = 0.08f))
+            colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
+            border = BorderStroke(1.dp, MaterialTheme.colorScheme.onSurface.copy(alpha = 0.08f))
         ) {
             Column(
                 modifier = Modifier
@@ -63,9 +61,9 @@ fun OnboardingScreen(
                     .padding(20.dp),
                 verticalArrangement = Arrangement.spacedBy(16.dp)
             ) {
-                OnboardingLine("1", "Choisis un mode, un pack et une intensité.")
-                OnboardingLine("2", "Répondez à 8 questions ensemble.")
-                OnboardingLine("3", "Compare le résultat et partage la Story.")
+                OnboardingLine("1", "Joue avec ton groupe ou compose un casting Solo.")
+                OnboardingLine("2", "Réponds à des questions rapides selon l’ambiance choisie.")
+                OnboardingLine("3", "Découvre le verdict et partage ton VibeCheck.")
             }
         }
 
@@ -78,8 +76,8 @@ fun OnboardingScreen(
                 .height(58.dp),
             shape = RoundedCornerShape(20.dp),
             colors = ButtonDefaults.buttonColors(
-                containerColor = VibeColors.PurpleBright,
-                contentColor = Color(0xFF18121F)
+                containerColor = MaterialTheme.colorScheme.primary,
+                contentColor = MaterialTheme.colorScheme.onPrimary
             )
         ) {
             Text("Commencer", fontWeight = FontWeight.Black)
@@ -89,7 +87,7 @@ fun OnboardingScreen(
 
         Text(
             "Pas de compte requis • fonctionne hors ligne",
-            color = VibeColors.TextSecondary,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
             style = MaterialTheme.typography.bodySmall
         )
     }
@@ -105,19 +103,19 @@ private fun OnboardingLine(number: String, text: String) {
         Card(
             shape = RoundedCornerShape(999.dp),
             colors = CardDefaults.cardColors(
-                containerColor = VibeColors.Purple.copy(alpha = 0.16f)
+                containerColor = MaterialTheme.colorScheme.primary.copy(alpha = 0.16f)
             )
         ) {
             Text(
                 number,
-                color = VibeColors.PurpleBright,
+                color = MaterialTheme.colorScheme.primary,
                 fontWeight = FontWeight.Black,
                 modifier = Modifier.padding(horizontal = 12.dp, vertical = 8.dp)
             )
         }
         Text(
             text,
-            color = VibeColors.TextPrimary,
+            color = MaterialTheme.colorScheme.onSurface,
             style = MaterialTheme.typography.bodyLarge,
             modifier = Modifier.weight(1f)
         )
