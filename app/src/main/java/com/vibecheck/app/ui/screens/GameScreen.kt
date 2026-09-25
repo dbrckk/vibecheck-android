@@ -48,6 +48,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.vibecheck.app.domain.model.GameMode
 import com.vibecheck.app.ui.theme.VibeColors
+import com.vibecheck.app.ui.theme.MotionPolicy
 
 data class SimulatedResponseUi(
     val personaName: String,
@@ -64,13 +65,14 @@ fun GameScreen(
     answers: List<String>,
     onAnswer: (String) -> Unit,
     onExit: () -> Unit,
+    animatorScale: Float = 1f,
     simulatedResponses: List<SimulatedResponseUi> = emptyList(),
     onContinueSimulation: (() -> Unit)? = null,
 ) {
     val progressFraction = if (total <= 0) 0f else progress.toFloat() / total.toFloat()
     val animatedProgress by animateFloatAsState(
         targetValue = progressFraction.coerceIn(0f, 1f),
-        animationSpec = tween(durationMillis = 280),
+        animationSpec = tween(durationMillis = MotionPolicy.durationMillis(280, animatorScale)),
         label = "questionProgress"
     )
     val reveal = remember { Animatable(1f) }
@@ -99,7 +101,7 @@ fun GameScreen(
         reveal.snapTo(0f)
         reveal.animateTo(
             targetValue = 1f,
-            animationSpec = tween(durationMillis = 220)
+            animationSpec = tween(durationMillis = MotionPolicy.durationMillis(220, animatorScale))
         )
     }
 
@@ -312,7 +314,12 @@ fun GameScreen(
                     val isPressed by interactionSource.collectIsPressedAsState()
                     val answerScale by animateFloatAsState(
                         targetValue = if (isPressed) 0.985f else 1f,
-                        animationSpec = tween(durationMillis = if (isPressed) 80 else 130),
+                        animationSpec = tween(
+                            durationMillis = MotionPolicy.durationMillis(
+                                if (isPressed) 80 else 130,
+                                animatorScale,
+                            )
+                        ),
                         label = "answerScale"
                     )
 
