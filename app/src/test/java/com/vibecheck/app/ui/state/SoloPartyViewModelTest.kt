@@ -19,18 +19,18 @@ class SoloPartyViewModelTest {
     @Test fun `selected companion ids survive viewmodel recreation`() { val state=SavedStateHandle(); val a=SoloPartyViewModel(state); PersonaCatalog.all.take(3).forEach{a.toggle(it.id)}; assertEquals(a.selectedIds.value,SoloPartyViewModel(state).selectedIds.value) }
 
     @Test
-    fun `solo player defaults to Moi and editable name survives recreation`() {
+    fun `solo player uses localized default and editable name survives recreation`() {
         val state = SavedStateHandle()
         val first = SoloPartyViewModel(state)
-        assertEquals("Moi", first.playerName.value)
+        assertEquals(SoloPartyViewModel.DEFAULT_PLAYER_NAME, first.playerName.value)
         first.setPlayerName("Alex")
         assertEquals("Alex", SoloPartyViewModel(state).playerName.value)
     }
 
     @Test
-    fun `blank solo player name normalizes back to Moi`() {
+    fun `blank solo player name normalizes back to localized default`() {
         val vm = SoloPartyViewModel(SavedStateHandle())
         vm.setPlayerName("   ")
-        assertEquals("Moi", vm.playerName.value)
+        assertEquals(SoloPartyViewModel.DEFAULT_PLAYER_NAME, vm.playerName.value)
     }
 }
