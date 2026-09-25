@@ -39,6 +39,7 @@ import com.vibecheck.app.data.OnboardingStore
 import com.vibecheck.app.data.PlayerGroupStore
 import com.vibecheck.app.data.QuestionHistoryStore
 import com.vibecheck.app.data.QuestionRepository
+import com.vibecheck.app.data.ThemeStore
 import com.vibecheck.app.domain.Challenge
 import com.vibecheck.app.domain.SessionCodec
 import com.vibecheck.app.domain.model.GameIntensity
@@ -57,6 +58,7 @@ import com.vibecheck.app.ui.state.GameViewModel
 import com.vibecheck.app.ui.theme.VibeBackdrop
 import com.vibecheck.app.ui.theme.VibeCheckTheme
 import com.vibecheck.app.ui.theme.VibeColors
+import com.vibecheck.app.ui.theme.VibeThemeStyle
 
 @Composable
 fun VibeCheckApp(
@@ -79,6 +81,12 @@ fun VibeCheckApp(
     }
     val onboardingStore = remember(context.applicationContext) {
         OnboardingStore(context.applicationContext)
+    }
+    val themeStore = remember(context.applicationContext) {
+        ThemeStore(context.applicationContext)
+    }
+    var themeStyle by remember {
+        mutableStateOf(themeStore.load())
     }
     var showOnboarding by remember {
         mutableStateOf(!onboardingStore.isCompleted())
@@ -195,9 +203,9 @@ fun VibeCheckApp(
         }
     }
 
-    VibeCheckTheme {
+    VibeCheckTheme(style = themeStyle) {
         Surface(modifier = Modifier.fillMaxSize(), color = Color.Transparent) {
-            VibeBackdrop {
+            VibeBackdrop(style = themeStyle) {
                 Box(
                     modifier = Modifier
                         .fillMaxSize()
@@ -435,6 +443,19 @@ fun VibeCheckApp(
                     }
                     }
                 }
+                }
+                if (!showOnboarding && screen == AppScreen.HOME) {
+                    Button(
+                        onClick = {
+                            val styles = VibeThemeStyle.entries
+                            val next = styles[(styles.indexOf(themeStyle) + 1) % styles.size]
+                            themeStyle = next
+                            themeStore.save(next)
+                        },
+                        modifier = Modifier.align(Alignment.BottomEnd)
+                    ) {
+                        Text(themeStyle.label)
+                    }
                 }
                 }
             }
