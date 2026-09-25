@@ -159,8 +159,8 @@ fun HomeScreen(
                 }
             }
             item {
-                Spacer(Modifier.height(6.dp))
-                PremiumCard(isPremium, premiumReady, premiumPrice, purchaseStatus, onBuyPremium)
+                // Monetization stays disabled for the first functional release.
+                // Billing code is kept for the later ads + lifetime-removal rollout.
                 Spacer(Modifier.height(16.dp))
             }
         }
