@@ -37,6 +37,9 @@ import androidx.compose.animation.core.tween
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.setValue
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -65,11 +68,14 @@ fun HomeScreen(
     onOpenLeaderboard: () -> Unit,
     onEditGroup: () -> Unit,
     onOpenSettings: () -> Unit,
+    onPlaySolo: () -> Unit,
     onBuyPremium: () -> Unit,
     onIntensity: (GameIntensity) -> Unit,
     onPack: (GamePack) -> Unit,
     onMode: (GameMode) -> Unit
 ) {
+    var showTogetherOptions by rememberSaveable { mutableStateOf(false) }
+
     Column(modifier = Modifier.fillMaxSize()) {
         Row(
             modifier = Modifier.fillMaxWidth(),
@@ -101,6 +107,7 @@ fun HomeScreen(
                 )
             }
         }
+
         Spacer(Modifier.height(8.dp))
         Text(
             "Qui connaît vraiment qui ?",
@@ -109,13 +116,36 @@ fun HomeScreen(
         )
         Spacer(Modifier.height(4.dp))
         Text(
-            "8 questions. Un groupe. Zéro filtre.",
+            "Choisis comment tu veux jouer, puis configure seulement ce dont tu as besoin.",
             color = Color(0xFFAAA2B5),
             style = MaterialTheme.typography.bodyLarge
         )
 
+        Spacer(Modifier.height(18.dp))
+        PlayEntryCard(
+            title = "Jouer ensemble",
+            subtitle = if (savedPlayerCount >= 2) {
+                "$savedPlayerCount joueurs mémorisés • configuration rapide"
+            } else {
+                "Passe le téléphone et compare les réponses du groupe"
+            },
+            icon = Icons.Default.Groups,
+            accent = VibeColors.Purple,
+            emphasized = true,
+            onClick = { showTogetherOptions = true },
+        )
+        Spacer(Modifier.height(10.dp))
+        PlayEntryCard(
+            title = "Jouer en solo",
+            subtitle = "Compose ton groupe virtuel et joue entièrement hors ligne",
+            icon = Icons.Default.Psychology,
+            accent = VibeColors.Blue,
+            emphasized = false,
+            onClick = onPlaySolo,
+        )
+
         if (savedPlayerCount >= 2) {
-            Spacer(Modifier.height(10.dp))
+            Spacer(Modifier.height(12.dp))
             Card(
                 colors = CardDefaults.cardColors(
                     containerColor = VibeColors.Green.copy(alpha = 0.10f)
@@ -180,8 +210,7 @@ fun HomeScreen(
             }
         }
 
-        Spacer(Modifier.height(18.dp))
-
+        Spacer(Modifier.height(14.dp))
         PremiumCard(
             isPremium = isPremium,
             premiumReady = premiumReady,
@@ -190,116 +219,200 @@ fun HomeScreen(
             onBuyPremium = onBuyPremium
         )
 
-        Spacer(Modifier.height(18.dp))
+        if (showTogetherOptions) {
+            Spacer(Modifier.height(18.dp))
 
-        Text(
-            "PACK",
-            color = Color(0xFF8F8799),
-            fontSize = 12.sp,
-            fontWeight = FontWeight.Bold,
-            letterSpacing = 1.2.sp
-        )
-        Spacer(Modifier.height(9.dp))
-        Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-            GamePack.entries.chunked(2).forEach { rowPacks ->
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.spacedBy(8.dp)
-                ) {
-                    rowPacks.forEach { pack ->
-                        val selected = pack == selectedPack
-                        Button(
-                            onClick = { onPack(pack) },
-                            modifier = Modifier.weight(1f),
-                            shape = RoundedCornerShape(15.dp),
-                            colors = ButtonDefaults.buttonColors(
-                                containerColor = if (selected) VibeColors.Blue else Color.White.copy(alpha = 0.055f),
-                                contentColor = if (selected) Color(0xFF11151C) else VibeColors.TextPrimary
-                            )
-                        ) {
-                            Text(pack.title, fontSize = 12.sp, fontWeight = FontWeight.Black)
+            Text(
+                "PACK",
+                color = Color(0xFF8F8799),
+                fontSize = 12.sp,
+                fontWeight = FontWeight.Bold,
+                letterSpacing = 1.2.sp
+            )
+            Spacer(Modifier.height(9.dp))
+            Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                GamePack.entries.chunked(2).forEach { rowPacks ->
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.spacedBy(8.dp)
+                    ) {
+                        rowPacks.forEach { pack ->
+                            val selected = pack == selectedPack
+                            Button(
+                                onClick = { onPack(pack) },
+                                modifier = Modifier.weight(1f),
+                                shape = RoundedCornerShape(15.dp),
+                                colors = ButtonDefaults.buttonColors(
+                                    containerColor = if (selected) {
+                                        VibeColors.Blue
+                                    } else {
+                                        Color.White.copy(alpha = 0.055f)
+                                    },
+                                    contentColor = if (selected) {
+                                        Color(0xFF11151C)
+                                    } else {
+                                        VibeColors.TextPrimary
+                                    }
+                                )
+                            ) {
+                                Text(pack.title, fontSize = 12.sp, fontWeight = FontWeight.Black)
+                            }
                         }
+                        if (rowPacks.size == 1) Spacer(Modifier.weight(1f))
                     }
-                    if (rowPacks.size == 1) Spacer(Modifier.weight(1f))
+                }
+            }
+            Spacer(Modifier.height(6.dp))
+            Text(
+                selectedPack.subtitle,
+                color = VibeColors.TextSecondary,
+                fontSize = 12.sp
+            )
+
+            Spacer(Modifier.height(16.dp))
+            Text(
+                "INTENSITÉ",
+                color = Color(0xFF8F8799),
+                fontSize = 12.sp,
+                fontWeight = FontWeight.Bold,
+                letterSpacing = 1.2.sp
+            )
+            Spacer(Modifier.height(9.dp))
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.spacedBy(8.dp)
+            ) {
+                GameIntensity.entries.forEach { intensity ->
+                    val selected = intensity == selectedIntensity
+                    Button(
+                        onClick = { onIntensity(intensity) },
+                        modifier = Modifier.weight(1f),
+                        shape = RoundedCornerShape(15.dp),
+                        colors = ButtonDefaults.buttonColors(
+                            containerColor = if (selected) {
+                                VibeColors.Purple
+                            } else {
+                                Color.White.copy(alpha = 0.055f)
+                            },
+                            contentColor = if (selected) {
+                                Color(0xFF18121F)
+                            } else {
+                                VibeColors.TextPrimary
+                            }
+                        ),
+                        contentPadding = androidx.compose.foundation.layout.PaddingValues(
+                            horizontal = 6.dp,
+                            vertical = 10.dp
+                        )
+                    ) {
+                        Text(
+                            intensity.title,
+                            fontSize = 12.sp,
+                            fontWeight = FontWeight.Black,
+                            maxLines = 1
+                        )
+                    }
+                }
+            }
+            Spacer(Modifier.height(6.dp))
+            Text(
+                selectedIntensity.subtitle,
+                color = VibeColors.TextSecondary,
+                fontSize = 12.sp
+            )
+
+            Spacer(Modifier.height(18.dp))
+            Text(
+                "CHOISIS TON VIBE",
+                color = Color(0xFF8F8799),
+                fontSize = 12.sp,
+                fontWeight = FontWeight.Bold,
+                letterSpacing = 1.2.sp
+            )
+            Spacer(Modifier.height(10.dp))
+
+            LazyColumn(
+                modifier = Modifier.fillMaxWidth(),
+                verticalArrangement = Arrangement.spacedBy(12.dp)
+            ) {
+                items(GameMode.entries) { mode ->
+                    ModeCard(
+                        mode = mode,
+                        expressStart = savedPlayerCount >= 2 || mode == GameMode.RED_GREEN,
+                        onClick = { onMode(mode) }
+                    )
                 }
             }
         }
-        Spacer(Modifier.height(6.dp))
-        Text(
-            selectedPack.subtitle,
-            color = VibeColors.TextSecondary,
-            fontSize = 12.sp
-        )
-        Spacer(Modifier.height(16.dp))
+    }
+}
 
-        Text(
-            "INTENSITÉ",
-            color = Color(0xFF8F8799),
-            fontSize = 12.sp,
-            fontWeight = FontWeight.Bold,
-            letterSpacing = 1.2.sp
-        )
-        Spacer(Modifier.height(9.dp))
+@Composable
+private fun PlayEntryCard(
+    title: String,
+    subtitle: String,
+    icon: ImageVector,
+    accent: Color,
+    emphasized: Boolean,
+    onClick: () -> Unit,
+) {
+    Card(
+        onClick = onClick,
+        modifier = Modifier.fillMaxWidth(),
+        shape = RoundedCornerShape(26.dp),
+        colors = CardDefaults.cardColors(
+            containerColor = if (emphasized) {
+                accent.copy(alpha = 0.16f)
+            } else {
+                Color.White.copy(alpha = 0.055f)
+            }
+        ),
+        border = BorderStroke(
+            width = if (emphasized) 2.dp else 1.dp,
+            color = accent.copy(alpha = if (emphasized) 0.48f else 0.22f),
+        ),
+        elevation = CardDefaults.cardElevation(
+            defaultElevation = if (emphasized) 9.dp else 4.dp,
+        ),
+    ) {
         Row(
-            modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.spacedBy(8.dp)
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 18.dp, vertical = 18.dp),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(15.dp),
         ) {
-            GameIntensity.entries.forEach { intensity ->
-                val selected = intensity == selectedIntensity
-                Button(
-                    onClick = { onIntensity(intensity) },
-                    modifier = Modifier.weight(1f),
-                    shape = RoundedCornerShape(15.dp),
-                    colors = ButtonDefaults.buttonColors(
-                        containerColor = if (selected) {
-                            VibeColors.Purple
-                        } else {
-                            Color.White.copy(alpha = 0.055f)
-                        },
-                        contentColor = if (selected) Color(0xFF18121F) else VibeColors.TextPrimary
-                    ),
-                    contentPadding = androidx.compose.foundation.layout.PaddingValues(
-                        horizontal = 6.dp,
-                        vertical = 10.dp
-                    )
-                ) {
-                    Text(
-                        intensity.title,
-                        fontSize = 12.sp,
-                        fontWeight = FontWeight.Black,
-                        maxLines = 1
-                    )
-                }
-            }
-        }
-        Spacer(Modifier.height(6.dp))
-        Text(
-            selectedIntensity.subtitle,
-            color = VibeColors.TextSecondary,
-            fontSize = 12.sp
-        )
-        Spacer(Modifier.height(18.dp))
-
-        Text(
-            "CHOISIS TON VIBE",
-            color = Color(0xFF8F8799),
-            fontSize = 12.sp,
-            fontWeight = FontWeight.Bold,
-            letterSpacing = 1.2.sp
-        )
-        Spacer(Modifier.height(10.dp))
-
-        LazyColumn(
-            modifier = Modifier.fillMaxWidth(),
-            verticalArrangement = Arrangement.spacedBy(12.dp)
-        ) {
-            items(GameMode.entries) { mode ->
-                ModeCard(
-                    mode = mode,
-                    expressStart = savedPlayerCount >= 2 || mode == GameMode.RED_GREEN,
-                    onClick = { onMode(mode) }
+            Box(
+                modifier = Modifier
+                    .size(50.dp)
+                    .background(accent.copy(alpha = 0.18f), CircleShape),
+                contentAlignment = Alignment.Center,
+            ) {
+                Icon(
+                    imageVector = icon,
+                    contentDescription = null,
+                    tint = accent,
                 )
             }
+            Column(modifier = Modifier.weight(1f)) {
+                Text(
+                    title,
+                    color = VibeColors.TextPrimary,
+                    style = MaterialTheme.typography.titleLarge,
+                )
+                Spacer(Modifier.height(3.dp))
+                Text(
+                    subtitle,
+                    color = VibeColors.TextSecondary,
+                    style = MaterialTheme.typography.bodyMedium,
+                )
+            }
+            Text(
+                "→",
+                color = accent,
+                fontSize = 24.sp,
+                fontWeight = FontWeight.Bold,
+            )
         }
     }
 }
