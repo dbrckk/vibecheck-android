@@ -14,6 +14,7 @@ import androidx.core.content.FileProvider
 import com.vibecheck.app.domain.model.GameMode
 import com.vibecheck.app.domain.model.GameIntensity
 import com.vibecheck.app.domain.model.GamePack
+import com.vibecheck.app.localization.AppLocale
 import java.io.File
 import java.io.FileOutputStream
 import kotlinx.coroutines.Dispatchers
@@ -112,19 +113,19 @@ object ResultCardSharer {
                 Intent.EXTRA_TEXT,
                 when {
                     isFictionalSimulation ->
-                        "Ma simulation fictive VibeCheck : $safeWinner arrive en tête avec $safePercent%. Résultat simulé pour le divertissement."
+                        AppLocale.pick("Ma simulation fictive VibeCheck : $safeWinner arrive en tête avec $safePercent%. Résultat simulé pour le divertissement.","My fictional VibeCheck simulation: $safeWinner comes out on top with $safePercent%. Simulated for entertainment.")
                     mode == GameMode.KNOWS_ME ->
-                        "Mon VibeCheck : $safeWinner connaît le mieux le groupe avec $safePercent% — ${mode.title}."
+                        AppLocale.pick("Mon VibeCheck : $safeWinner connaît le mieux le groupe avec $safePercent% — ${mode.title}.","My VibeCheck: $safeWinner knows the group best with $safePercent% — ${mode.title}.")
                     podiumText.isNotBlank() ->
-                        "Mon VibeCheck : $safeWinner arrive en tête avec $safePercent% — $podiumText"
+                        AppLocale.pick("Mon VibeCheck : $safeWinner arrive en tête avec $safePercent% — $podiumText","My VibeCheck: $safeWinner comes out on top with $safePercent% — $podiumText")
                     else ->
-                        "Mon VibeCheck : $safeWinner arrive en tête avec $safePercent% — ${mode.title}."
+                        AppLocale.pick("Mon VibeCheck : $safeWinner arrive en tête avec $safePercent% — ${mode.title}.","My VibeCheck: $safeWinner comes out on top with $safePercent% — ${mode.title}.")
                 }
             )
             addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
         }
 
-        context.startActivity(Intent.createChooser(shareIntent, "Partager le VibeCheck"))
+        context.startActivity(Intent.createChooser(shareIntent, AppLocale.pick("Partager le VibeCheck","Share VibeCheck")))
     }
 
     private fun createCard(
@@ -178,7 +179,7 @@ object ResultCardSharer {
 
         val eyebrow = textPaint(44f, Color.rgb(186, 177, 202), false)
         canvas.drawText(
-            if (isFictionalSimulation) "SIMULATION FICTIVE • DIVERTISSEMENT" else "LE RÉSULTAT DU GROUPE",
+            if (isFictionalSimulation) AppLocale.pick("SIMULATION FICTIVE • DIVERTISSEMENT","FICTIONAL SIMULATION • ENTERTAINMENT") else AppLocale.pick("LE RÉSULTAT DU GROUPE","THE GROUP RESULT"),
             86f,
             270f,
             eyebrow
@@ -220,9 +221,9 @@ object ResultCardSharer {
 
         val subtitlePaint = textPaint(48f, Color.rgb(184, 176, 196), false)
         val subtitle = when {
-            isFictionalSimulation -> "résultat simulé"
-            mode == GameMode.KNOWS_ME -> "de bonnes réponses"
-            else -> "des réponses"
+            isFictionalSimulation -> AppLocale.pick("résultat simulé","simulated result")
+            mode == GameMode.KNOWS_ME -> AppLocale.pick("de bonnes réponses","correct answers")
+            else -> AppLocale.pick("des réponses","of answers")
         }
         canvas.drawText(
             subtitle,
@@ -252,7 +253,7 @@ object ResultCardSharer {
         if (localWins > 0) {
             val historyPaint = textPaint(34f, Color.rgb(201, 193, 214), true)
             val history = localWins.toString() +
-                if (localWins == 1) " victoire locale" else " victoires locales"
+                if (localWins == 1) AppLocale.pick(" victoire locale"," local win") else AppLocale.pick(" victoires locales"," local wins")
             canvas.drawText(
                 history,
                 WIDTH / 2f - historyPaint.measureText(history) / 2f,
@@ -261,7 +262,7 @@ object ResultCardSharer {
             )
             if (bestScorePercent > 0) {
                 val bestPaint = textPaint(30f, Color.rgb(159, 150, 174), false)
-                val best = "Meilleur score : " + bestScorePercent + "%"
+                val best = AppLocale.pick("Meilleur score : ","Best score: ") + bestScorePercent + "%"
                 canvas.drawText(
                     best,
                     WIDTH / 2f - bestPaint.measureText(best) / 2f,
@@ -273,9 +274,9 @@ object ResultCardSharer {
 
         val ctaPaint = textPaint(45f, Color.WHITE, true)
         val cta = if (isFictionalSimulation) {
-            "Crée ta propre simulation VibeCheck"
+            AppLocale.pick("Crée ta propre simulation VibeCheck","Create your own VibeCheck simulation")
         } else {
-            "Et toi, ton groupe dirait quoi ?"
+            AppLocale.pick("Et toi, ton groupe dirait quoi ?","What would your group say about you?")
         }
         canvas.drawText(
             cta,
@@ -285,7 +286,7 @@ object ResultCardSharer {
         )
 
         val footerPaint = textPaint(37f, Color.rgb(175, 163, 188), false)
-        val footer = "VibeCheck • joue • compare • partage"
+        val footer = AppLocale.pick("VibeCheck • joue • compare • partage","VibeCheck • play • compare • share")
         canvas.drawText(
             footer,
             WIDTH / 2f - footerPaint.measureText(footer) / 2f,
@@ -332,7 +333,7 @@ object ResultCardSharer {
             .replace(Regex("\\s+"), " ")
             .trim()
             .take(MAX_WINNER_LENGTH)
-            .ifBlank { "Le groupe" }
+            .ifBlank { AppLocale.pick("Le groupe","The group") }
 
     private fun pruneOldCards(directory: File) {
         directory.listFiles()
