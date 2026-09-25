@@ -43,12 +43,14 @@ import com.vibecheck.app.data.PlayerGroupStore
 import com.vibecheck.app.data.QuestionHistoryStore
 import com.vibecheck.app.data.QuestionRepository
 import com.vibecheck.app.data.AppearanceStore
+import com.vibecheck.app.data.PersonaCatalog
 import com.vibecheck.app.domain.Challenge
 import com.vibecheck.app.domain.SessionCodec
 import com.vibecheck.app.domain.model.GameIntensity
 import com.vibecheck.app.domain.model.GameMode
 import com.vibecheck.app.domain.model.GameResult
 import com.vibecheck.app.domain.model.GamePack
+import com.vibecheck.app.domain.solo.PersonaAnswerEngine
 import com.vibecheck.app.ui.screens.GameScreen
 import com.vibecheck.app.ui.screens.HomeScreen
 import com.vibecheck.app.ui.screens.LeaderboardScreen
@@ -57,6 +59,7 @@ import com.vibecheck.app.ui.screens.PassPhoneScreen
 import com.vibecheck.app.ui.screens.PlayerSetupScreen
 import com.vibecheck.app.ui.screens.ResultScreen
 import com.vibecheck.app.ui.screens.SettingsScreen
+import com.vibecheck.app.ui.screens.SimulatedResponseUi
 import com.vibecheck.app.ui.screens.SoloPartyScreen
 import com.vibecheck.app.ui.state.AppScreen
 import com.vibecheck.app.ui.state.GameViewModel
@@ -128,6 +131,8 @@ fun VibeCheckApp(
     val knowGuesserIndex by gameViewModel.knowGuesserIndex.collectAsState()
     val knowScores by gameViewModel.knowScores.collectAsState()
     val knowHandoffPending by gameViewModel.knowHandoffPending.collectAsState()
+    val isSoloSession by gameViewModel.isSoloSession.collectAsState()
+    val soloPersonaIds by gameViewModel.soloPersonaIds.collectAsState()
     val soloSelectedIds by soloPartyViewModel.selectedIds.collectAsState()
     val soloVisiblePersonas by soloPartyViewModel.visiblePersonas.collectAsState()
     val soloQuery by soloPartyViewModel.query.collectAsState()
@@ -152,6 +157,9 @@ fun VibeCheckApp(
     }
     val sessionIntensity = if (legacyChallenge) null else selectedIntensity
     val sessionPack = if (legacyChallenge) GamePack.MIX else selectedPack
+    val activeSoloPersonas = soloPersonaIds.mapNotNull { id ->
+        PersonaCatalog.all.firstOrNull { it.id == id }
+    }
     val groupLeader = if (screen == AppScreen.HOME) {
         players
             .map(localStatsStore::statFor)
@@ -258,7 +266,16 @@ fun VibeCheckApp(
                                 count = 5,
                             )
                         },
-                        onStart = {},
+                        onStart = {
+                            if (soloCanStart) {
+                                gameViewModel.startSoloSession(
+                                    personaIds = soloSelectedIds,
+                                    mode = GameMode.WHO_OF_US,
+                                    seed = System.currentTimeMillis(),
+                                )
+                                soloPartyOpen = false
+                            }
+                        },
                     )
                 } else if (settingsOpen && screen == AppScreen.HOME) {
                     SettingsScreen(
@@ -427,25 +444,67 @@ fun VibeCheckApp(
                                 val safeIndex = questionIndex.coerceIn(0, questions.lastIndex)
                                 val question = questions[safeIndex]
 
-                                GameScreen(
-                                    mode = selectedMode,
-                                    questionText = question.text,
-                                    progress = safeIndex + 1,
-                                    total = questions.size,
-                                    answers = if (selectedMode == GameMode.RED_GREEN) {
+                                if (isSoloSession) {
+                                    val soloOptions = if (selectedMode == GameMode.RED_GREEN) {
                                         listOf("Green Flag", "Red Flag")
                                     } else {
-                                        players
-                                    },
-                                    onAnswer = { answer ->
-                                        gameViewModel.answer(
+                                        activeSoloPersonas.map { it.displayName }
+                                    }
+                                    val simulatedAnswers = activeSoloPersonas.map { persona ->
+                                        PersonaAnswerEngine.answer(
+                                            persona = persona,
                                             questionId = question.id,
-                                            answer = answer,
-                                            isLastQuestion = safeIndex == questions.lastIndex
+                                            questionText = question.text,
+                                            options = soloOptions,
+                                            seed = sessionSeed,
                                         )
-                                    },
-                                    onExit = gameViewModel::abandonGame
-                                )
+                                    }
+                                    val simulatedUi = activeSoloPersonas.zip(simulatedAnswers).map { (persona, answer) ->
+                                        SimulatedResponseUi(
+                                            personaName = persona.displayName,
+                                            option = answer.option,
+                                            isFictionalSimulation = answer.isFictionalSimulation,
+                                        )
+                                    }
+
+                                    GameScreen(
+                                        mode = selectedMode,
+                                        questionText = question.text,
+                                        progress = safeIndex + 1,
+                                        total = questions.size,
+                                        answers = emptyList(),
+                                        onAnswer = {},
+                                        onExit = gameViewModel::abandonGame,
+                                        simulatedResponses = simulatedUi,
+                                        onContinueSimulation = {
+                                            gameViewModel.submitSoloRound(
+                                                questionId = question.id,
+                                                answers = simulatedAnswers,
+                                                isLastQuestion = safeIndex == questions.lastIndex,
+                                            )
+                                        },
+                                    )
+                                } else {
+                                    GameScreen(
+                                        mode = selectedMode,
+                                        questionText = question.text,
+                                        progress = safeIndex + 1,
+                                        total = questions.size,
+                                        answers = if (selectedMode == GameMode.RED_GREEN) {
+                                            listOf("Green Flag", "Red Flag")
+                                        } else {
+                                            players
+                                        },
+                                        onAnswer = { answer ->
+                                            gameViewModel.answer(
+                                                questionId = question.id,
+                                                answer = answer,
+                                                isLastQuestion = safeIndex == questions.lastIndex
+                                            )
+                                        },
+                                        onExit = gameViewModel::abandonGame
+                                    )
+                                }
                             }
                         }
                     }
@@ -497,6 +556,7 @@ fun VibeCheckApp(
                             sessionInstanceId = sessionInstanceId,
                             intensity = selectedIntensity,
                             pack = selectedPack,
+                            isSoloSession = isSoloSession,
                             onReplay = gameViewModel::replay,
                             onHome = gameViewModel::goHome
                         )
