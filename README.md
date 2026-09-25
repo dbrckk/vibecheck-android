@@ -34,7 +34,16 @@ gradle :app:assembleDebug --stacktrace
 gradle :app:bundleRelease --stacktrace
 ```
 
-The workflow publishes the debug APK and an unsigned release AAB as CI artifacts. A Play Store upload still requires the final app signing configuration and Play Console listing/policy assets.
+The workflow publishes the debug APK and an unsigned release AAB as CI artifacts.
+
+## Play Store release gate
+Before production publication, the remaining distribution work is deliberately kept outside source control:
+1. configure the Play App Signing/upload key without committing keystore material;
+2. build and verify a signed release AAB;
+3. complete Play Console store listing, screenshots, content rating, data-safety and app-access declarations;
+4. run the final device/pre-launch smoke test on the exact signed candidate.
+
+Do not commit keystores, signing passwords, service-account credentials or Play Console secrets to this repository.
 
 ## Monetization
 Core play remains free. Google Play Billing is available in the project for the planned non-consumable ad-removal purchase. Ads must only appear at natural session boundaries; monetization must not block the core game loop.
