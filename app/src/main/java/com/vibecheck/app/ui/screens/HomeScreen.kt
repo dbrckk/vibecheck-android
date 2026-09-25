@@ -22,12 +22,14 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Bolt
 import androidx.compose.material.icons.filled.Groups
 import androidx.compose.material.icons.filled.Psychology
+import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material.icons.filled.Whatshot
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.animation.core.animateFloatAsState
@@ -62,6 +64,7 @@ fun HomeScreen(
     groupLeaderWins: Int,
     onOpenLeaderboard: () -> Unit,
     onEditGroup: () -> Unit,
+    onOpenSettings: () -> Unit,
     onBuyPremium: () -> Unit,
     onIntensity: (GameIntensity) -> Unit,
     onPack: (GamePack) -> Unit,
@@ -69,21 +72,34 @@ fun HomeScreen(
 ) {
     Column(modifier = Modifier.fillMaxSize()) {
         Row(
+            modifier = Modifier.fillMaxWidth(),
             verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.spacedBy(8.dp)
+            horizontalArrangement = Arrangement.SpaceBetween,
         ) {
-            Box(
-                modifier = Modifier
-                    .size(8.dp)
-                    .background(VibeColors.Green, CircleShape)
-            )
-            Text(
-                "VIBECHECK",
-                color = VibeColors.Purple,
-                fontSize = 13.sp,
-                fontWeight = FontWeight.Black,
-                letterSpacing = 2.2.sp
-            )
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(8.dp),
+            ) {
+                Box(
+                    modifier = Modifier
+                        .size(8.dp)
+                        .background(VibeColors.Green, CircleShape)
+                )
+                Text(
+                    "VIBECHECK",
+                    color = VibeColors.Purple,
+                    fontSize = 13.sp,
+                    fontWeight = FontWeight.Black,
+                    letterSpacing = 2.2.sp
+                )
+            }
+            IconButton(onClick = onOpenSettings) {
+                Icon(
+                    imageVector = Icons.Default.Settings,
+                    contentDescription = "Ouvrir les réglages",
+                    tint = VibeColors.TextSecondary,
+                )
+            }
         }
         Spacer(Modifier.height(8.dp))
         Text(
