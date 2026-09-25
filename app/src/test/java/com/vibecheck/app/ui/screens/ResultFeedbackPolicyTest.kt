@@ -27,4 +27,17 @@ class ResultFeedbackPolicyTest {
         assertEquals(true, policy.recordLocalStats)
         assertEquals(true, policy.allowChallengeShare)
     }
+
+    @Test
+    fun solo_result_uses_dedicated_copy() {
+        val copy = resultCopy(
+            isSoloSession = true,
+            knowsMe = false,
+            modeTitle = "Qui de nous ?"
+        )
+        assertEquals("CASTING SIMULÉ", copy.badge)
+        assertEquals("du casting simulé • Qui de nous ?", copy.scoreLabel)
+        assertEquals("Rejouer avec ce casting", copy.replayLabel)
+        assertEquals("Accueil", copy.homeLabel)
+    }
 }
