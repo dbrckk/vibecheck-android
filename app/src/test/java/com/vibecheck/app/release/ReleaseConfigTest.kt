@@ -21,4 +21,9 @@ class ReleaseConfigTest {
     fun `backup is disabled for privacy safe offline v1`() {
         assertTrue(!ReleaseConfig.allowBackup)
     }
+
+    @Test
+    fun `cleartext network traffic is disabled`() {
+        assertTrue(!ReleaseConfig.usesCleartextTraffic)
+    }
 }
