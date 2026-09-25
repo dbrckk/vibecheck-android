@@ -4,8 +4,53 @@ import com.vibecheck.app.domain.solo.Persona
 import com.vibecheck.app.domain.solo.PersonaKind
 import com.vibecheck.app.domain.solo.PersonaPresentation
 import com.vibecheck.app.domain.solo.PersonaTraits
+import com.vibecheck.app.localization.AppLocale
 
 object PersonaCatalog {
+
+    private val englishArchetypeById = mapOf(
+        "beyonce" to "Confident, elegant and unifying",
+        "taylor_swift" to "Narrative-minded, observant and highly structured",
+        "rihanna" to "Cool, direct and highly confident",
+        "adele" to "Warm, expressive and naturally funny",
+        "lady_gaga" to "Theatrical, creative and bold",
+        "zendaya" to "Composed, modern and precise",
+        "dua_lipa" to "Energetic, social and determined",
+        "ariana_grande" to "Quick, sensitive and playful",
+        "billie_eilish" to "Offbeat, introspective and unpredictable",
+        "shakira" to "Dynamic, warm and competitive",
+        "selena_gomez" to "Gentle, calm and attentive",
+        "miley_cyrus" to "Frank, free-spirited and unpredictable",
+        "jennifer_lopez" to "Ambitious, radiant and disciplined",
+        "emma_watson" to "Thoughtful, reserved and methodical",
+        "margot_robbie" to "Playful, confident and adaptable",
+        "dwayne_johnson" to "Energetic, positive and ultra-competitive",
+        "ryan_reynolds" to "Ironic, quick and highly social",
+        "keanu_reeves" to "Calm, discreet and kind",
+        "chris_hemsworth" to "Relaxed, sporty and playful",
+        "tom_holland" to "Enthusiastic, spontaneous and approachable",
+        "leonardo_dicaprio" to "Reserved, intense and calculated",
+        "brad_pitt" to "Cool, composed and subtly competitive",
+        "will_smith" to "Expressive, charismatic and highly social",
+        "robert_downey_jr" to "Quick-witted, sarcastic and confident",
+        "michael_b_jordan" to "Focused, ambitious and controlled",
+        "pedro_pascal" to "Warm, funny and easygoing",
+        "harry_styles" to "Creative, open and relaxed",
+        "ed_sheeran" to "Down-to-earth, romantic and social",
+        "drake" to "Competitive, self-assured and emotional",
+        "the_weeknd" to "Mysterious, intense and introspective",
+        "nova" to "Cosmic optimist who turns everything into an adventure",
+        "milo" to "Calm strategist who thinks before every choice",
+        "pixel" to "Digital chaos agent, funny and unpredictable",
+        "luna" to "Intuitive dreamer, empathetic and romantic",
+        "jax" to "Extroverted competitor who decides fast",
+        "sage" to "Zen observer, cautious and analytical",
+        "ruby" to "Flamboyant leader, direct and highly social",
+        "echo" to "Social chameleon who adapts to the group",
+        "atlas" to "Reliable protector, methodical and loyal",
+        "zora" to "Bold creative who loves unexpected choices"
+    )
+
     val all: List<Persona> = listOf(
         public("beyonce", "Beyoncé", PersonaPresentation.FEMININE, "Présence assurée, élégante et rassembleuse", 55, 82, 78, 72, 68, 64, 24, 78),
         public("taylor_swift", "Taylor Swift", PersonaPresentation.FEMININE, "Narrative, observatrice et très structurée", 58, 66, 76, 62, 72, 82, 26, 88),
@@ -69,7 +114,7 @@ object PersonaCatalog {
         displayName = displayName,
         kind = PersonaKind.PUBLIC_SIMULATION,
         presentation = presentation,
-        archetype = archetype,
+        archetype = AppLocale.pick(archetype, englishArchetypeById[id] ?: archetype),
         traits = PersonaTraits(
             humor = humor,
             boldness = boldness,
