@@ -1,34 +1,40 @@
 # VibeCheck Android
 
-Android-first social party game with a viral sharing loop.
+Android-first social party game with an offline-first core and native sharing.
 
-## Current M0 slice
-- 4 game modes
-- offline local questions
-- quick voting loop
-- deterministic results
-- native result sharing
-- no account/backend required
+## V1 feature set
+- local multiplayer party flow
+- offline Solo Party with selectable simulated personas and original fictional characters
+- deterministic solo answers: same persona + question + seed produces the same result
+- public-person answers are explicitly labelled fictional simulations for entertainment
+- 6 selectable visual themes: Premium Dark, Kawaii, Pop, Elegant, Street and Minimal
+- persistent appearance and solo-session state
+- native result sharing and challenge deep links
+- no account, backend or paid AI service required for core play
+- reduced-motion support follows Android animation settings
 
-## Stack
-- Kotlin
-- Jetpack Compose
-- Material 3
+## Android baseline
+- Kotlin + Jetpack Compose + Material 3
 - JDK 17
 - compileSdk / targetSdk 36
 - minSdk 24
+- V1 version: `1.0.0` (`versionCode 1`)
+- release builds enable code minification and resource shrinking
+- Android backup disabled for the V1 offline data model
 
-The architecture direction follows the Android Product references in `dbrckk/star-list`, especially `android/nowinandroid`. `airbnb/lottie-android` is reserved for later micro-animation work where it adds real UX value.
+## Verification gate
 
-## Verification
-
-With Gradle 8.11.1+ installed:
+CI verifies every pull request with:
 
 ```bash
-gradle :app:testDebugUnitTest
-gradle :app:lintDebug
-gradle :app:assembleDebug
+gradle :app:testDebugUnitTest --stacktrace
+gradle :app:compileDebugAndroidTestKotlin --stacktrace
+gradle :app:lintDebug --stacktrace
+gradle :app:assembleDebug --stacktrace
+gradle :app:bundleRelease --stacktrace
 ```
 
+The workflow publishes the debug APK and an unsigned release AAB as CI artifacts. A Play Store upload still requires the final app signing configuration and Play Console listing/policy assets.
+
 ## Monetization
-Core play remains free. Ads will be inserted only at natural session boundaries. A non-consumable Play Billing product will permanently disable ads. Billing and ads are intentionally deferred until the core loop is stable.
+Core play remains free. Google Play Billing is available in the project for the planned non-consumable ad-removal purchase. Ads must only appear at natural session boundaries; monetization must not block the core game loop.
