@@ -5,6 +5,7 @@ import androidx.lifecycle.ViewModel
 import com.vibecheck.app.data.PersonaCatalog
 import com.vibecheck.app.domain.solo.Persona
 import com.vibecheck.app.domain.solo.PersonaKind
+import com.vibecheck.app.localization.AppLocale
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlin.random.Random
@@ -24,7 +25,7 @@ class SoloPartyViewModel(private val savedStateHandle: SavedStateHandle) : ViewM
     fun setQuery(value: String) { _query.value=value; refreshVisiblePersonas() }
     fun autoCompose(seed: Long, count: Int) { require(count in MIN_COMPANIONS..MAX_COMPANIONS); val public=PersonaCatalog.all.filter{it.kind==PersonaKind.PUBLIC_SIMULATION}.shuffled(Random(seed)); val originals=PersonaCatalog.all.filter{it.kind==PersonaKind.ORIGINAL}.shuffled(Random(seed xor 0x5DEECE66DL)); val selected=buildList { add(public.first()); add(originals.first()); addAll((public.drop(1)+originals.drop(1)).shuffled(Random(seed xor 0xC6A4A7935BD1E995UL.toLong())).take(count-size)) }.map{it.id}; savedStateHandle[KEY_SELECTED_IDS]=selected; updateValidation(selected.size) }
     private fun refreshVisiblePersonas() { val q=_query.value.trim().lowercase(); val k=_kindFilter.value; _visiblePersonas.value=PersonaCatalog.all.filter{(k==null||it.kind==k)&&(q.isBlank()||it.displayName.lowercase().contains(q)||it.archetype.lowercase().contains(q))} }
-    private fun updateValidation(size:Int,maxReached:Boolean=false){_canStart.value=size in MIN_COMPANIONS..MAX_COMPANIONS;_validationMessage.value=if(maxReached)"Maximum $MAX_COMPANIONS compagnons." else validationFor(size)}
-    private fun validationFor(size:Int)=when{size<MIN_COMPANIONS->"Sélectionne au moins $MIN_COMPANIONS compagnons.";size>MAX_COMPANIONS->"Maximum $MAX_COMPANIONS compagnons.";else->""}
-    companion object { const val MIN_COMPANIONS=2; const val MAX_COMPANIONS=7; const val DEFAULT_PLAYER_NAME="Moi"; private const val KEY_SELECTED_IDS="solo_party_selected_ids"; private const val KEY_PLAYER_NAME="solo_party_player_name" }
+    private fun updateValidation(size:Int,maxReached:Boolean=false){_canStart.value=size in MIN_COMPANIONS..MAX_COMPANIONS;_validationMessage.value=if(maxReached)AppLocale.pick("Maximum $MAX_COMPANIONS compagnons.","Maximum $MAX_COMPANIONS companions.") else validationFor(size)}
+    private fun validationFor(size:Int)=when{size<MIN_COMPANIONS->AppLocale.pick("Sélectionne au moins $MIN_COMPANIONS compagnons.","Select at least $MIN_COMPANIONS companions.");size>MAX_COMPANIONS->AppLocale.pick("Maximum $MAX_COMPANIONS compagnons.","Maximum $MAX_COMPANIONS companions.");else->""}
+    companion object { const val MIN_COMPANIONS=2; const val MAX_COMPANIONS=7; val DEFAULT_PLAYER_NAME:String get()=AppLocale.pick("Moi","Me"); private const val KEY_SELECTED_IDS="solo_party_selected_ids"; private const val KEY_PLAYER_NAME="solo_party_player_name" }
 }
