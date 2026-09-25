@@ -529,6 +529,7 @@ fun VibeCheckApp(
                             sessionInstanceId = sessionInstanceId,
                             intensity = selectedIntensity,
                             pack = selectedPack,
+                            isSoloSession = isSoloSession,
                             onReplay = gameViewModel::replay,
                             onHome = gameViewModel::goHome
                         )
