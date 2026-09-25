@@ -4,7 +4,8 @@
         android:allowBackup="false"
         android:label="VibeCheck"
         android:supportsRtl="true"
-        android:theme="@style/Theme.VibeCheck">
+        android:theme="@style/Theme.VibeCheck"
+        android:usesCleartextTraffic="false">
         <activity
             android:name=".MainActivity"
             android:exported="true"
