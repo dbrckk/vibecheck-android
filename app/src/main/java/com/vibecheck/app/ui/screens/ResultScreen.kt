@@ -71,10 +71,12 @@ fun ResultScreen(
     sessionInstanceId: Long,
     intensity: GameIntensity,
     pack: GamePack,
+    isSoloSession: Boolean = false,
     onReplay: () -> Unit,
     onHome: () -> Unit
 ) {
     val result = resultOverride ?: GameEngine.result(votes)
+    val policy = resultPolicy(isSoloSession)
     val context = LocalContext.current
     val statsStore = remember(context.applicationContext) {
         LocalStatsStore(context.applicationContext)
@@ -145,7 +147,7 @@ fun ResultScreen(
     )
 
     LaunchedEffect(sessionInstanceId, result.winner, percent, mode) {
-        if (mode != GameMode.RED_GREEN && result.winner.isNotBlank() && result.winner != "Personne") {
+        if (policy.recordLocalStats && mode != GameMode.RED_GREEN && result.winner.isNotBlank() && result.winner != "Personne") {
             playerStat = statsStore.recordResult(
                 sessionKey = mode.name + "_" + sessionInstanceId,
                 mode = mode,
@@ -465,6 +467,7 @@ fun ResultScreen(
                 )
             }
 
+            if (policy.allowChallengeShare) {
             Button(
                 onClick = {
                     challengeShareError = false
@@ -508,6 +511,7 @@ fun ResultScreen(
                     textAlign = TextAlign.Center,
                     modifier = Modifier.fillMaxWidth()
                 )
+            }
             }
 
             Row(
