@@ -10,4 +10,5 @@ object ReleaseConfig {
     const val minSdk = 24
     const val targetSdk = 36
     const val allowBackup = false
+    const val usesCleartextTraffic = false
 }
