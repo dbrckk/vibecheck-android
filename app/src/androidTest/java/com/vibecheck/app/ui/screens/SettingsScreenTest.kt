@@ -33,6 +33,7 @@ class SettingsScreenTest {
         VibeThemeStyle.entries.forEach { style ->
             composeRule.onNodeWithText(style.label).assertIsDisplayed()
         }
+        composeRule.onNodeWithText("Aucun compte requis", substring = true).assertIsDisplayed()
         composeRule.onNodeWithText("Kawaii").performClick()
         composeRule.runOnIdle { assertEquals(VibeThemeStyle.KAWAII, selected) }
     }
