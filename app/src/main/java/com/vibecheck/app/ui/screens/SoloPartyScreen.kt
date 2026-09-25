@@ -2,26 +2,11 @@ package com.vibecheck.app.ui.screens
 
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.Button
-import androidx.compose.material3.ButtonDefaults
-import androidx.compose.material3.Card
-import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.FilterChip
-import androidx.compose.material3.FilterChipDefaults
-import androidx.compose.material3.OutlinedTextField
-import androidx.compose.material3.OutlinedTextFieldDefaults
-import androidx.compose.material3.Text
+import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -34,190 +19,16 @@ import com.vibecheck.app.domain.solo.PersonaKind
 import com.vibecheck.app.ui.theme.VibeColors
 
 @Composable
-fun SoloPartyScreen(
-    personas: List<Persona>,
-    selectedIds: List<String>,
-    selectedKind: PersonaKind?,
-    query: String,
-    validationMessage: String,
-    canStart: Boolean,
-    onBack: () -> Unit,
-    onQueryChange: (String) -> Unit,
-    onKindChange: (PersonaKind?) -> Unit,
-    onTogglePersona: (String) -> Unit,
-    onAutoCompose: () -> Unit,
-    onStart: () -> Unit,
-) {
-    Column(modifier = Modifier.fillMaxSize()) {
-        Row(
-            modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.SpaceBetween,
-        ) {
-            Button(
-                onClick = onBack,
-                colors = ButtonDefaults.buttonColors(
-                    containerColor = VibeColors.SurfaceStrong,
-                    contentColor = VibeColors.TextPrimary,
-                ),
-            ) {
-                Text("Retour")
-            }
-            Text(
-                text = selectedIds.size.toString() + "/7",
-                color = VibeColors.TextSecondary,
-                fontWeight = FontWeight.Bold,
-                modifier = Modifier.padding(top = 12.dp),
-            )
-        }
-
-        Spacer(Modifier.height(14.dp))
-        Text(
-            text = "Groupe solo",
-            color = VibeColors.TextPrimary,
-            fontWeight = FontWeight.Black,
-        )
-        Spacer(Modifier.height(4.dp))
-        Text(
-            text = "Choisis 2 à 7 compagnons. Les profils publics utilisent une Simulation fictive pour le divertissement.",
-            color = VibeColors.TextSecondary,
-        )
-
-        Spacer(Modifier.height(14.dp))
-        OutlinedTextField(
-            value = query,
-            onValueChange = onQueryChange,
-            modifier = Modifier.fillMaxWidth(),
-            singleLine = true,
-            label = { Text("Rechercher un profil") },
-            colors = OutlinedTextFieldDefaults.colors(
-                focusedTextColor = VibeColors.TextPrimary,
-                unfocusedTextColor = VibeColors.TextPrimary,
-                focusedBorderColor = VibeColors.Purple,
-                unfocusedBorderColor = VibeColors.SurfaceStrong,
-                focusedLabelColor = VibeColors.Purple,
-                unfocusedLabelColor = VibeColors.TextSecondary,
-            ),
-        )
-
-        Spacer(Modifier.height(10.dp))
-        Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-            FilterChip(
-                selected = selectedKind == null,
-                onClick = { onKindChange(null) },
-                label = { Text("Tous") },
-                colors = FilterChipDefaults.filterChipColors(
-                    selectedContainerColor = VibeColors.Purple.copy(alpha = 0.24f),
-                    selectedLabelColor = VibeColors.TextPrimary,
-                    labelColor = VibeColors.TextSecondary,
-                ),
-            )
-            FilterChip(
-                selected = selectedKind == PersonaKind.PUBLIC_SIMULATION,
-                onClick = { onKindChange(PersonaKind.PUBLIC_SIMULATION) },
-                label = { Text("Public") },
-                colors = FilterChipDefaults.filterChipColors(
-                    selectedContainerColor = VibeColors.Purple.copy(alpha = 0.24f),
-                    selectedLabelColor = VibeColors.TextPrimary,
-                    labelColor = VibeColors.TextSecondary,
-                ),
-            )
-            FilterChip(
-                selected = selectedKind == PersonaKind.ORIGINAL,
-                onClick = { onKindChange(PersonaKind.ORIGINAL) },
-                label = { Text("Originaux") },
-                colors = FilterChipDefaults.filterChipColors(
-                    selectedContainerColor = VibeColors.Purple.copy(alpha = 0.24f),
-                    selectedLabelColor = VibeColors.TextPrimary,
-                    labelColor = VibeColors.TextSecondary,
-                ),
-            )
-        }
-
-        Spacer(Modifier.height(10.dp))
-        Button(
-            onClick = onAutoCompose,
-            modifier = Modifier.fillMaxWidth(),
-            colors = ButtonDefaults.buttonColors(
-                containerColor = VibeColors.SurfaceStrong,
-                contentColor = VibeColors.TextPrimary,
-            ),
-        ) {
-            Text("Composer automatiquement")
-        }
-
-        if (validationMessage.isNotBlank()) {
-            Spacer(Modifier.height(8.dp))
-            Text(
-                text = validationMessage,
-                color = VibeColors.Orange,
-                fontWeight = FontWeight.Bold,
-            )
-        }
-
-        Spacer(Modifier.height(8.dp))
-        LazyColumn(
-            modifier = Modifier
-                .weight(1f)
-                .fillMaxWidth(),
-            verticalArrangement = Arrangement.spacedBy(8.dp),
-        ) {
-            items(personas, key = { it.id }) { persona ->
-                val selected = persona.id in selectedIds
-                Card(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .clip(RoundedCornerShape(18.dp))
-                        .semantics {
-                            contentDescription = if (selected) {
-                                persona.displayName + ", sélectionné"
-                            } else {
-                                persona.displayName
-                            }
-                        }
-                        .clickable { onTogglePersona(persona.id) },
-                    colors = CardDefaults.cardColors(
-                        containerColor = if (selected) {
-                            VibeColors.Purple.copy(alpha = 0.18f)
-                        } else {
-                            VibeColors.Surface.copy(alpha = 0.92f)
-                        },
-                    ),
-                    border = BorderStroke(
-                        1.dp,
-                        if (selected) VibeColors.Purple else VibeColors.SurfaceStrong,
-                    ),
-                    shape = RoundedCornerShape(18.dp),
-                ) {
-                    Column(modifier = Modifier.padding(14.dp)) {
-                        Text(
-                            text = persona.displayName,
-                            color = VibeColors.TextPrimary,
-                            fontWeight = FontWeight.ExtraBold,
-                        )
-                        Text(
-                            text = persona.archetype,
-                            color = VibeColors.TextSecondary,
-                        )
-                        if (persona.isFictionalSimulation) {
-                            Spacer(Modifier.height(4.dp))
-                            Text(
-                                text = "Simulation fictive",
-                                color = VibeColors.Purple,
-                                fontWeight = FontWeight.Bold,
-                            )
-                        }
-                    }
-                }
-            }
-        }
-
-        Spacer(Modifier.height(10.dp))
-        Button(
-            onClick = onStart,
-            enabled = canStart,
-            modifier = Modifier.fillMaxWidth(),
-        ) {
-            Text("Démarrer la partie")
-        }
-    }
+fun SoloPartyScreen(personas:List<Persona>,selectedIds:List<String>,selectedKind:PersonaKind?,query:String,playerName:String,validationMessage:String,canStart:Boolean,onBack:()->Unit,onQueryChange:(String)->Unit,onPlayerNameChange:(String)->Unit,onKindChange:(PersonaKind?)->Unit,onTogglePersona:(String)->Unit,onAutoCompose:()->Unit,onStart:()->Unit){
+ Column(Modifier.fillMaxSize()){
+  Row(Modifier.fillMaxWidth(),horizontalArrangement=Arrangement.SpaceBetween){Button(onClick=onBack){Text("Retour")};Text("${selectedIds.size}/7 compagnons",color=VibeColors.TextSecondary,modifier=Modifier.padding(top=12.dp))}
+  Spacer(Modifier.height(12.dp));Text("Ta soirée solo",style=MaterialTheme.typography.headlineMedium,color=VibeColors.TextPrimary);Text("Tu joues vraiment : tu réponds d’abord, puis les personnages simulés répondent.",color=VibeColors.TextSecondary)
+  Spacer(Modifier.height(12.dp));Card(colors=CardDefaults.cardColors(containerColor=VibeColors.Green.copy(alpha=.24f)),shape=RoundedCornerShape(26.dp)){Column(Modifier.padding(16.dp)){Text("Participant humain",fontWeight=FontWeight.Black,color=VibeColors.TextPrimary);OutlinedTextField(value=playerName,onValueChange=onPlayerNameChange,modifier=Modifier.fillMaxWidth(),singleLine=true,label={Text("Moi / mon pseudo")});Text("Tes réponses sont les seules réponses réelles de cette partie.",color=VibeColors.TextSecondary,style=MaterialTheme.typography.bodyMedium)}}
+  Spacer(Modifier.height(10.dp));Card(colors=CardDefaults.cardColors(containerColor=VibeColors.Rose.copy(alpha=.18f)),shape=RoundedCornerShape(22.dp)){Text("Simulation fictive : les réponses attribuées aux profils publics sont générées pour le divertissement. Elles ne viennent pas de ces personnes et ne représentent pas leurs opinions réelles.",modifier=Modifier.padding(14.dp),color=VibeColors.TextPrimary,fontWeight=FontWeight.Bold)}
+  Spacer(Modifier.height(10.dp));OutlinedTextField(value=query,onValueChange=onQueryChange,modifier=Modifier.fillMaxWidth(),singleLine=true,label={Text("Rechercher un compagnon")})
+  Row(horizontalArrangement=Arrangement.spacedBy(6.dp)){listOf<Pair<String,PersonaKind?>>("Tous" to null,"Public" to PersonaKind.PUBLIC_SIMULATION,"Originaux" to PersonaKind.ORIGINAL).forEach{(label,kind)->FilterChip(selected=selectedKind==kind,onClick={onKindChange(kind)},label={Text(label)})}}
+  Button(onClick=onAutoCompose,modifier=Modifier.fillMaxWidth()){Text("Composer automatiquement")};if(validationMessage.isNotBlank())Text(validationMessage,color=VibeColors.Rose,fontWeight=FontWeight.Bold)
+  LazyColumn(Modifier.weight(1f).fillMaxWidth(),verticalArrangement=Arrangement.spacedBy(8.dp)){items(personas,key={it.id}){p->val selected=p.id in selectedIds;Card(Modifier.fillMaxWidth().clip(RoundedCornerShape(22.dp)).semantics{contentDescription=p.displayName+if(selected)", sélectionné" else ""}.clickable{onTogglePersona(p.id)},colors=CardDefaults.cardColors(containerColor=if(selected)VibeColors.Purple.copy(alpha=.22f) else MaterialTheme.colorScheme.surface),border=BorderStroke(1.dp,if(selected)VibeColors.Purple else MaterialTheme.colorScheme.surfaceVariant)){Column(Modifier.padding(14.dp)){Text(p.displayName,fontWeight=FontWeight.ExtraBold,color=VibeColors.TextPrimary);Text(p.archetype,color=VibeColors.TextSecondary);if(p.isFictionalSimulation)Text("Simulation fictive",color=VibeColors.Rose,fontWeight=FontWeight.Bold)}}}}
+  Button(onClick=onStart,enabled=canStart,modifier=Modifier.fillMaxWidth().height(58.dp),shape=RoundedCornerShape(22.dp)){Text("Je participe — démarrer",fontWeight=FontWeight.Black)}
+ }
 }
