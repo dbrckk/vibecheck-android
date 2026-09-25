@@ -55,22 +55,16 @@ Test the exact candidate installed on a physical Android device:
 
 ## 4. Billing
 
-The code expects the one-time in-app product ID:
+V1 is ad-free and does **not** expose the legacy `remove_ads_lifetime` purchase.
 
-`remove_ads_lifetime`
+Release gate:
 
-Before exposing the purchase as production-ready:
+- [ ] `ReleaseConfig.adRemovalPurchaseEnabled == false`.
+- [ ] No Premium / ad-removal purchase card is visible in the V1 UI.
+- [ ] Google Play Billing is not initialized during normal V1 app startup.
+- [ ] Play Console does not need an active `remove_ads_lifetime` product for V1.
 
-- [ ] Create that exact INAPP product in Play Console.
-- [ ] Set its price and activate it.
-- [ ] Install the app from a Play test track; sideloaded builds are not a valid end-to-end billing test.
-- [ ] Test purchase with a Play license tester.
-- [ ] Verify cancellation leaves premium disabled.
-- [ ] Verify pending purchase does not unlock premium early.
-- [ ] Verify completed purchase unlocks premium.
-- [ ] Verify ownership restores after reinstall / relaunch from Play.
-
-If advertising is not present in the shipping V1, the purchase UI/copy must not promise removal of ads that the user cannot encounter. If ads are added, re-run privacy/data-safety review before publication.
+If ads or paid entitlements are introduced later, re-enable billing deliberately and run a new billing, privacy and Data Safety review before publication.
 
 ## 5. Play Console declarations
 
