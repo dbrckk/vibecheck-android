@@ -130,7 +130,7 @@ fun GameScreen(
                     }
                     Text(
                         "Question " + progress + " sur " + total,
-                        color = Color(0xFF8B8494),
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
                         fontSize = 13.sp
                     )
                 }
@@ -138,7 +138,7 @@ fun GameScreen(
                     onClick = onExit,
                     shape = RoundedCornerShape(14.dp),
                     colors = ButtonDefaults.textButtonColors(
-                        contentColor = VibeColors.TextSecondary
+                        contentColor = MaterialTheme.colorScheme.onSurfaceVariant
                     )
                 ) {
                     Text(
@@ -159,7 +159,7 @@ fun GameScreen(
         }
 
         Card(
-            colors = CardDefaults.cardColors(containerColor = Color(0xEE1B1721)),
+            colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
             border = BorderStroke(1.dp, accent.copy(alpha = 0.28f)),
             elevation = CardDefaults.cardElevation(defaultElevation = 12.dp),
             shape = RoundedCornerShape(30.dp),
@@ -192,7 +192,7 @@ fun GameScreen(
                 Spacer(Modifier.height(18.dp))
                 Text(
                     questionText,
-                    color = VibeColors.TextPrimary,
+                    color = MaterialTheme.colorScheme.onSurface,
                     fontSize = questionFontSize,
                     lineHeight = questionLineHeight,
                     fontWeight = FontWeight.Black,
@@ -240,7 +240,7 @@ fun GameScreen(
                             if (index == 0) VibeColors.Green else VibeColors.Rose
                         ),
                         colors = ButtonDefaults.outlinedButtonColors(
-                            contentColor = VibeColors.TextPrimary,
+                            contentColor = MaterialTheme.colorScheme.onSurface,
                             containerColor = if (index == 0) VibeColors.Green.copy(alpha = 0.08f) else VibeColors.Rose.copy(alpha = 0.08f)
                         )
                     ) {
@@ -261,9 +261,9 @@ fun GameScreen(
                         shape = RoundedCornerShape(20.dp),
                         colors = ButtonDefaults.buttonColors(
                             containerColor = accent.copy(alpha = 0.16f),
-                            contentColor = VibeColors.TextPrimary,
+                            contentColor = MaterialTheme.colorScheme.onSurface,
                             disabledContainerColor = accent.copy(alpha = 0.08f),
-                            disabledContentColor = VibeColors.TextPrimary.copy(alpha = 0.5f)
+                            disabledContentColor = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.5f)
                         )
                     ) {
                         Text(answer, fontSize = 17.sp, fontWeight = FontWeight.Bold)
