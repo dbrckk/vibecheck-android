@@ -23,6 +23,9 @@ Android-first social party game with an offline-first core and native sharing.
 - Android backup disabled for the V1 offline data model
 - cleartext HTTP traffic disabled
 
+## V1 privacy posture
+The core game does not require an account or backend. Game state, theme preferences and solo-party state are local to the device. V1 does not request broad storage, contacts, location, microphone or camera permissions. Native sharing is initiated explicitly by the user. Any future advertising/analytics integration must update the Play Console Data safety declaration and this documentation before release.
+
 ## Verification gate
 
 CI verifies every pull request with:
