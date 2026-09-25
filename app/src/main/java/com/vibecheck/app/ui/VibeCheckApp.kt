@@ -269,6 +269,7 @@ fun VibeCheckApp(
                         onOpenLeaderboard = gameViewModel::openLeaderboard,
                         onEditGroup = gameViewModel::editPlayers,
                         onOpenSettings = { settingsOpen = true },
+                        onPlaySolo = {},
                         onBuyPremium = {
                             (context as? Activity)?.let { activity ->
                                 billingManager.launchPurchase(activity)
