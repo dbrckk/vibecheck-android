@@ -1,8 +1,9 @@
 package com.vibecheck.app.ui.screens
 
-import androidx.compose.ui.test.assertDoesNotExist
 import androidx.compose.ui.test.assertIsDisplayed
+import androidx.compose.ui.test.assertCountEquals
 import androidx.compose.ui.test.junit4.createComposeRule
+import androidx.compose.ui.test.onAllNodesWithText
 import androidx.compose.ui.test.onNodeWithText
 import com.vibecheck.app.domain.model.GameIntensity
 import com.vibecheck.app.domain.model.GameMode
@@ -69,7 +70,7 @@ class SoloResultScreenTest {
             }
         }
 
-        composeRule.onNodeWithText("Défier un ami").assertDoesNotExist()
+        composeRule.onAllNodesWithText("Défier un ami").assertCountEquals(0)
         composeRule.onNodeWithText("Partager la simulation").assertIsDisplayed()
     }
 }
