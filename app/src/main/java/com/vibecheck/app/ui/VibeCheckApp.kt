@@ -65,6 +65,8 @@ import com.vibecheck.app.ui.theme.VibeCheckTheme
 import com.vibecheck.app.ui.theme.VibeColors
 import com.vibecheck.app.ui.theme.VibeThemeStyle
 
+private const val MONETIZATION_ENABLED = false
+
 @Composable
 fun VibeCheckApp(
     incomingChallenge: Challenge? = null,
@@ -94,9 +96,11 @@ fun VibeCheckApp(
     }
     var groupHydrated by remember { mutableStateOf(false) }
 
-    DisposableEffect(billingManager) {
-        billingManager.start()
-        onDispose { billingManager.close() }
+    if (MONETIZATION_ENABLED) {
+        DisposableEffect(billingManager) {
+            billingManager.start()
+            onDispose { billingManager.close() }
+        }
     }
 
     val isPremium by billingManager.isPremium.collectAsState()
