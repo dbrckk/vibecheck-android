@@ -25,11 +25,9 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
-import com.vibecheck.app.ui.theme.VibeColors
 
 @Composable
 fun PassPhoneScreen(
@@ -45,8 +43,8 @@ fun PassPhoneScreen(
         Card(
             modifier = Modifier.fillMaxWidth(),
             shape = RoundedCornerShape(32.dp),
-            border = BorderStroke(1.dp, VibeColors.Blue.copy(alpha = 0.35f)),
-            colors = CardDefaults.cardColors(containerColor = Color(0xF21B1721)),
+            border = BorderStroke(1.dp, MaterialTheme.colorScheme.primary.copy(alpha = 0.35f)),
+            colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
             elevation = CardDefaults.cardElevation(defaultElevation = 14.dp)
         ) {
             Column(
@@ -58,13 +56,13 @@ fun PassPhoneScreen(
                 Box(
                     modifier = Modifier
                         .size(58.dp)
-                        .background(VibeColors.Blue.copy(alpha = 0.15f), CircleShape),
+                        .background(MaterialTheme.colorScheme.primary.copy(alpha = 0.15f), CircleShape),
                     contentAlignment = Alignment.Center
                 ) {
                     Icon(
                         imageVector = Icons.Default.VisibilityOff,
                         contentDescription = null,
-                        tint = VibeColors.Blue
+                        tint = MaterialTheme.colorScheme.primary
                     )
                 }
 
@@ -72,12 +70,12 @@ fun PassPhoneScreen(
 
                 Text(
                     "Passe le téléphone à",
-                    color = VibeColors.TextSecondary,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
                     style = MaterialTheme.typography.bodyLarge
                 )
                 Text(
                     nextPlayer,
-                    color = VibeColors.TextPrimary,
+                    color = MaterialTheme.colorScheme.onSurface,
                     style = MaterialTheme.typography.headlineLarge,
                     fontWeight = FontWeight.Black,
                     textAlign = TextAlign.Center
@@ -87,7 +85,7 @@ fun PassPhoneScreen(
 
                 Text(
                     promptLabel,
-                    color = VibeColors.TextSecondary,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
                     textAlign = TextAlign.Center,
                     style = MaterialTheme.typography.bodyMedium
                 )
@@ -101,8 +99,8 @@ fun PassPhoneScreen(
                         .height(58.dp),
                     shape = RoundedCornerShape(20.dp),
                     colors = ButtonDefaults.buttonColors(
-                        containerColor = VibeColors.Blue,
-                        contentColor = Color(0xFF11151C)
+                        containerColor = MaterialTheme.colorScheme.primary,
+                        contentColor = MaterialTheme.colorScheme.onPrimary
                     )
                 ) {
                     Text(
