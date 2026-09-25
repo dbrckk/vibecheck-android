@@ -19,7 +19,7 @@ android {
     namespace = "com.vibecheck.app"
     compileSdk = 36
     defaultConfig {
-        applicationId = "com.vibecheck.app"
+        applicationId = "com.dbrckk.vibecheck"
         minSdk = 24
         targetSdk = 36
         versionCode = 1
