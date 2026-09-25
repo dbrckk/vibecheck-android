@@ -487,49 +487,51 @@ fun ResultScreen(
                 )
             }
 
-            Button(
-                onClick = {
-                    challengeShareError = false
-                    try {
-                        ChallengeSharer.share(
-                            context = context,
-                            challenge = Challenge(
-                                mode = mode,
-                                targetPercent = percent,
-                                seed = sessionSeed,
-                                intensity = intensity,
-                                pack = pack
+            if (!isSoloSession) {
+                Button(
+                    onClick = {
+                        challengeShareError = false
+                        try {
+                            ChallengeSharer.share(
+                                context = context,
+                                challenge = Challenge(
+                                    mode = mode,
+                                    targetPercent = percent,
+                                    seed = sessionSeed,
+                                    intensity = intensity,
+                                    pack = pack
+                                )
                             )
-                        )
-                    } catch (_: Exception) {
-                        challengeShareError = true
-                    }
-                },
-                interactionSource = challengeInteraction,
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(56.dp)
-                    .graphicsLayer {
-                        scaleX = challengeScale
-                        scaleY = challengeScale
+                        } catch (_: Exception) {
+                            challengeShareError = true
+                        }
                     },
-                shape = RoundedCornerShape(20.dp),
-                colors = ButtonDefaults.buttonColors(
-                    containerColor = accent.copy(alpha = 0.16f),
-                    contentColor = VibeColors.TextPrimary
-                )
-            ) {
-                Text("Défier un ami", fontWeight = FontWeight.Bold)
-            }
+                    interactionSource = challengeInteraction,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(56.dp)
+                        .graphicsLayer {
+                            scaleX = challengeScale
+                            scaleY = challengeScale
+                        },
+                    shape = RoundedCornerShape(20.dp),
+                    colors = ButtonDefaults.buttonColors(
+                        containerColor = accent.copy(alpha = 0.16f),
+                        contentColor = VibeColors.TextPrimary
+                    )
+                ) {
+                    Text("Défier un ami", fontWeight = FontWeight.Bold)
+                }
 
-            if (challengeShareError) {
-                Text(
-                    "Impossible d'ouvrir le partage du défi. Réessaie.",
-                    color = VibeColors.Rose,
-                    fontSize = 13.sp,
-                    textAlign = TextAlign.Center,
-                    modifier = Modifier.fillMaxWidth()
-                )
+                if (challengeShareError) {
+                    Text(
+                        "Impossible d'ouvrir le partage du défi. Réessaie.",
+                        color = VibeColors.Rose,
+                        fontSize = 13.sp,
+                        textAlign = TextAlign.Center,
+                        modifier = Modifier.fillMaxWidth()
+                    )
+                }
             }
 
             Row(
