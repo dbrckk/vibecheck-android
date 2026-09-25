@@ -10,22 +10,14 @@ Before submission, inspect the final dependency/permission report and confirm wh
 
 ## Billing
 
-The app integrates Google Play Billing for the one-time INAPP product `remove_ads_lifetime`.
+V1 is ad-free. The legacy Google Play Billing integration remains in the codebase for future use, but the V1 release contract disables the ad-removal purchase:
 
-Required console setup:
-- create exactly `remove_ads_lifetime` as a one-time in-app product;
-- activate and price it;
-- validate through a Play test track and license tester;
-- verify pending purchases do not unlock premium;
-- verify completed ownership restores after relaunch/reinstall.
+- `ReleaseConfig.adRemovalPurchaseEnabled == false`;
+- the Premium / ad-removal card is not shown;
+- the billing connection is not started during normal V1 startup;
+- no active `remove_ads_lifetime` Play product is required for V1.
 
-### V1 product-copy gate
-
-The current UI describes Premium as removing ads. If the release candidate contains no advertising that a normal user can encounter, either:
-1. do not expose/activate this purchase for V1, or
-2. change the product proposition before production.
-
-Do not sell an ad-removal entitlement for an experience that has no ads to remove.
+If monetization is reintroduced later, repeat the billing, privacy, Data Safety and store-copy review before publishing that update.
 
 ## Ads declaration
 
