@@ -76,11 +76,11 @@ fun PlayerSetupScreen(
                 Box(
                     modifier = Modifier
                         .size(9.dp)
-                        .background(VibeColors.Purple, CircleShape)
+                        .background(MaterialTheme.colorScheme.primary, CircleShape)
                 )
                 Text(
                     "Crée ton groupe",
-                    color = VibeColors.TextPrimary,
+                    color = MaterialTheme.colorScheme.onSurface,
                     style = MaterialTheme.typography.headlineLarge
                 )
             }
@@ -91,11 +91,11 @@ fun PlayerSetupScreen(
             ) {
                 Text(
                     "Ajoute entre " + PlayerRules.MIN_PLAYERS + " et " + PlayerRules.MAX_PLAYERS + " joueurs.",
-                    color = Color(0xFFBEB7C9)
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
                 Text(
                     players.size.toString() + "/" + PlayerRules.MAX_PLAYERS,
-                    color = VibeColors.Purple,
+                    color = MaterialTheme.colorScheme.primary,
                     fontWeight = FontWeight.Black
                 )
             }
@@ -103,14 +103,14 @@ fun PlayerSetupScreen(
             LinearProgressIndicator(
                 progress = { capacityProgress.coerceIn(0f, 1f) },
                 modifier = Modifier.fillMaxWidth(),
-                color = VibeColors.Purple,
-                trackColor = VibeColors.Purple.copy(alpha = 0.14f)
+                color = MaterialTheme.colorScheme.primary,
+                trackColor = MaterialTheme.colorScheme.primary.copy(alpha = 0.14f)
             )
             if (challengeTarget != null) {
                 Spacer(Modifier.height(10.dp))
                 Card(
-                    colors = CardDefaults.cardColors(containerColor = VibeColors.Purple.copy(alpha = 0.14f)),
-                    border = BorderStroke(1.dp, VibeColors.Purple.copy(alpha = 0.4f)),
+                    colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.primary.copy(alpha = 0.14f)),
+                    border = BorderStroke(1.dp, MaterialTheme.colorScheme.primary.copy(alpha = 0.4f)),
                     elevation = CardDefaults.cardElevation(defaultElevation = 6.dp),
                     shape = RoundedCornerShape(18.dp),
                     modifier = Modifier.fillMaxWidth()
@@ -136,7 +136,7 @@ fun PlayerSetupScreen(
                 supportingText = {
                     Text(
                         input.length.toString() + "/" + PlayerRules.MAX_NAME_LENGTH,
-                        color = VibeColors.TextSecondary
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
                 },
                 singleLine = true,
@@ -150,12 +150,12 @@ fun PlayerSetupScreen(
                     }
                 ),
                 colors = OutlinedTextFieldDefaults.colors(
-                    focusedBorderColor = VibeColors.Purple,
-                    focusedLabelColor = VibeColors.Purple,
-                    cursorColor = VibeColors.Purple,
+                    focusedBorderColor = MaterialTheme.colorScheme.primary,
+                    focusedLabelColor = MaterialTheme.colorScheme.primary,
+                    cursorColor = MaterialTheme.colorScheme.primary,
                     unfocusedBorderColor = Color.White.copy(alpha = 0.18f),
-                    focusedTextColor = VibeColors.TextPrimary,
-                    unfocusedTextColor = VibeColors.TextPrimary,
+                    focusedTextColor = MaterialTheme.colorScheme.onSurface,
+                    unfocusedTextColor = MaterialTheme.colorScheme.onSurface,
                     focusedContainerColor = Color.White.copy(alpha = 0.035f),
                     unfocusedContainerColor = Color.White.copy(alpha = 0.02f)
                 ),
@@ -174,9 +174,9 @@ fun PlayerSetupScreen(
                 modifier = Modifier.fillMaxWidth().height(54.dp),
                 shape = RoundedCornerShape(18.dp),
                 colors = ButtonDefaults.buttonColors(
-                    containerColor = VibeColors.Purple.copy(alpha = 0.16f),
-                    contentColor = VibeColors.TextPrimary,
-                    disabledContainerColor = VibeColors.SurfaceStrong.copy(alpha = 0.6f),
+                    containerColor = MaterialTheme.colorScheme.primary.copy(alpha = 0.16f),
+                    contentColor = MaterialTheme.colorScheme.onSurface,
+                    disabledContainerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.6f),
                     disabledContentColor = Color.White.copy(alpha = 0.35f)
                 )
             ) {
@@ -187,7 +187,7 @@ fun PlayerSetupScreen(
 
             if (players.isEmpty()) {
                 Card(
-                    colors = CardDefaults.cardColors(containerColor = Color(0xCC17131D)),
+                    colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
                     border = BorderStroke(1.dp, Color.White.copy(alpha = 0.07f)),
                     shape = RoundedCornerShape(20.dp),
                     modifier = Modifier.fillMaxWidth()
@@ -200,7 +200,7 @@ fun PlayerSetupScreen(
                         )
                         Text(
                             "Ajoute " + PlayerRules.MIN_PLAYERS + " joueurs minimum pour commencer.",
-                            color = Color(0xFF8B8494)
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
                         )
                     }
                 }
@@ -214,8 +214,8 @@ fun PlayerSetupScreen(
                 ) {
                     items(players, key = { it }) { player ->
                         Card(
-                            colors = CardDefaults.cardColors(containerColor = Color(0xE61D1824)),
-                            border = BorderStroke(1.dp, VibeColors.Purple.copy(alpha = 0.16f)),
+                            colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
+                            border = BorderStroke(1.dp, MaterialTheme.colorScheme.primary.copy(alpha = 0.16f)),
                             elevation = CardDefaults.cardElevation(defaultElevation = 4.dp),
                             shape = RoundedCornerShape(18.dp),
                             modifier = Modifier
@@ -234,18 +234,18 @@ fun PlayerSetupScreen(
                                     Box(
                                         modifier = Modifier
                                             .size(30.dp)
-                                            .background(VibeColors.Purple.copy(alpha = 0.16f), CircleShape),
+                                            .background(MaterialTheme.colorScheme.primary.copy(alpha = 0.16f), CircleShape),
                                         contentAlignment = Alignment.Center
                                     ) {
                                         Text(
                                             player.take(1).uppercase(),
-                                            color = VibeColors.Purple,
+                                            color = MaterialTheme.colorScheme.primary,
                                             fontWeight = FontWeight.Black
                                         )
                                     }
                                     Text(
                                         player,
-                                        color = VibeColors.TextPrimary,
+                                        color = MaterialTheme.colorScheme.onSurface,
                                         style = MaterialTheme.typography.titleMedium
                                     )
                                 }
@@ -253,7 +253,7 @@ fun PlayerSetupScreen(
                                     Icon(
                                         imageVector = Icons.Default.Close,
                                         contentDescription = "Supprimer " + player,
-                                        tint = Color(0xFFBEB7C9)
+                                        tint = MaterialTheme.colorScheme.onSurfaceVariant
                                     )
                                 }
                             }
@@ -270,9 +270,9 @@ fun PlayerSetupScreen(
                 modifier = Modifier.fillMaxWidth().height(60.dp),
                 shape = RoundedCornerShape(20.dp),
                 colors = ButtonDefaults.buttonColors(
-                    containerColor = VibeColors.Purple,
-                    contentColor = Color(0xFF18121F),
-                    disabledContainerColor = VibeColors.SurfaceStrong,
+                    containerColor = MaterialTheme.colorScheme.primary,
+                    contentColor = MaterialTheme.colorScheme.onPrimary,
+                    disabledContainerColor = MaterialTheme.colorScheme.surfaceVariant,
                     disabledContentColor = Color.White.copy(alpha = 0.34f)
                 )
             ) {
@@ -287,7 +287,7 @@ fun PlayerSetupScreen(
                 shape = RoundedCornerShape(18.dp),
                 colors = ButtonDefaults.buttonColors(
                     containerColor = Color.White.copy(alpha = 0.06f),
-                    contentColor = VibeColors.TextPrimary
+                    contentColor = MaterialTheme.colorScheme.onSurface
                 )
             ) {
                 Text("Retour")
