@@ -77,6 +77,11 @@ fun ResultScreen(
 ) {
     val result = resultOverride ?: GameEngine.result(votes)
     val policy = resultPolicy(isSoloSession)
+    val copy = resultCopy(
+        isSoloSession = isSoloSession,
+        knowsMe = mode == GameMode.KNOWS_ME,
+        modeTitle = mode.title
+    )
     val context = LocalContext.current
     val statsStore = remember(context.applicationContext) {
         LocalStatsStore(context.applicationContext)
@@ -223,7 +228,7 @@ fun ResultScreen(
                             .padding(horizontal = 13.dp, vertical = 7.dp)
                     ) {
                         Text(
-                            if (mode == GameMode.KNOWS_ME) "QUI CONNAÎT LE MIEUX ?" else "LE GROUPE A PARLÉ",
+                            copy.badge,
                             color = accent,
                             fontSize = 11.sp,
                             fontWeight = FontWeight.Black,
@@ -252,11 +257,7 @@ fun ResultScreen(
                         fontWeight = FontWeight.Black
                     )
                     Text(
-                        if (mode == GameMode.KNOWS_ME) {
-                            "de bonnes réponses • " + mode.title
-                        } else {
-                            "des réponses • " + mode.title
-                        },
+                        copy.scoreLabel,
                         color = Color(0xFFA9A3B3),
                         textAlign = TextAlign.Center
                     )
@@ -533,7 +534,7 @@ fun ResultScreen(
                         contentColor = Color(0xFF18121F)
                     )
                 ) {
-                    Text("Rejouer", fontWeight = FontWeight.Bold)
+                    Text(copy.replayLabel, fontWeight = FontWeight.Bold)
                 }
 
                 Button(
@@ -548,7 +549,7 @@ fun ResultScreen(
                     shape = RoundedCornerShape(18.dp),
                     colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF302A39))
                 ) {
-                    Text("Modes")
+                    Text(copy.homeLabel)
                 }
             }
         }
