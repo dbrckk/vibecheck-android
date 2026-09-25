@@ -17,22 +17,32 @@ data class SoloPartyState(
 
     fun autoCompose(catalog: List<Persona>, size: Int = 5, seed: Long): SoloPartyState {
         val target = size.coerceIn(MIN_PARTY_SIZE, MAX_PARTY_SIZE)
-        if (catalog.isEmpty()) return SoloPartyState()
-
         val ordered = catalog.distinctBy { it.id }.sortedBy { stableRank(it.id, seed) }
+        if (ordered.isEmpty()) return SoloPartyState()
+
         val picked = mutableListOf<Persona>()
 
         fun addFirst(predicate: (Persona) -> Boolean) {
+            if (picked.size >= target) return
             ordered.firstOrNull { candidate -> candidate !in picked && predicate(candidate) }?.let(picked::add)
         }
 
-        // Seed a varied cast before filling by deterministic rank.
-        addFirst { it.kind == PersonaKind.PUBLIC_SIMULATION && it.gender == PersonaGender.WOMAN }
-        addFirst { it.kind == PersonaKind.PUBLIC_SIMULATION && it.gender == PersonaGender.MAN }
-        addFirst { it.kind == PersonaKind.ORIGINAL }
+        // For the smallest valid cast, prioritize both catalogue variety and gender variety.
+        if (target == 2) {
+            addFirst { it.kind == PersonaKind.PUBLIC_SIMULATION && it.gender == PersonaGender.WOMAN }
+            addFirst { it.kind == PersonaKind.ORIGINAL && it.gender != picked.firstOrNull()?.gender }
+            addFirst { it.kind == PersonaKind.ORIGINAL }
+        } else {
+            // Larger casts seed both public genders plus an original before deterministic fill.
+            addFirst { it.kind == PersonaKind.PUBLIC_SIMULATION && it.gender == PersonaGender.WOMAN }
+            addFirst { it.kind == PersonaKind.PUBLIC_SIMULATION && it.gender == PersonaGender.MAN }
+            addFirst { it.kind == PersonaKind.ORIGINAL }
+        }
 
-        ordered.forEach { if (picked.size < target && it !in picked) picked += it }
-        return SoloPartyState(picked.take(target).map { it.id })
+        ordered.forEach { candidate ->
+            if (picked.size < target && candidate !in picked) picked += candidate
+        }
+        return SoloPartyState(picked.map { it.id })
     }
 
     companion object {
