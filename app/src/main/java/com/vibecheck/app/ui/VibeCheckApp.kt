@@ -57,8 +57,10 @@ import com.vibecheck.app.ui.screens.PassPhoneScreen
 import com.vibecheck.app.ui.screens.PlayerSetupScreen
 import com.vibecheck.app.ui.screens.ResultScreen
 import com.vibecheck.app.ui.screens.SettingsScreen
+import com.vibecheck.app.ui.screens.SoloPartyScreen
 import com.vibecheck.app.ui.state.AppScreen
 import com.vibecheck.app.ui.state.GameViewModel
+import com.vibecheck.app.ui.state.SoloPartyViewModel
 import com.vibecheck.app.ui.theme.VibeBackdrop
 import com.vibecheck.app.ui.theme.VibeCheckTheme
 import com.vibecheck.app.ui.theme.VibeColors
@@ -68,7 +70,8 @@ import com.vibecheck.app.ui.theme.VibeThemeStyle
 fun VibeCheckApp(
     incomingChallenge: Challenge? = null,
     onChallengeConsumed: () -> Unit = {},
-    gameViewModel: GameViewModel = viewModel()
+    gameViewModel: GameViewModel = viewModel(),
+    soloPartyViewModel: SoloPartyViewModel = viewModel(),
 ) {
     val context = LocalContext.current
     val billingManager = remember(context.applicationContext) {
@@ -97,6 +100,7 @@ fun VibeCheckApp(
         mutableStateOf(!onboardingStore.isCompleted())
     }
     var settingsOpen by rememberSaveable { mutableStateOf(false) }
+    var soloPartyOpen by rememberSaveable { mutableStateOf(false) }
     var groupHydrated by remember { mutableStateOf(false) }
 
     DisposableEffect(billingManager) {
@@ -124,6 +128,12 @@ fun VibeCheckApp(
     val knowGuesserIndex by gameViewModel.knowGuesserIndex.collectAsState()
     val knowScores by gameViewModel.knowScores.collectAsState()
     val knowHandoffPending by gameViewModel.knowHandoffPending.collectAsState()
+    val soloSelectedIds by soloPartyViewModel.selectedIds.collectAsState()
+    val soloVisiblePersonas by soloPartyViewModel.visiblePersonas.collectAsState()
+    val soloQuery by soloPartyViewModel.query.collectAsState()
+    val soloKindFilter by soloPartyViewModel.kindFilter.collectAsState()
+    val soloCanStart by soloPartyViewModel.canStart.collectAsState()
+    val soloValidationMessage by soloPartyViewModel.validationMessage.collectAsState()
 
     val screen = runCatching { AppScreen.valueOf(screenName) }.getOrDefault(AppScreen.HOME)
     val selectedMode = runCatching { GameMode.valueOf(modeName) }.getOrDefault(GameMode.WHO_OF_US)
@@ -205,9 +215,11 @@ fun VibeCheckApp(
         }
     }
 
-    BackHandler(enabled = settingsOpen || screen != AppScreen.HOME) {
+    BackHandler(enabled = settingsOpen || soloPartyOpen || screen != AppScreen.HOME) {
         if (settingsOpen) {
             settingsOpen = false
+        } else if (soloPartyOpen) {
+            soloPartyOpen = false
         } else {
             when (screen) {
                 AppScreen.PLAYERS -> gameViewModel.goBackHome()
@@ -228,7 +240,27 @@ fun VibeCheckApp(
                         .safeDrawingPadding()
                         .padding(horizontal = 20.dp, vertical = 16.dp)
                 ) {
-                if (settingsOpen && screen == AppScreen.HOME) {
+                if (soloPartyOpen && screen == AppScreen.HOME) {
+                    SoloPartyScreen(
+                        personas = soloVisiblePersonas,
+                        selectedIds = soloSelectedIds,
+                        selectedKind = soloKindFilter,
+                        query = soloQuery,
+                        validationMessage = soloValidationMessage,
+                        canStart = soloCanStart,
+                        onBack = { soloPartyOpen = false },
+                        onQueryChange = soloPartyViewModel::setQuery,
+                        onKindChange = soloPartyViewModel::setKindFilter,
+                        onTogglePersona = soloPartyViewModel::toggle,
+                        onAutoCompose = {
+                            soloPartyViewModel.autoCompose(
+                                seed = System.nanoTime(),
+                                count = 5,
+                            )
+                        },
+                        onStart = {},
+                    )
+                } else if (settingsOpen && screen == AppScreen.HOME) {
                     SettingsScreen(
                         selectedStyle = themeStyle,
                         onStyleSelected = { style ->
@@ -269,7 +301,7 @@ fun VibeCheckApp(
                         onOpenLeaderboard = gameViewModel::openLeaderboard,
                         onEditGroup = gameViewModel::editPlayers,
                         onOpenSettings = { settingsOpen = true },
-                        onPlaySolo = {},
+                        onPlaySolo = { soloPartyOpen = true },
                         onBuyPremium = {
                             (context as? Activity)?.let { activity ->
                                 billingManager.launchPurchase(activity)
