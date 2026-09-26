@@ -60,9 +60,9 @@ V1 is ad-free and does **not** expose the legacy `remove_ads_lifetime` purchase.
 Release gate:
 
 - [ ] `ReleaseConfig.adRemovalPurchaseEnabled == false`.
-- [ ] No Premium / ad-removal purchase card is visible in the V1 UI.
-- [ ] Google Play Billing is not initialized during normal V1 app startup.
-- [ ] Play Console does not need an active `remove_ads_lifetime` product for V1.
+- [ ] No Premium / ad-removal purchase card is present in the V1.1 UI.
+- [ ] Google Play Billing SDK is not packaged in the V1.1 artifact.
+- [ ] Play Console does not need an active `remove_ads_lifetime` product for V1.1.
 
 If ads or paid entitlements are introduced later, re-enable billing deliberately and run a new billing, privacy and Data Safety review before publication.
 
