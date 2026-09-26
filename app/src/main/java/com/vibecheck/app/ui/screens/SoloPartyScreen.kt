@@ -13,6 +13,7 @@ import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import com.vibecheck.app.domain.model.GameMode
 import com.vibecheck.app.domain.solo.Persona
 import com.vibecheck.app.localization.AppLocale
 import com.vibecheck.app.ui.components.VibeActionSurface
@@ -22,6 +23,7 @@ import com.vibecheck.app.ui.theme.VibeColors
 fun SoloPartyScreen(
     personas: List<Persona>,
     selectedIds: List<String>,
+    selectedMode: GameMode,
     query: String,
     playerName: String,
     validationMessage: String,
@@ -29,6 +31,7 @@ fun SoloPartyScreen(
     onBack: () -> Unit,
     onQueryChange: (String) -> Unit,
     onPlayerNameChange: (String) -> Unit,
+    onModeChange: (GameMode) -> Unit,
     onTogglePersona: (String) -> Unit,
     onAutoCompose: () -> Unit,
     onStart: () -> Unit,
@@ -69,6 +72,50 @@ fun SoloPartyScreen(
             ),
             color = VibeColors.TextSecondary,
         )
+
+        Spacer(Modifier.height(12.dp))
+        Text(
+            AppLocale.pick("MODE SOLO", "SOLO MODE"),
+            color = VibeColors.TextSecondary,
+            fontWeight = FontWeight.Black,
+        )
+        Spacer(Modifier.height(7.dp))
+        Row(
+            Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.spacedBy(7.dp),
+        ) {
+            listOf(GameMode.WHO_OF_US, GameMode.MOST_LIKELY, GameMode.RED_GREEN).forEach { mode ->
+                val selected = mode == selectedMode
+                val modeAccent = when (mode) {
+                    GameMode.WHO_OF_US -> VibeColors.Purple
+                    GameMode.MOST_LIKELY -> VibeColors.Orange
+                    GameMode.RED_GREEN -> VibeColors.Green
+                    GameMode.KNOWS_ME -> VibeColors.Blue
+                }
+                VibeActionSurface(
+                    onClick = { onModeChange(mode) },
+                    modifier = Modifier.weight(1f),
+                    accent = modeAccent,
+                    containerColor = if (selected) modeAccent.copy(alpha = .20f)
+                        else MaterialTheme.colorScheme.surface,
+                    emphasized = selected,
+                    minHeight = 54.dp,
+                ) {
+                    Box(
+                        Modifier.fillMaxWidth().padding(horizontal = 6.dp, vertical = 11.dp),
+                        contentAlignment = Alignment.Center,
+                    ) {
+                        Text(
+                            mode.title,
+                            color = VibeColors.TextPrimary,
+                            style = MaterialTheme.typography.labelMedium,
+                            fontWeight = FontWeight.Black,
+                            maxLines = 2,
+                        )
+                    }
+                }
+            }
+        }
 
         Spacer(Modifier.height(12.dp))
         Card(
