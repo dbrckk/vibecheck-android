@@ -1,8 +1,9 @@
 package com.vibecheck.app.ui.screens
 
-import androidx.compose.ui.test.assertDoesNotExist
+import androidx.compose.ui.test.assertCountEquals
 import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.junit4.createComposeRule
+import androidx.compose.ui.test.onAllNodesWithText
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
 import com.vibecheck.app.data.PersonaCatalog
@@ -34,8 +35,8 @@ class SoloPartyScreenTest {
             personas=PersonaCatalog.soloPublic.take(8),selectedIds=emptyList(),selectedMode=GameMode.WHO_OF_US,query="",playerName="Moi",validationMessage="",canStart=false,
             onBack={},onQueryChange={},onPlayerNameChange={},onModeChange={},onTogglePersona={},onAutoCompose={},onStart={}
         ) } }
-        composeRule.onNodeWithText("Originaux").assertDoesNotExist()
-        composeRule.onNodeWithText("Originals").assertDoesNotExist()
+        composeRule.onAllNodesWithText("Originaux").assertCountEquals(0)
+        composeRule.onAllNodesWithText("Originals").assertCountEquals(0)
     }
 
     @Test fun valid_party_can_start_with_human_participant() {
