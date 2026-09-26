@@ -8,7 +8,6 @@ import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.onNodeWithContentDescription
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
-import com.vibecheck.app.billing.PurchaseStatus
 import com.vibecheck.app.domain.model.GameIntensity
 import com.vibecheck.app.domain.model.GamePack
 import com.vibecheck.app.ui.theme.VibeCheckTheme
@@ -29,10 +28,6 @@ class SettingsScreenTest {
         composeRule.setContent {
             VibeCheckTheme {
                 HomeScreen(
-                    isPremium = false,
-                    premiumReady = false,
-                    premiumPrice = null,
-                    purchaseStatus = PurchaseStatus.IDLE,
                     selectedIntensity = GameIntensity.NORMAL,
                     selectedPack = GamePack.MIX,
                     savedPlayerCount = 0,
@@ -42,7 +37,6 @@ class SettingsScreenTest {
                     onEditGroup = {},
                     onOpenSettings = { opened = true },
                     onPlaySolo = {},
-                    onBuyPremium = {},
                     onIntensity = {},
                     onPack = {},
                     onMode = {},
