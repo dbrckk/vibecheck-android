@@ -19,12 +19,10 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.vibecheck.app.data.PlayerStat
-import com.vibecheck.app.ui.theme.VibeColors
 
 @Composable
 fun LeaderboardScreen(
@@ -37,13 +35,13 @@ fun LeaderboardScreen(
     ) {
         Text(
             "Classement du groupe",
-            color = VibeColors.TextPrimary,
+            color = MaterialTheme.colorScheme.onSurface,
             style = MaterialTheme.typography.headlineLarge,
             fontWeight = FontWeight.Black
         )
         Text(
             "Basé uniquement sur les parties jouées sur cet appareil.",
-            color = VibeColors.TextSecondary,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
             fontSize = 13.sp
         )
 
@@ -51,12 +49,12 @@ fun LeaderboardScreen(
             Card(
                 modifier = Modifier.fillMaxWidth(),
                 shape = RoundedCornerShape(24.dp),
-                colors = CardDefaults.cardColors(containerColor = Color(0xF21B1721)),
-                border = BorderStroke(1.dp, Color.White.copy(alpha = 0.08f))
+                colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
+                border = BorderStroke(1.dp, MaterialTheme.colorScheme.onSurface.copy(alpha = 0.08f))
             ) {
                 Text(
                     "Joue quelques parties pour créer le classement.",
-                    color = VibeColors.TextSecondary,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
                     modifier = Modifier.padding(20.dp)
                 )
             }
@@ -67,11 +65,11 @@ fun LeaderboardScreen(
                     modifier = Modifier.fillMaxWidth(),
                     shape = RoundedCornerShape(20.dp),
                     colors = CardDefaults.cardColors(
-                        containerColor = if (leader) VibeColors.Purple.copy(alpha = 0.15f) else Color(0xF21B1721)
+                        containerColor = if (leader) MaterialTheme.colorScheme.primary.copy(alpha = 0.15f) else MaterialTheme.colorScheme.surface
                     ),
                     border = BorderStroke(
                         1.dp,
-                        if (leader) VibeColors.Purple.copy(alpha = 0.40f) else Color.White.copy(alpha = 0.07f)
+                        if (leader) MaterialTheme.colorScheme.primary.copy(alpha = 0.40f) else MaterialTheme.colorScheme.onSurface.copy(alpha = 0.07f)
                     )
                 ) {
                     Row(
@@ -81,21 +79,21 @@ fun LeaderboardScreen(
                     ) {
                         Text(
                             "#" + (index + 1),
-                            color = if (leader) VibeColors.PurpleBright else VibeColors.TextSecondary,
+                            color = if (leader) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurfaceVariant,
                             fontWeight = FontWeight.Black,
                             fontSize = 18.sp
                         )
                         Column(modifier = Modifier.weight(1f)) {
-                            Text(stat.name, color = VibeColors.TextPrimary, fontWeight = FontWeight.Black)
+                            Text(stat.name, color = MaterialTheme.colorScheme.onSurface, fontWeight = FontWeight.Black)
                             Text(
                                 stat.wins.toString() + if (stat.wins == 1) " victoire" else " victoires",
-                                color = VibeColors.TextSecondary,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant,
                                 fontSize = 12.sp
                             )
                         }
                         Text(
                             stat.bestScorePercent.toString() + "%",
-                            color = VibeColors.Green,
+                            color = MaterialTheme.colorScheme.tertiary,
                             fontWeight = FontWeight.Black
                         )
                     }
@@ -110,8 +108,8 @@ fun LeaderboardScreen(
             modifier = Modifier.fillMaxWidth().height(56.dp),
             shape = RoundedCornerShape(18.dp),
             colors = ButtonDefaults.buttonColors(
-                containerColor = Color(0xFF302A39),
-                contentColor = VibeColors.TextPrimary
+                containerColor = MaterialTheme.colorScheme.surfaceVariant,
+                contentColor = MaterialTheme.colorScheme.onSurface
             )
         ) {
             Text("Retour", fontWeight = FontWeight.Bold)

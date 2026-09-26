@@ -37,6 +37,7 @@ import com.vibecheck.app.data.KnowMeRepository
 import com.vibecheck.app.data.LocalStatsStore
 import com.vibecheck.app.data.OnboardingStore
 import com.vibecheck.app.data.PlayerGroupStore
+import com.vibecheck.app.data.PersonaCatalog
 import com.vibecheck.app.data.QuestionHistoryStore
 import com.vibecheck.app.data.QuestionRepository
 import com.vibecheck.app.domain.Challenge
@@ -45,6 +46,7 @@ import com.vibecheck.app.domain.model.GameIntensity
 import com.vibecheck.app.domain.model.GameMode
 import com.vibecheck.app.domain.model.GameResult
 import com.vibecheck.app.domain.model.GamePack
+import com.vibecheck.app.domain.solo.SoloRoundResolver
 import com.vibecheck.app.ui.screens.GameScreen
 import com.vibecheck.app.ui.screens.HomeScreen
 import com.vibecheck.app.ui.screens.LeaderboardScreen
@@ -52,16 +54,25 @@ import com.vibecheck.app.ui.screens.OnboardingScreen
 import com.vibecheck.app.ui.screens.PassPhoneScreen
 import com.vibecheck.app.ui.screens.PlayerSetupScreen
 import com.vibecheck.app.ui.screens.ResultScreen
+import com.vibecheck.app.ui.screens.SettingsScreen
+import com.vibecheck.app.ui.screens.SoloGameScreen
+import com.vibecheck.app.ui.screens.SoloPartyScreen
 import com.vibecheck.app.ui.state.AppScreen
 import com.vibecheck.app.ui.state.GameViewModel
+import com.vibecheck.app.ui.state.SoloPartyState
 import com.vibecheck.app.ui.theme.VibeBackdrop
 import com.vibecheck.app.ui.theme.VibeCheckTheme
 import com.vibecheck.app.ui.theme.VibeColors
+import com.vibecheck.app.ui.theme.VibeThemeStyle
+
+private const val MONETIZATION_ENABLED = false
 
 @Composable
 fun VibeCheckApp(
     incomingChallenge: Challenge? = null,
     onChallengeConsumed: () -> Unit = {},
+    selectedTheme: VibeThemeStyle = VibeThemeStyle.PREMIUM_DARK,
+    onThemeSelected: (VibeThemeStyle) -> Unit = {},
     gameViewModel: GameViewModel = viewModel()
 ) {
     val context = LocalContext.current
@@ -85,9 +96,11 @@ fun VibeCheckApp(
     }
     var groupHydrated by remember { mutableStateOf(false) }
 
-    DisposableEffect(billingManager) {
-        billingManager.start()
-        onDispose { billingManager.close() }
+    if (MONETIZATION_ENABLED) {
+        DisposableEffect(billingManager) {
+            billingManager.start()
+            onDispose { billingManager.close() }
+        }
     }
 
     val isPremium by billingManager.isPremium.collectAsState()
@@ -110,6 +123,8 @@ fun VibeCheckApp(
     val knowGuesserIndex by gameViewModel.knowGuesserIndex.collectAsState()
     val knowScores by gameViewModel.knowScores.collectAsState()
     val knowHandoffPending by gameViewModel.knowHandoffPending.collectAsState()
+    val soloPersonaIds by gameViewModel.soloPersonaIds.collectAsState()
+    val isSoloSession by gameViewModel.isSoloSession.collectAsState()
 
     val screen = runCatching { AppScreen.valueOf(screenName) }.getOrDefault(AppScreen.HOME)
     val selectedMode = runCatching { GameMode.valueOf(modeName) }.getOrDefault(GameMode.WHO_OF_US)
@@ -188,6 +203,8 @@ fun VibeCheckApp(
     BackHandler(enabled = screen != AppScreen.HOME) {
         when (screen) {
             AppScreen.PLAYERS -> gameViewModel.goBackHome()
+            AppScreen.SOLO_PARTY -> gameViewModel.goBackHome()
+            AppScreen.SETTINGS -> gameViewModel.goBackHome()
             AppScreen.GAME -> gameViewModel.abandonGame()
             AppScreen.RESULT -> gameViewModel.goHome()
             AppScreen.LEADERBOARD -> gameViewModel.goHome()
@@ -234,6 +251,9 @@ fun VibeCheckApp(
                         groupLeaderWins = groupLeader?.wins ?: 0,
                         onOpenLeaderboard = gameViewModel::openLeaderboard,
                         onEditGroup = gameViewModel::editPlayers,
+                        onOpenSettings = gameViewModel::openSettings,
+                        onPlayTogether = gameViewModel::editPlayers,
+                        onPlaySolo = gameViewModel::openSoloParty,
                         onBuyPremium = {
                             (context as? Activity)?.let { activity ->
                                 billingManager.launchPurchase(activity)
@@ -243,6 +263,34 @@ fun VibeCheckApp(
                         onPack = gameViewModel::selectPack,
                         onMode = gameViewModel::quickStartMode
                     )
+
+                    AppScreen.SETTINGS -> SettingsScreen(
+                        selectedTheme = selectedTheme,
+                        onThemeSelected = onThemeSelected,
+                        onBack = gameViewModel::goBackHome
+                    )
+
+                    AppScreen.SOLO_PARTY -> {
+                        val soloState = SoloPartyState(soloPersonaIds.toList())
+                        SoloPartyScreen(
+                            personas = PersonaCatalog.all,
+                            state = soloState,
+                            onToggle = { personaId ->
+                                gameViewModel.setSoloParty(soloState.toggle(personaId).selectedIds)
+                            },
+                            onAutoCompose = {
+                                gameViewModel.setSoloParty(
+                                    soloState.autoCompose(
+                                        catalog = PersonaCatalog.all,
+                                        size = 5,
+                                        seed = sessionSeed
+                                    ).selectedIds
+                                )
+                            },
+                            onBack = gameViewModel::goBackHome,
+                            onStart = gameViewModel::startSoloGame
+                        )
+                    }
 
                     AppScreen.PLAYERS -> PlayerSetupScreen(
                         mode = selectedMode,
@@ -255,7 +303,63 @@ fun VibeCheckApp(
                     )
 
                     AppScreen.GAME -> {
-                        if (selectedMode == GameMode.KNOWS_ME) {
+                        if (isSoloSession) {
+                            val castById = PersonaCatalog.all.associateBy { it.id }
+                            val cast = soloPersonaIds.mapNotNull(castById::get)
+                            val questions = QuestionRepository.forMode(
+                                mode = selectedMode,
+                                seed = sessionSeed,
+                                avoidIds = avoidedIds,
+                                intensity = sessionIntensity,
+                                pack = sessionPack
+                            )
+
+                            if (cast.size < 2 || questions.isEmpty()) {
+                                Box(
+                                    modifier = Modifier.fillMaxSize(),
+                                    contentAlignment = Alignment.Center
+                                ) {
+                                    Text(
+                                        "Casting Solo indisponible. Reviens au casting.",
+                                        color = VibeColors.TextPrimary,
+                                        fontWeight = FontWeight.Bold
+                                    )
+                                }
+                            } else {
+                                val safeIndex = questionIndex.coerceIn(0, questions.lastIndex)
+                                val question = questions[safeIndex]
+                                val round = remember(
+                                    question.id,
+                                    sessionSeed,
+                                    soloPersonaIds
+                                ) {
+                                    SoloRoundResolver().resolve(
+                                        question = question,
+                                        cast = cast,
+                                        sessionSeed = sessionSeed + safeIndex
+                                    )
+                                }
+                                SoloGameScreen(
+                                    questionText = question.text,
+                                    progress = safeIndex + 1,
+                                    total = questions.size,
+                                    cast = cast,
+                                    round = round,
+                                    onNext = {
+                                        val winnerName = round.winnerPersonaId
+                                            ?.let(castById::get)
+                                            ?.displayName
+                                            ?: "Personne"
+                                        gameViewModel.answer(
+                                            questionId = question.id,
+                                            answer = winnerName,
+                                            isLastQuestion = safeIndex == questions.lastIndex
+                                        )
+                                    },
+                                    onExit = gameViewModel::abandonGame
+                                )
+                            }
+                        } else if (selectedMode == GameMode.KNOWS_ME) {
                             val prompts = KnowMeRepository.forSeed(
                                 seed = sessionSeed,
                                 avoidIds = avoidedIds,
@@ -429,6 +533,7 @@ fun VibeCheckApp(
                             sessionInstanceId = sessionInstanceId,
                             intensity = selectedIntensity,
                             pack = selectedPack,
+                            isSoloSession = isSoloSession,
                             onReplay = gameViewModel::replay,
                             onHome = gameViewModel::goHome
                         )
