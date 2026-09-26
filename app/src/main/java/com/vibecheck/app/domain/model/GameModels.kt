@@ -9,7 +9,7 @@ enum class GamePack(
     private val subtitleEn: String
 ) {
     MIX("Mix", "Mix", "Un mélange équilibré", "A balanced mix"),
-    FRIENDS("Friends", "Friends", "Pour les groupes d'amis", "For groups of friends"),
+    FRIENDS("Amis", "Friends", "Pour les groupes d'amis", "For groups of friends"),
     DEEP("Deep", "Deep", "Plus personnel et révélateur", "More personal and revealing"),
     CHAOS("Chaos", "Chaos", "Le plus imprévisible", "The most unpredictable");
 
@@ -38,7 +38,7 @@ enum class GameMode(
     private val subtitleEn: String
 ) {
     WHO_OF_US("Qui de nous ?", "Who of us?", "Vote pour la personne qui correspond le mieux.", "Vote for the person who fits best."),
-    MOST_LIKELY("Most Likely To", "Most Likely To", "Le plus probable de faire ça.", "Who is most likely to do it."),
+    MOST_LIKELY("Le plus susceptible de…", "Most Likely To", "Le plus probable de faire ça.", "Who is most likely to do it."),
     RED_GREEN("Red Flag / Green Flag", "Red Flag / Green Flag", "Décide si le comportement passe ou casse.", "Decide whether the behavior is a green flag or a red flag."),
     KNOWS_ME("Qui me connaît le mieux ?", "Who knows me best?", "Une personne répond en secret. Les autres doivent deviner.", "One person answers secretly. Everyone else has to guess.");
 
