@@ -10,12 +10,12 @@ Before submission, inspect the final dependency/permission report and confirm wh
 
 ## Billing
 
-V1 is ad-free. The legacy Google Play Billing integration remains in the codebase for future use, but the V1 release contract disables the ad-removal purchase:
+V1.1 is ad-free. Google Play Billing is not packaged in the app and there is no purchase UI or billing runtime:
 
 - `ReleaseConfig.adRemovalPurchaseEnabled == false`;
-- the Premium / ad-removal card is not shown;
-- the billing connection is not started during normal V1 startup;
-- no active `remove_ads_lifetime` Play product is required for V1.
+- the Premium / ad-removal card has been removed;
+- the Billing SDK and billing manager are not included in V1.1;
+- no active `remove_ads_lifetime` Play product is required for V1.1.
 
 If monetization is reintroduced later, repeat the billing, privacy, Data Safety and store-copy review before publishing that update.
 
@@ -37,7 +37,7 @@ Complete the questionnaire from the actual question catalog and final release co
 
 ## Privacy policy
 
-Whether Play requires a privacy-policy URL depends on the final declarations, SDK behavior, permissions, audience and distribution configuration. If a policy is supplied, it must describe the exact shipped behavior, including Google Play Billing and any later analytics/ads SDKs.
+Whether Play requires a privacy-policy URL depends on the final declarations, SDK behavior, permissions, audience and distribution configuration. If a policy is supplied, it must describe the exact shipped behavior and any later analytics, ads or billing SDKs if those are introduced.
 
 ## Final artifact gate
 
