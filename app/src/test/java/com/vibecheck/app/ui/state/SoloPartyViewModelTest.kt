@@ -3,7 +3,6 @@ package com.vibecheck.app.ui.state
 import androidx.lifecycle.SavedStateHandle
 import com.vibecheck.app.data.PersonaCatalog
 import com.vibecheck.app.domain.model.GameMode
-import com.vibecheck.app.domain.solo.PersonaKind
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
 import org.junit.Assert.assertTrue
@@ -14,8 +13,7 @@ class SoloPartyViewModelTest {
     @Test fun `selection accepts two through seven public companions`() { val vm=SoloPartyViewModel(SavedStateHandle()); PersonaCatalog.soloPublic.take(7).forEach{vm.toggle(it.id)}; assertTrue(vm.canStart.value); assertEquals(7,vm.selectedIds.value.size) }
     @Test fun `eighth companion is rejected without losing current selection`() { val vm=SoloPartyViewModel(SavedStateHandle()); PersonaCatalog.soloPublic.take(8).forEach{vm.toggle(it.id)}; assertEquals(7,vm.selectedIds.value.size) }
     @Test fun `tapping selected companion deselects it`() { val vm=SoloPartyViewModel(SavedStateHandle()); val p=PersonaCatalog.soloPublic.first(); vm.toggle(p.id); vm.toggle(p.id); assertTrue(vm.selectedIds.value.isEmpty()) }
-    @Test fun `visible solo personas are always public simulations`() { val vm=SoloPartyViewModel(SavedStateHandle()); assertTrue(vm.visiblePersonas.value.isNotEmpty()); assertTrue(vm.visiblePersonas.value.all{it.kind==PersonaKind.PUBLIC_SIMULATION}) }
-    @Test fun `original kind filter cannot expose fictional personas`() { val vm=SoloPartyViewModel(SavedStateHandle()); vm.setKindFilter(PersonaKind.ORIGINAL); assertTrue(vm.visiblePersonas.value.all{it.kind==PersonaKind.PUBLIC_SIMULATION}) }
+    @Test fun `visible solo personas are always public simulations`() { val vm=SoloPartyViewModel(SavedStateHandle()); assertTrue(vm.visiblePersonas.value.isNotEmpty()); assertTrue(vm.visiblePersonas.value.all{it.isFictionalSimulation}) }
     @Test fun `search matches public display name case insensitively`() { val vm=SoloPartyViewModel(SavedStateHandle()); vm.setQuery("zend"); assertEquals(listOf("Zendaya"),vm.visiblePersonas.value.map{it.displayName}) }
     @Test fun `auto compose selects only unique public figures reproducibly`() { val a=SoloPartyViewModel(SavedStateHandle()); val b=SoloPartyViewModel(SavedStateHandle()); a.autoCompose(42L,5); b.autoCompose(42L,5); assertEquals(a.selectedIds.value,b.selectedIds.value); assertEquals(5,a.selectedIds.value.distinct().size); assertTrue(a.selectedIds.value.all{ id -> PersonaCatalog.soloPublic.any{it.id==id} }); assertTrue(a.canStart.value) }
     @Test fun `restored unknown ids are discarded`() { val public=PersonaCatalog.soloPublic.first(); val state=SavedStateHandle(mapOf("solo_party_selected_ids" to listOf("legacy_original_persona",public.id))); val vm=SoloPartyViewModel(state); assertEquals(listOf(public.id),vm.selectedIds.value) }
