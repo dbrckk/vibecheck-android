@@ -15,6 +15,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.vibecheck.app.domain.solo.Persona
 import com.vibecheck.app.localization.AppLocale
+import com.vibecheck.app.ui.components.VibeActionSurface
 import com.vibecheck.app.ui.theme.VibeColors
 
 @Composable
@@ -46,7 +47,7 @@ fun SoloPartyScreen(
                 shape = RoundedCornerShape(999.dp),
             ) {
                 Text(
-                    AppLocale.pick("\${selectedIds.size}/7 personnalités", "\${selectedIds.size}/7 public figures"),
+                    AppLocale.pick("${selectedIds.size}/7 personnalités", "${selectedIds.size}/7 public figures"),
                     color = VibeColors.TextSecondary,
                     fontWeight = FontWeight.Bold,
                     modifier = Modifier.padding(horizontal = 11.dp, vertical = 6.dp),
@@ -133,17 +134,24 @@ fun SoloPartyScreen(
             shape = RoundedCornerShape(18.dp),
         )
 
-        OutlinedButton(
+        VibeActionSurface(
             onClick = onAutoCompose,
-            modifier = Modifier.fillMaxWidth().heightIn(min = 52.dp),
-            shape = RoundedCornerShape(18.dp),
-            border = BorderStroke(1.5.dp, VibeColors.Purple.copy(alpha = .42f)),
+            modifier = Modifier.fillMaxWidth(),
+            accent = VibeColors.Purple,
+            containerColor = VibeColors.Purple.copy(alpha = .10f),
         ) {
-            Text(
-                AppLocale.pick("Composer automatiquement", "Auto-compose group"),
-                color = VibeColors.TextPrimary,
-                fontWeight = FontWeight.Bold,
-            )
+            Row(
+                Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 13.dp),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically,
+            ) {
+                Text(
+                    AppLocale.pick("Composer automatiquement", "Auto-compose group"),
+                    color = VibeColors.TextPrimary,
+                    fontWeight = FontWeight.Black,
+                )
+                Text("↻", color = VibeColors.Purple, fontWeight = FontWeight.Black)
+            }
         }
 
         if (validationMessage.isNotBlank()) {
@@ -156,7 +164,7 @@ fun SoloPartyScreen(
         ) {
             items(personas, key = { it.id }) { persona ->
                 val selected = persona.id in selectedIds
-                Card(
+                VibeActionSurface(
                     onClick = { onTogglePersona(persona.id) },
                     modifier = Modifier
                         .fillMaxWidth()
@@ -164,20 +172,10 @@ fun SoloPartyScreen(
                             contentDescription = persona.displayName +
                                 if (selected) AppLocale.pick(", sélectionné", ", selected") else ""
                         },
-                    colors = CardDefaults.cardColors(
-                        containerColor = if (selected) {
-                            VibeColors.Purple.copy(alpha = .16f)
-                        } else {
-                            MaterialTheme.colorScheme.surface
-                        }
-                    ),
-                    border = BorderStroke(
-                        if (selected) 2.dp else 1.dp,
-                        if (selected) VibeColors.Purple.copy(alpha = .55f)
-                        else MaterialTheme.colorScheme.surfaceVariant,
-                    ),
-                    shape = RoundedCornerShape(22.dp),
-                    elevation = CardDefaults.cardElevation(defaultElevation = if (selected) 3.dp else 1.dp),
+                    accent = VibeColors.Purple,
+                    containerColor = if (selected) VibeColors.Purple.copy(alpha = .16f)
+                        else MaterialTheme.colorScheme.surface,
+                    emphasized = selected,
                 ) {
                     Row(
                         Modifier.fillMaxWidth().padding(14.dp),
@@ -202,18 +200,22 @@ fun SoloPartyScreen(
             }
         }
 
-        Button(
+        VibeActionSurface(
             onClick = onStart,
             enabled = canStart,
-            modifier = Modifier.fillMaxWidth().height(60.dp),
-            shape = RoundedCornerShape(22.dp),
-            colors = ButtonDefaults.buttonColors(
-                containerColor = VibeColors.Purple,
-                contentColor = MaterialTheme.colorScheme.onPrimary,
-            ),
-            elevation = ButtonDefaults.buttonElevation(defaultElevation = 6.dp, pressedElevation = 1.dp),
+            modifier = Modifier.fillMaxWidth(),
+            accent = VibeColors.Purple,
+            containerColor = VibeColors.Purple,
+            emphasized = true,
+            minHeight = 60.dp,
         ) {
-            Text(AppLocale.pick("Je participe — démarrer", "I’m playing — start"), fontWeight = FontWeight.Black)
+            Box(Modifier.fillMaxWidth().padding(horizontal = 18.dp, vertical = 17.dp), contentAlignment = Alignment.Center) {
+                Text(
+                    AppLocale.pick("Je participe — démarrer", "I’m playing — start"),
+                    color = MaterialTheme.colorScheme.onPrimary,
+                    fontWeight = FontWeight.Black,
+                )
+            }
         }
     }
 }
