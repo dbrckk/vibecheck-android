@@ -5,7 +5,6 @@ import androidx.lifecycle.ViewModel
 import com.vibecheck.app.data.PersonaCatalog
 import com.vibecheck.app.domain.model.GameMode
 import com.vibecheck.app.domain.solo.Persona
-import com.vibecheck.app.domain.solo.PersonaKind
 import com.vibecheck.app.localization.AppLocale
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -26,7 +25,6 @@ class SoloPartyViewModel(private val savedStateHandle: SavedStateHandle) : ViewM
     val selectedMode: StateFlow<GameMode> = _selectedMode
     val playerName: StateFlow<String> = savedStateHandle.getStateFlow(KEY_PLAYER_NAME, DEFAULT_PLAYER_NAME)
     private val _query = MutableStateFlow(""); val query: StateFlow<String> = _query
-    private val _kindFilter = MutableStateFlow<PersonaKind?>(null); val kindFilter: StateFlow<PersonaKind?> = _kindFilter
     private val _visiblePersonas = MutableStateFlow(PersonaCatalog.soloPublic); val visiblePersonas: StateFlow<List<Persona>> = _visiblePersonas
     private val _canStart = MutableStateFlow(initialSelected.size in MIN_COMPANIONS..MAX_COMPANIONS); val canStart: StateFlow<Boolean> = _canStart
     private val _validationMessage = MutableStateFlow(validationFor(initialSelected.size)); val validationMessage: StateFlow<String> = _validationMessage
@@ -38,7 +36,6 @@ class SoloPartyViewModel(private val savedStateHandle: SavedStateHandle) : ViewM
         savedStateHandle[KEY_MODE] = mode.name
     }
     fun toggle(personaId: String) { if (PersonaCatalog.soloPublic.none{it.id==personaId}) return; val c=selectedIds.value; val u=when { personaId in c -> c.filterNot{it==personaId}; c.size>=MAX_COMPANIONS -> { updateValidation(c.size,true); return }; else -> c+personaId }; savedStateHandle[KEY_SELECTED_IDS]=u; updateValidation(u.size) }
-    fun setKindFilter(kind: PersonaKind?) { _kindFilter.value=if(kind==PersonaKind.PUBLIC_SIMULATION) kind else null; refreshVisiblePersonas() }
     fun setQuery(value: String) { _query.value=value; refreshVisiblePersonas() }
     fun autoCompose(seed: Long, count: Int) { require(count in MIN_COMPANIONS..MAX_COMPANIONS); val selected=PersonaCatalog.soloPublic.shuffled(Random(seed)).take(count).map{it.id}; savedStateHandle[KEY_SELECTED_IDS]=selected; updateValidation(selected.size) }
     private fun refreshVisiblePersonas() { val q=_query.value.trim().lowercase(); _visiblePersonas.value=PersonaCatalog.soloPublic.filter{q.isBlank()||it.displayName.lowercase().contains(q)||it.archetype.lowercase().contains(q)} }
