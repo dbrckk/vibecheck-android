@@ -86,9 +86,13 @@ class AmbientMusicController(
         if (closed) return
         val shouldPlay = AmbientMusicPolicy(enabled, foreground, hasAudioFocus).shouldPlay
         if (shouldPlay) {
-            val current = player ?: MediaPlayer.create(appContext, soundtrackResId)?.also {
+            val current = player ?: MediaPlayer.create(
+                appContext,
+                soundtrackResId,
+                attributes,
+                AudioManager.AUDIO_SESSION_ID_GENERATE,
+            )?.also {
                 it.isLooping = true
-                it.setAudioAttributes(attributes)
                 it.setVolume(volume, volume)
                 player = it
             }
