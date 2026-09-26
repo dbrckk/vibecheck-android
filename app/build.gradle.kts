@@ -15,6 +15,19 @@ val keystoreProperties = Properties().apply {
 val hasReleaseSigning = listOf("storeFile", "storePassword", "keyAlias", "keyPassword")
     .all { !keystoreProperties.getProperty(it).isNullOrBlank() }
 
+val ambientMusicSource = rootProject.file("menumusicloop-tiggo.ogg")
+val generatedAmbientRes = layout.buildDirectory.dir("generated/ambientMusicRes")
+val syncAmbientMusic by tasks.registering(Copy::class) {
+    from(ambientMusicSource)
+    into(generatedAmbientRes.map { it.dir("raw") })
+    rename { "vibecheck_pastel_ambient.ogg" }
+    doFirst {
+        check(ambientMusicSource.isFile) {
+            "Missing CC0 ambient soundtrack: ${ambientMusicSource.path}"
+        }
+    }
+}
+
 android {
     namespace = "com.vibecheck.app"
     compileSdk = 36
@@ -25,6 +38,7 @@ android {
         versionCode = 1
         versionName = "1.0.0"
     }
+    sourceSets.getByName("main").res.srcDir(generatedAmbientRes)
     buildFeatures { compose = true }
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_17
@@ -52,6 +66,8 @@ android {
     }
 }
 
+tasks.named("preBuild").configure { dependsOn(syncAmbientMusic) }
+
 kotlin { jvmToolchain(17) }
 
 dependencies {
@@ -61,6 +77,7 @@ dependencies {
     implementation("androidx.activity:activity-compose:1.10.1")
     implementation("androidx.core:core-ktx:1.15.0")
     implementation("androidx.lifecycle:lifecycle-viewmodel-compose:2.9.4")
+    implementation("androidx.lifecycle:lifecycle-runtime-compose:2.9.4")
     implementation("androidx.datastore:datastore-preferences:1.2.1")
     implementation("com.android.billingclient:billing:9.1.0")
     implementation("androidx.compose.material3:material3")
