@@ -2,6 +2,7 @@ package com.vibecheck.app.ui.state
 
 import androidx.lifecycle.SavedStateHandle
 import com.vibecheck.app.data.PersonaCatalog
+import com.vibecheck.app.domain.model.GameMode
 import com.vibecheck.app.domain.solo.PersonaKind
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
@@ -21,4 +22,22 @@ class SoloPartyViewModelTest {
     @Test fun `selected public ids survive viewmodel recreation`() { val state=SavedStateHandle(); val a=SoloPartyViewModel(state); PersonaCatalog.soloPublic.take(3).forEach{a.toggle(it.id)}; assertEquals(a.selectedIds.value,SoloPartyViewModel(state).selectedIds.value) }
     @Test fun `solo player uses localized default and editable name survives recreation`() { val state=SavedStateHandle(); val first=SoloPartyViewModel(state); assertEquals(SoloPartyViewModel.DEFAULT_PLAYER_NAME, first.playerName.value); first.setPlayerName("Alex"); assertEquals("Alex", SoloPartyViewModel(state).playerName.value) }
     @Test fun `blank solo player name normalizes back to localized default`() { val vm=SoloPartyViewModel(SavedStateHandle()); vm.setPlayerName("   "); assertEquals(SoloPartyViewModel.DEFAULT_PLAYER_NAME, vm.playerName.value) }
+    @Test fun `solo mode defaults to who of us and survives recreation`() {
+        val state = SavedStateHandle()
+        val first = SoloPartyViewModel(state)
+        assertEquals(GameMode.WHO_OF_US, first.selectedMode.value)
+        first.setMode(GameMode.RED_GREEN)
+        assertEquals(GameMode.RED_GREEN, SoloPartyViewModel(state).selectedMode.value)
+    }
+
+    @Test fun `solo mode rejects unsupported knows me`() {
+        val vm = SoloPartyViewModel(SavedStateHandle())
+        vm.setMode(GameMode.KNOWS_ME)
+        assertEquals(GameMode.WHO_OF_US, vm.selectedMode.value)
+        assertEquals(
+            listOf(GameMode.WHO_OF_US, GameMode.MOST_LIKELY, GameMode.RED_GREEN),
+            SoloPartyViewModel.SOLO_MODES,
+        )
+    }
 }
+
