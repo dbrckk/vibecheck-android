@@ -16,8 +16,9 @@ class ResultShareCopyTest {
         )
         assertTrue(text.contains("fictional", ignoreCase = true))
         assertTrue(text.contains("simulat", ignoreCase = true))
+        assertTrue(text.contains("not their real opinions", ignoreCase = true))
         assertFalse(text.contains("really thinks", ignoreCase = true))
-        assertFalse(text.contains("real opinion", ignoreCase = true))
+        assertFalse(text.contains("genuine opinion", ignoreCase = true))
     }
 
     @Test fun `group copy includes winner score and podium when available`() {
