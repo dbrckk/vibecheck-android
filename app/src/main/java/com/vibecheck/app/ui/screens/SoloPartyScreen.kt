@@ -237,11 +237,20 @@ fun SoloPartyScreen(
                             )
                             Text(persona.archetype, color = VibeColors.TextSecondary)
                         }
-                        Text(
-                            "SIMULATION",
-                            color = VibeColors.Rose,
-                            fontWeight = FontWeight.Black,
-                        )
+                        Column(horizontalAlignment = Alignment.End) {
+                            Text(
+                                if (selected) AppLocale.pick("✓ SÉLECTIONNÉE", "✓ SELECTED") else "SIMULATION",
+                                color = if (selected) VibeColors.Purple else VibeColors.Rose,
+                                fontWeight = FontWeight.Black,
+                            )
+                            if (selected) {
+                                Text(
+                                    AppLocale.pick("Touchez pour retirer", "Tap to remove"),
+                                    color = VibeColors.TextSecondary,
+                                    style = MaterialTheme.typography.labelSmall,
+                                )
+                            }
+                        }
                     }
                 }
             }
