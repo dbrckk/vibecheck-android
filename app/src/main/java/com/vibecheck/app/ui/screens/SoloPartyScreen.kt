@@ -10,6 +10,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.selected
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
@@ -94,7 +95,7 @@ fun SoloPartyScreen(
                 }
                 VibeActionSurface(
                     onClick = { onModeChange(mode) },
-                    modifier = Modifier.weight(1f),
+                    modifier = Modifier.weight(1f).semantics { this.selected = selected },
                     accent = modeAccent,
                     containerColor = if (selected) modeAccent.copy(alpha = .20f)
                         else MaterialTheme.colorScheme.surface,
@@ -216,6 +217,7 @@ fun SoloPartyScreen(
                     modifier = Modifier
                         .fillMaxWidth()
                         .semantics {
+                            this.selected = selected
                             contentDescription = persona.displayName +
                                 if (selected) AppLocale.pick(", sélectionné", ", selected") else ""
                         },
