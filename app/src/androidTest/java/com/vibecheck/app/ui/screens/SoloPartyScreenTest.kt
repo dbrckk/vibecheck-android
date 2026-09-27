@@ -45,6 +45,6 @@ class SoloPartyScreenTest {
             personas=PersonaCatalog.soloPublic.take(8),selectedIds=ids,selectedMode=GameMode.WHO_OF_US,query="",playerName="Alex",validationMessage="",canStart=true,
             onBack={},onQueryChange={},onPlayerNameChange={},onModeChange={},onTogglePersona={},onAutoCompose={},onStart={started=true}
         ) } }
-        composeRule.onNodeWithText("Je participe — démarrer").performClick();composeRule.runOnIdle{assertTrue(started)}
+        composeRule.onNodeWithText("✓ SÉLECTIONNÉE").assertIsDisplayed()\n        composeRule.onNodeWithText("Je participe — démarrer").performClick();composeRule.runOnIdle{assertTrue(started)}
     }
 }
