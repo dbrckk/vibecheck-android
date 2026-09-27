@@ -48,23 +48,32 @@ fun VibeActionSurface(
         modifier = modifier
             .heightIn(min = minHeight)
             .graphicsLayer {
-                val pressedScale = if (pressed) 0.975f else 1f
+                val pressedScale = if (pressed) 0.965f else 1f
                 scaleX = pressedScale
                 scaleY = pressedScale
-                translationY = if (pressed) 2.dp.toPx() else 0f
+                translationY = if (pressed) 3.dp.toPx() else 0f
+                alpha = if (enabled) 1f else .64f
             }
             .semantics { role = Role.Button },
         shape = RoundedCornerShape(if (emphasized) 28.dp else 24.dp),
         colors = CardDefaults.cardColors(
             containerColor = containerColor,
-            disabledContainerColor = containerColor.copy(alpha = .48f),
+            disabledContainerColor = containerColor.copy(alpha = .52f),
         ),
         border = BorderStroke(
-            if (emphasized) 2.dp else 1.5.dp,
-            accent.copy(alpha = if (enabled) .46f else .20f),
+            if (emphasized) 2.5.dp else 1.5.dp,
+            accent.copy(alpha = when {
+                !enabled -> .20f
+                pressed -> .72f
+                emphasized -> .58f
+                else -> .46f
+            }),
         ),
         elevation = CardDefaults.cardElevation(
-            defaultElevation = if (emphasized) 7.dp else 4.dp,
+            defaultElevation = if (emphasized) 9.dp else 5.dp,
+            pressedElevation = 1.dp,
+            focusedElevation = if (emphasized) 10.dp else 6.dp,
+            hoveredElevation = if (emphasized) 10.dp else 6.dp,
             disabledElevation = 0.dp,
         ),
         content = content,
