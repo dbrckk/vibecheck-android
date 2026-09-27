@@ -40,11 +40,14 @@ class SoloPartyScreenTest {
     }
 
     @Test fun valid_party_can_start_with_human_participant() {
-        var started=false;val ids=PersonaCatalog.soloPublic.take(2).map{it.id}
+        var started=false
+        val ids=PersonaCatalog.soloPublic.take(2).map{it.id}
         composeRule.setContent { VibeCheckTheme { SoloPartyScreen(
             personas=PersonaCatalog.soloPublic.take(8),selectedIds=ids,selectedMode=GameMode.WHO_OF_US,query="",playerName="Alex",validationMessage="",canStart=true,
             onBack={},onQueryChange={},onPlayerNameChange={},onModeChange={},onTogglePersona={},onAutoCompose={},onStart={started=true}
         ) } }
-        composeRule.onNodeWithText("✓ SÉLECTIONNÉE").assertIsDisplayed()\n        composeRule.onNodeWithText("Je participe — démarrer").performClick();composeRule.runOnIdle{assertTrue(started)}
+        composeRule.onNodeWithText("✓ SÉLECTIONNÉE").assertIsDisplayed()
+        composeRule.onNodeWithText("Je participe — démarrer").performClick()
+        composeRule.runOnIdle { assertTrue(started) }
     }
 }
