@@ -102,11 +102,13 @@ class GameViewModel(
 
     fun restorePlayers(restoredPlayers: List<String>) {
         if (players.value.isNotEmpty()) return
-        savedStateHandle[KEY_PLAYERS] = ArrayList(restoredPlayers)
+        savedStateHandle[KEY_PLAYERS] = ArrayList(sanitizePlayers(restoredPlayers))
     }
 
     fun addPlayer(player: String) {
-        savedStateHandle[KEY_PLAYERS] = ArrayList(players.value + player)
+        if (!PlayerRules.canAdd(players.value, player)) return
+        val normalized = PlayerRules.normalize(player)
+        savedStateHandle[KEY_PLAYERS] = ArrayList(players.value + normalized)
     }
 
     fun removePlayer(player: String) {
@@ -123,6 +125,13 @@ class GameViewModel(
     }
 
     fun startGame() {
+        val mode = runCatching { GameMode.valueOf(modeName.value) }
+            .getOrDefault(GameMode.WHO_OF_US)
+        if (mode != GameMode.RED_GREEN && !PlayerRules.canStart(players.value)) {
+            savedStateHandle[KEY_SCREEN] = AppScreen.PLAYERS.name
+            return
+        }
+
         savedStateHandle[KEY_VOTES] = arrayListOf<String>()
         savedStateHandle[KEY_QUESTION_INDEX] = 0
         resetKnowMeState()
@@ -215,6 +224,16 @@ class GameViewModel(
         savedStateHandle[KEY_CHALLENGE_TARGET] = NO_CHALLENGE
         resetKnowMeState()
         savedStateHandle[KEY_SCREEN] = AppScreen.HOME.name
+    }
+
+    private fun sanitizePlayers(candidates: List<String>): List<String> {
+        val sanitized = mutableListOf<String>()
+        candidates.forEach { candidate ->
+            if (PlayerRules.canAdd(sanitized, candidate)) {
+                sanitized += PlayerRules.normalize(candidate)
+            }
+        }
+        return sanitized
     }
 
     private fun ensureKnowScoreSlots() {
