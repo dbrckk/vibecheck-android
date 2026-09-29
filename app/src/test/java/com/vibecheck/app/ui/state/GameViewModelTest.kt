@@ -37,6 +37,8 @@ class GameViewModelTest {
         val viewModel = GameViewModel(SavedStateHandle())
         val seed = 123456789L
         viewModel.acceptChallenge(Challenge(GameMode.WHO_OF_US, 64, seed = seed))
+        viewModel.addPlayer("Alice")
+        viewModel.addPlayer("Bob")
         viewModel.startGame()
         assertEquals(seed, viewModel.sessionSeed.value)
         viewModel.replay()
@@ -337,6 +339,56 @@ class GameViewModelTest {
         assertEquals(GamePack.FRIENDS.name, viewModel.packName.value)
         viewModel.selectPack(GamePack.CHAOS)
         assertEquals(GamePack.FRIENDS.name, viewModel.packName.value)
+    }
+
+    @Test
+    fun add_player_normalizes_names_and_rejects_invalid_or_duplicate_entries() {
+        val viewModel = GameViewModel(SavedStateHandle())
+
+        viewModel.addPlayer("  Alice   Martin  ")
+        viewModel.addPlayer("alice martin")
+        viewModel.addPlayer("   ")
+
+        assertEquals(listOf("Alice Martin"), viewModel.players.value)
+    }
+
+    @Test
+    fun restored_group_is_sanitized_before_entering_game_state() {
+        val viewModel = GameViewModel(SavedStateHandle())
+
+        viewModel.restorePlayers(
+            listOf(
+                " Alice ",
+                "alice",
+                "",
+                "Bob",
+                "Chloe",
+                "Dan",
+                "Eve",
+                "Fay",
+                "Gus",
+                "Hugo",
+                "Ignored"
+            )
+        )
+
+        assertEquals(
+            listOf("Alice", "Bob", "Chloe", "Dan", "Eve", "Fay", "Gus", "Hugo"),
+            viewModel.players.value
+        )
+    }
+
+    @Test
+    fun group_mode_cannot_start_with_invalid_player_count() {
+        val viewModel = GameViewModel(SavedStateHandle())
+        viewModel.selectMode(GameMode.WHO_OF_US)
+        viewModel.addPlayer("Alice")
+
+        viewModel.startGame()
+
+        assertEquals(AppScreen.PLAYERS.name, viewModel.screenName.value)
+        assertEquals(0, viewModel.questionIndex.value)
+        assertTrue(viewModel.savedVotes.value.isEmpty())
     }
 
     @Test
