@@ -69,11 +69,15 @@ class PremiumBillingManager(
                 override fun onBillingSetupFinished(billingResult: BillingResult) {
                     if (billingResult.responseCode == BillingClient.BillingResponseCode.OK) {
                         refresh()
+                    } else {
+                        _isPurchaseReady.value = false
+                        _purchaseStatus.value = PurchaseStatus.ERROR
                     }
                 }
 
                 override fun onBillingServiceDisconnected() {
                     _isPurchaseReady.value = false
+                    _purchaseStatus.value = PurchaseStatus.LOADING
                 }
             }
         )
@@ -85,8 +89,14 @@ class PremiumBillingManager(
             start()
             return false
         }
-        val details = productDetails ?: return false
-        val offerToken = selectedOfferToken ?: return false
+        val details = productDetails ?: run {
+            _purchaseStatus.value = PurchaseStatus.ERROR
+            return false
+        }
+        val offerToken = selectedOfferToken ?: run {
+            _purchaseStatus.value = PurchaseStatus.ERROR
+            return false
+        }
 
         val productParams = BillingFlowParams.ProductDetailsParams.newBuilder()
             .setProductDetails(details)
@@ -117,7 +127,11 @@ class PremiumBillingManager(
     ) {
         when (billingResult.responseCode) {
             BillingClient.BillingResponseCode.OK -> {
-                if (purchases != null) processPurchases(purchases)
+                if (purchases != null) {
+                    processPurchases(purchases)
+                } else {
+                    _purchaseStatus.value = PurchaseStatus.ERROR
+                }
             }
             BillingClient.BillingResponseCode.USER_CANCELED ->
                 _purchaseStatus.value = PurchaseStatus.CANCELLED

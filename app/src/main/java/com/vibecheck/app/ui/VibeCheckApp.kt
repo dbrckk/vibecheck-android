@@ -1,6 +1,7 @@
 package com.vibecheck.app.ui
 
 import android.app.Activity
+import android.media.MediaPlayer
 import androidx.activity.compose.BackHandler
 import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.fadeIn
@@ -31,6 +32,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
+import com.vibecheck.app.R
 import com.vibecheck.app.billing.PremiumBillingManager
 import com.vibecheck.app.billing.PurchaseStatus
 import com.vibecheck.app.data.KnowMeRepository
@@ -61,12 +63,21 @@ import com.vibecheck.app.ui.theme.VibeColors
 @Composable
 fun VibeCheckApp(
     incomingChallenge: Challenge? = null,
+    appInForeground: Boolean = true,
     onChallengeConsumed: () -> Unit = {},
     gameViewModel: GameViewModel = viewModel()
 ) {
     val context = LocalContext.current
     val billingManager = remember(context.applicationContext) {
         PremiumBillingManager(context.applicationContext)
+    }
+    val menuMusicPlayer = remember(context.applicationContext) {
+        runCatching {
+            MediaPlayer.create(context.applicationContext, R.raw.menu_music_loop)?.apply {
+                isLooping = true
+                setVolume(0.16f, 0.16f)
+            }
+        }.getOrNull()
     }
     val questionHistory = remember(context.applicationContext) {
         QuestionHistoryStore(context.applicationContext)
@@ -88,6 +99,15 @@ fun VibeCheckApp(
     DisposableEffect(billingManager) {
         billingManager.start()
         onDispose { billingManager.close() }
+    }
+
+    DisposableEffect(menuMusicPlayer) {
+        onDispose {
+            menuMusicPlayer?.let { player ->
+                runCatching { player.stop() }
+                player.release()
+            }
+        }
     }
 
     val isPremium by billingManager.isPremium.collectAsState()
@@ -128,6 +148,17 @@ fun VibeCheckApp(
     }
     val sessionIntensity = if (legacyChallenge) null else selectedIntensity
     val sessionPack = if (legacyChallenge) GamePack.MIX else selectedPack
+    LaunchedEffect(screen, appInForeground, menuMusicPlayer) {
+        menuMusicPlayer?.let { player ->
+            val shouldPlay = appInForeground && screen == AppScreen.HOME
+            if (shouldPlay && !player.isPlaying) {
+                runCatching { player.start() }
+            } else if (!shouldPlay && player.isPlaying) {
+                runCatching { player.pause() }
+            }
+        }
+    }
+
     val groupLeader = if (screen == AppScreen.HOME) {
         players
             .map(localStatsStore::statFor)
