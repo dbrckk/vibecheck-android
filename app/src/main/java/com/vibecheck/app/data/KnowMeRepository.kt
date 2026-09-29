@@ -2,6 +2,7 @@ package com.vibecheck.app.data
 
 import com.vibecheck.app.domain.model.GameIntensity
 import com.vibecheck.app.domain.model.GamePack
+import com.vibecheck.app.localization.AppLocale
 import kotlin.random.Random
 
 data class KnowMePrompt(
@@ -38,6 +39,34 @@ object KnowMeRepository {
         KnowMePrompt("km_24", "Pour prendre une décision importante ?", listOf("Demander des avis", "Décider seul"))
     )
 
+
+    private val englishById = mapOf(
+        "km_01" to ("For a perfect weekend?" to listOf("Beach", "Mountains")),
+        "km_02" to ("For an ideal evening?" to listOf("Go out", "Stay home")),
+        "km_03" to ("When waking up?" to listOf("Coffee", "20 more minutes")),
+        "km_04" to ("When traveling?" to listOf("Plan everything", "Improvise")),
+        "km_05" to ("To relax?" to listOf("Music", "Series or movie")),
+        "km_06" to ("In a group?" to listOf("Talk a lot", "Observe first")),
+        "km_07" to ("For a gift?" to listOf("An experience", "An object")),
+        "km_08" to ("On Sunday?" to listOf("Stay active", "Plan nothing")),
+        "km_09" to ("On vacation?" to listOf("Explore", "Rest")),
+        "km_10" to ("To communicate?" to listOf("Messages", "Calls")),
+        "km_11" to ("When making a choice?" to listOf("Instinct", "Think it through")),
+        "km_12" to ("For food?" to listOf("Sweet", "Savory")),
+        "km_13" to ("For a destination?" to listOf("Big city", "Nature")),
+        "km_14" to ("For an activity?" to listOf("Competition", "Cooperation")),
+        "km_15" to ("When something is wrong?" to listOf("Talk about it quickly", "Take a step back")),
+        "km_16" to ("To discover something new?" to listOf("Read / research", "Try it directly")),
+        "km_17" to ("For photos?" to listOf("Take lots", "Enjoy it without the phone")),
+        "km_18" to ("For a surprise?" to listOf("Love it", "Prefer to know")),
+        "km_19" to ("To work?" to listOf("With noise", "In quiet")),
+        "km_20" to ("For a fun purchase?" to listOf("Travel / outing", "Tech / object")),
+        "km_21" to ("Facing the unexpected?" to listOf("Adapt quickly", "Regain control")),
+        "km_22" to ("For a new passion?" to listOf("All in immediately", "Little by little")),
+        "km_23" to ("To celebrate good news?" to listOf("With a crowd", "With a small group")),
+        "km_24" to ("For an important decision?" to listOf("Ask for opinions", "Decide alone"))
+    )
+
     fun forSeed(
         seed: Long,
         limit: Int = 8,
@@ -46,6 +75,15 @@ object KnowMeRepository {
         pack: GamePack = GamePack.MIX
     ): List<KnowMePrompt> {
         val filtered = prompts
+            .map { prompt ->
+                val en = englishById[prompt.id]
+                if (en == null) prompt else prompt.copy(
+                    text = AppLocale.pick(prompt.text, en.first),
+                    options = prompt.options.mapIndexed { index, option ->
+                        AppLocale.pick(option, en.second.getOrElse(index) { option })
+                    }
+                )
+            }
             .filter { intensity == null || matchesIntensity(it.id, intensity) }
             .filter { matchesPack(it.id, pack) }
         val shuffled = filtered.shuffled(Random(seed))

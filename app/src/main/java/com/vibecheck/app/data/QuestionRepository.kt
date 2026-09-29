@@ -4,6 +4,7 @@ import com.vibecheck.app.domain.model.GameIntensity
 import com.vibecheck.app.domain.model.GameMode
 import com.vibecheck.app.domain.model.GamePack
 import com.vibecheck.app.domain.model.Question
+import com.vibecheck.app.localization.AppLocale
 import kotlin.random.Random
 
 object QuestionRepository {
@@ -109,6 +110,109 @@ object QuestionRepository {
         Question("know_24", GameMode.KNOWS_ME, "Qui connaît le mieux les habitudes que chacun essaie de changer ?")
     )
 
+
+    private val englishById = mapOf(
+        "who_01" to "Who would survive an apocalypse best?",
+        "who_02" to "Who would reply to a message at 3 a.m.?",
+        "who_03" to "Who could become famous by accident?",
+        "who_04" to "Who would keep a secret best?",
+        "who_05" to "Who would move to another country without warning anyone?",
+        "who_06" to "Who would make the best spy?",
+        "who_07" to "Who would end up adopting five pets?",
+        "who_08" to "Who could win a TV competition?",
+        "who_09" to "Who is most likely to forget where they put their phone?",
+        "who_10" to "Who would be best at organizing a last-minute party?",
+        "who_11" to "Who could disappear from the group chat for three days without replying?",
+        "who_12" to "Who would laugh at the worst possible moment?",
+        "who_13" to "Who could improvise an entire weekend without booking anything?",
+        "who_14" to "Who would be most believable on a reality TV show?",
+        "who_15" to "Who would last longest without social media?",
+        "who_16" to "Who would start a wild project and get everyone on board?",
+        "who_17" to "Who would make the best roommate?",
+        "who_18" to "Who could recognize a song in under three seconds?",
+        "who_19" to "Who would be hardest to beat in a bluffing game?",
+        "who_20" to "Who could completely change their style overnight?",
+        "who_21" to "Who is most likely to go viral without trying?",
+        "who_22" to "Who would give the best improvised speech?",
+        "who_23" to "Who could turn a disaster into a great memory?",
+        "who_24" to "Who could live for a week with only a backpack?",
+
+        "likely_01" to "Who is most likely to take a spontaneous trip?",
+        "likely_02" to "Who is most likely to start their own business?",
+        "likely_03" to "Who is most likely to forget their own birthday?",
+        "likely_04" to "Who is most likely to win a ridiculous debate?",
+        "likely_05" to "Who is most likely to delete social media for a month?",
+        "likely_06" to "Who is most likely to order food at midnight?",
+        "likely_07" to "Who is most likely to move away for a new adventure?",
+        "likely_08" to "Who is most likely to become obsessed with a new hobby?",
+        "likely_09" to "Who is most likely to arrive late with a brilliant excuse?",
+        "likely_10" to "Who is most likely to send a five-minute voice note?",
+        "likely_11" to "Who is most likely to make a friend while waiting in line?",
+        "likely_12" to "Who is most likely to attempt a completely pointless challenge?",
+        "likely_13" to "Who is most likely to book a flight the same day?",
+        "likely_14" to "Who is most likely to start a channel or podcast?",
+        "likely_15" to "Who is most likely to reply with a meme instead of a sentence?",
+        "likely_16" to "Who is most likely to end up in an unbelievable adventure?",
+        "likely_17" to "Who is most likely to change careers for something they love?",
+        "likely_18" to "Who is most likely to make everyone laugh during a serious moment?",
+        "likely_19" to "Who is most likely to buy something just because it is limited edition?",
+        "likely_20" to "Who is most likely to organize an unforgettable surprise?",
+        "likely_21" to "Who is most likely to try a trend before everyone else?",
+        "likely_22" to "Who is most likely to live in three different countries?",
+        "likely_23" to "Who is most likely to win a game by bluffing?",
+        "likely_24" to "Who is most likely to turn a hobby into a real project?",
+
+        "rg_01" to "Reading a message and replying three days later.",
+        "rg_02" to "Always offering to split the bill.",
+        "rg_03" to "Regularly cancelling at the last minute.",
+        "rg_04" to "Quickly admitting when they are wrong.",
+        "rg_05" to "Staying in touch with all their exes.",
+        "rg_06" to "Never lending anyone their phone.",
+        "rg_07" to "Letting people know when they are going to be late.",
+        "rg_08" to "Giving compliments for no particular reason.",
+        "rg_09" to "Looking at someone else's notifications over their shoulder.",
+        "rg_10" to "Always wanting to choose what everyone does that evening.",
+        "rg_11" to "Apologizing clearly after an argument.",
+        "rg_12" to "Sharing chores without being asked.",
+        "rg_13" to "Keeping their phone face down for an entire conversation.",
+        "rg_14" to "Clearly saying they need some time alone.",
+        "rg_15" to "Regularly liking someone's old photos.",
+        "rg_16" to "Suggesting a calm conversation after a disagreement.",
+        "rg_17" to "Wanting to know all of the other person's passwords.",
+        "rg_18" to "Respecting a no without asking for an explanation.",
+        "rg_19" to "Often comparing the relationship to ones seen on social media.",
+        "rg_20" to "Supporting personal projects even when they take a lot of time.",
+        "rg_21" to "Joking about something the other person asked them to avoid.",
+        "rg_22" to "Being fine spending an evening separately.",
+        "rg_23" to "Talking about a conflict with the whole group before speaking to the person involved.",
+        "rg_24" to "Clearly saying what they expect instead of making the other person guess.",
+
+        "know_01" to "Who knows the group's habits best?",
+        "know_02" to "Who could best guess everyone else's ideal vacation destination?",
+        "know_03" to "Who notices fastest when someone is not doing well?",
+        "know_04" to "Who remembers the little stories best?",
+        "know_05" to "Who could guess everyone's favorite food?",
+        "know_06" to "Who would know which song cheers someone up?",
+        "know_07" to "Who knows everyone else's little habits best?",
+        "know_08" to "Who could most easily guess the perfect gift?",
+        "know_09" to "Who best knows what annoys each person in the group?",
+        "know_10" to "Who remembers old group conversations best?",
+        "know_11" to "Who would spot a fake story told by a friend fastest?",
+        "know_12" to "Who knows everyone else's secret or future plans best?",
+        "know_13" to "Who would know exactly who to call to cheer each person up?",
+        "know_14" to "Who could best guess everyone's usual order?",
+        "know_15" to "Who would know which situation makes each person most uncomfortable?",
+        "know_16" to "Who remembers the group's important dates best?",
+        "know_17" to "Who could best guess everyone's next big purchase?",
+        "know_18" to "Who would know which movie or series to recommend to each person?",
+        "know_19" to "Who best knows the phrases everyone keeps repeating?",
+        "know_20" to "Who could best guess what everyone would do with a month off?",
+        "know_21" to "Who would immediately know when someone is pretending to be okay?",
+        "know_22" to "Who remembers everyone's first impressions best?",
+        "know_23" to "Who could best guess each person's secret dream?",
+        "know_24" to "Who best knows the habits everyone is trying to change?"
+    )
+
     fun forMode(
         mode: GameMode,
         seed: Long = 0L,
@@ -118,6 +222,9 @@ object QuestionRepository {
         pack: GamePack = GamePack.MIX
     ): List<Question> {
         val shuffled = questions
+            .map { question ->
+                question.copy(text = AppLocale.pick(question.text, englishById[question.id] ?: question.text))
+            }
             .filter { it.mode == mode }
             .filter { intensity == null || matchesIntensity(it.id, intensity) }
             .filter { matchesPack(it.id, pack) }

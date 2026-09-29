@@ -5,49 +5,31 @@ import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
-import androidx.compose.foundation.interaction.MutableInteractionSource
-import androidx.compose.foundation.interaction.collectIsPressedAsState
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.Button
-import androidx.compose.material3.ButtonDefaults
-import androidx.compose.material3.Card
-import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.LinearProgressIndicator
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedButton
-import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
+import androidx.compose.material3.*
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.graphicsLayer
-import androidx.compose.ui.hapticfeedback.HapticFeedbackType
-import androidx.compose.ui.platform.LocalHapticFeedback
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.vibecheck.app.domain.model.GameMode
+import com.vibecheck.app.localization.AppLocale
+import com.vibecheck.app.ui.components.VibeActionSurface
+import com.vibecheck.app.ui.theme.MotionPolicy
 import com.vibecheck.app.ui.theme.VibeColors
+
+data class SimulatedResponseUi(
+    val personaName: String,
+    val option: String,
+    val isFictionalSimulation: Boolean,
+)
 
 @Composable
 fun GameScreen(
@@ -57,13 +39,16 @@ fun GameScreen(
     total: Int,
     answers: List<String>,
     onAnswer: (String) -> Unit,
-    onExit: () -> Unit
+    onExit: () -> Unit,
+    animatorScale: Float = 1f,
+    simulatedResponses: List<SimulatedResponseUi> = emptyList(),
+    onContinueSimulation: (() -> Unit)? = null,
 ) {
-    val progressFraction = if (total <= 0) 0f else progress.toFloat() / total.toFloat()
-    val animatedProgress by animateFloatAsState(
-        targetValue = progressFraction.coerceIn(0f, 1f),
-        animationSpec = tween(durationMillis = 280),
-        label = "questionProgress"
+    val fraction = if (total <= 0) 0f else progress.toFloat() / total
+    val animated by animateFloatAsState(
+        fraction.coerceIn(0f, 1f),
+        tween(MotionPolicy.durationMillis(280, animatorScale)),
+        label = "questionProgress",
     )
     val reveal = remember { Animatable(1f) }
     val accent = when (mode) {
@@ -72,201 +57,220 @@ fun GameScreen(
         GameMode.RED_GREEN -> VibeColors.Green
         GameMode.KNOWS_ME -> VibeColors.Blue
     }
-    val questionFontSize = when {
+    val size = when {
         questionText.length > 110 -> 23.sp
         questionText.length > 80 -> 25.sp
         questionText.length > 55 -> 27.sp
         else -> 30.sp
     }
-    val questionLineHeight = when {
+    val line = when {
         questionText.length > 110 -> 29.sp
         questionText.length > 80 -> 31.sp
         questionText.length > 55 -> 33.sp
         else -> 36.sp
     }
-    val haptic = LocalHapticFeedback.current
     var answering by remember(progress, questionText) { mutableStateOf(false) }
 
     LaunchedEffect(progress) {
         reveal.snapTo(0f)
-        reveal.animateTo(
-            targetValue = 1f,
-            animationSpec = tween(durationMillis = 220)
-        )
+        reveal.animateTo(1f, tween(MotionPolicy.durationMillis(220, animatorScale)))
     }
 
     fun submit(answer: String) {
         if (answering) return
         answering = true
-        haptic.performHapticFeedback(HapticFeedbackType.LongPress)
         onAnswer(answer)
     }
 
-    Column(
-        modifier = Modifier.fillMaxSize(),
-        verticalArrangement = Arrangement.SpaceBetween
-    ) {
+    Column(Modifier.fillMaxSize(), verticalArrangement = Arrangement.SpaceBetween) {
         Column {
             Row(
-                modifier = Modifier.fillMaxWidth(),
+                Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.SpaceBetween,
-                verticalAlignment = Alignment.CenterVertically
+                verticalAlignment = Alignment.CenterVertically,
             ) {
                 Column {
                     Row(
                         verticalAlignment = Alignment.CenterVertically,
-                        horizontalArrangement = Arrangement.spacedBy(8.dp)
+                        horizontalArrangement = Arrangement.spacedBy(8.dp),
                     ) {
-                        Box(
-                            modifier = Modifier
-                                .size(8.dp)
-                                .background(accent, CircleShape)
-                        )
+                        Box(Modifier.size(9.dp).background(accent, CircleShape))
                         Text(
                             mode.title,
                             color = accent,
-                            style = MaterialTheme.typography.titleMedium
+                            style = MaterialTheme.typography.titleMedium,
+                            fontWeight = FontWeight.Black,
                         )
                     }
                     Text(
-                        "Question " + progress + " sur " + total,
-                        color = Color(0xFF8B8494),
-                        fontSize = 13.sp
+                        AppLocale.pick("Question $progress sur $total", "Question $progress of $total"),
+                        color = VibeColors.TextSecondary,
+                        fontSize = 13.sp,
                     )
                 }
                 TextButton(
                     onClick = onExit,
-                    shape = RoundedCornerShape(14.dp),
-                    colors = ButtonDefaults.textButtonColors(
-                        contentColor = VibeColors.TextSecondary
-                    )
+                    shape = RoundedCornerShape(16.dp),
+                    colors = ButtonDefaults.textButtonColors(contentColor = VibeColors.TextSecondary),
                 ) {
-                    Text(
-                        "Quitter",
-                        fontWeight = FontWeight.Bold
-                    )
+                    Text(AppLocale.pick("Quitter", "Exit"), fontWeight = FontWeight.Bold)
                 }
             }
-
             Spacer(Modifier.height(10.dp))
-
             LinearProgressIndicator(
-                progress = { animatedProgress },
+                progress = { animated },
                 modifier = Modifier.fillMaxWidth().height(8.dp),
                 color = accent,
-                trackColor = accent.copy(alpha = 0.14f)
+                trackColor = accent.copy(alpha = .14f),
             )
         }
 
         Card(
-            colors = CardDefaults.cardColors(containerColor = Color(0xEE1B1721)),
-            border = BorderStroke(1.dp, accent.copy(alpha = 0.28f)),
-            elevation = CardDefaults.cardElevation(defaultElevation = 12.dp),
-            shape = RoundedCornerShape(30.dp),
-            modifier = Modifier
-                .fillMaxWidth()
-                .graphicsLayer {
-                    alpha = reveal.value
-                    translationY = (1f - reveal.value) * 24f
-                    scaleX = 0.985f + reveal.value * 0.015f
-                    scaleY = 0.985f + reveal.value * 0.015f
-                }
+            colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
+            border = BorderStroke(1.dp, accent.copy(alpha = .24f)),
+            elevation = CardDefaults.cardElevation(defaultElevation = 4.dp),
+            shape = RoundedCornerShape(34.dp),
+            modifier = Modifier.fillMaxWidth().graphicsLayer {
+                alpha = reveal.value
+                translationY = (1f - reveal.value) * 24f
+            },
         ) {
             Column(
-                modifier = Modifier.padding(horizontal = 22.dp, vertical = 30.dp),
-                horizontalAlignment = Alignment.CenterHorizontally
+                Modifier.padding(horizontal = 22.dp, vertical = 30.dp),
+                horizontalAlignment = Alignment.CenterHorizontally,
             ) {
-                Box(
-                    modifier = Modifier
-                        .background(accent.copy(alpha = 0.12f), RoundedCornerShape(999.dp))
-                        .padding(horizontal = 12.dp, vertical = 7.dp)
+                Card(
+                    colors = CardDefaults.cardColors(containerColor = accent.copy(alpha = .14f)),
+                    shape = RoundedCornerShape(999.dp),
                 ) {
                     Text(
-                        "CHOISIS SANS TROP RÉFLÉCHIR",
-                        color = accent,
+                        AppLocale.pick("CHOISIS SANS TROP RÉFLÉCHIR", "DON’T OVERTHINK IT"),
+                        color = VibeColors.TextPrimary,
                         fontSize = 11.sp,
                         fontWeight = FontWeight.Black,
-                        letterSpacing = 1.05.sp
+                        letterSpacing = 1.sp,
+                        modifier = Modifier.padding(horizontal = 13.dp, vertical = 7.dp),
                     )
                 }
                 Spacer(Modifier.height(18.dp))
                 Text(
                     questionText,
                     color = VibeColors.TextPrimary,
-                    fontSize = questionFontSize,
-                    lineHeight = questionLineHeight,
+                    fontSize = size,
+                    lineHeight = line,
                     fontWeight = FontWeight.Black,
-                    textAlign = TextAlign.Center
+                    textAlign = TextAlign.Center,
                 )
             }
         }
 
         Spacer(Modifier.height(20.dp))
 
-        LazyColumn(
-            modifier = Modifier
-                .fillMaxWidth()
-                .weight(1f)
-                .graphicsLayer {
-                    alpha = reveal.value
-                    translationY = (1f - reveal.value) * 32f
-                },
-            verticalArrangement = Arrangement.spacedBy(10.dp)
-        ) {
-            itemsIndexed(answers, key = { index, answer -> index.toString() + ":" + answer }) { index, answer ->
-                val interactionSource = remember(answer, progress) { MutableInteractionSource() }
-                val isPressed by interactionSource.collectIsPressedAsState()
-                val answerScale by animateFloatAsState(
-                    targetValue = if (isPressed) 0.985f else 1f,
-                    animationSpec = tween(durationMillis = if (isPressed) 80 else 130),
-                    label = "answerScale"
-                )
-
-                if (mode == GameMode.RED_GREEN) {
-                    OutlinedButton(
-                        onClick = { submit(answer) },
-                        enabled = !answering,
-                        interactionSource = interactionSource,
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .height(62.dp)
-                            .graphicsLayer {
-                                scaleX = answerScale
-                                scaleY = answerScale
-                            },
-                        shape = RoundedCornerShape(18.dp),
-                        border = BorderStroke(
-                            1.5.dp,
-                            if (index == 0) VibeColors.Green else VibeColors.Rose
-                        ),
-                        colors = ButtonDefaults.outlinedButtonColors(
-                            contentColor = VibeColors.TextPrimary,
-                            containerColor = if (index == 0) VibeColors.Green.copy(alpha = 0.08f) else VibeColors.Rose.copy(alpha = 0.08f)
-                        )
-                    ) {
-                        Text(answer, fontSize = 17.sp, fontWeight = FontWeight.Bold)
-                    }
-                } else {
-                    Button(
-                        onClick = { submit(answer) },
-                        enabled = !answering,
-                        interactionSource = interactionSource,
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .height(62.dp)
-                            .graphicsLayer {
-                                scaleX = answerScale
-                                scaleY = answerScale
-                            },
+        if (simulatedResponses.isNotEmpty()) {
+            LazyColumn(
+                Modifier.fillMaxWidth().weight(1f).graphicsLayer { alpha = reveal.value },
+                verticalArrangement = Arrangement.spacedBy(10.dp),
+            ) {
+                item {
+                    Card(
+                        colors = CardDefaults.cardColors(containerColor = VibeColors.Rose.copy(alpha = .14f)),
+                        border = BorderStroke(1.dp, VibeColors.Rose.copy(alpha = .28f)),
                         shape = RoundedCornerShape(20.dp),
-                        colors = ButtonDefaults.buttonColors(
-                            containerColor = accent.copy(alpha = 0.16f),
-                            contentColor = VibeColors.TextPrimary,
-                            disabledContainerColor = accent.copy(alpha = 0.08f),
-                            disabledContentColor = VibeColors.TextPrimary.copy(alpha = 0.5f)
-                        )
+                        modifier = Modifier.fillMaxWidth(),
                     ) {
-                        Text(answer, fontSize = 17.sp, fontWeight = FontWeight.Bold)
+                        Text(
+                            AppLocale.pick(
+                                "Simulation fictive hors ligne : les réponses des personnalités publiques sont générées pour le jeu et ne représentent pas leurs opinions réelles.",
+                                "Offline fictional simulation: public-figure answers are generated for the game and do not represent their real opinions.",
+                            ),
+                            color = VibeColors.TextSecondary,
+                            fontSize = 12.sp,
+                            lineHeight = 17.sp,
+                            modifier = Modifier.padding(14.dp),
+                        )
+                    }
+                }
+
+                itemsIndexed(simulatedResponses, key = { i, r -> "$i:${r.personaName}" }) { _, response ->
+                    Card(
+                        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
+                        border = BorderStroke(1.dp, VibeColors.Rose.copy(alpha = .25f)),
+                        shape = RoundedCornerShape(22.dp),
+                        modifier = Modifier.fillMaxWidth(),
+                    ) {
+                        Column(Modifier.padding(15.dp)) {
+                            Text(
+                                "${response.personaName} → ${response.option}",
+                                color = VibeColors.TextPrimary,
+                                fontSize = 16.sp,
+                                fontWeight = FontWeight.Bold,
+                            )
+                            Text(
+                                AppLocale.pick("Simulation fictive", "Fictional simulation"),
+                                color = VibeColors.Rose,
+                                fontSize = 11.sp,
+                                fontWeight = FontWeight.Bold,
+                            )
+                        }
+                    }
+                }
+
+                item {
+                    VibeActionSurface(
+                        onClick = { onContinueSimulation?.invoke() },
+                        enabled = onContinueSimulation != null,
+                        modifier = Modifier.fillMaxWidth(),
+                        accent = accent,
+                        containerColor = accent,
+                        emphasized = true,
+                        minHeight = 58.dp,
+                    ) {
+                        Box(
+                            Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 16.dp),
+                            contentAlignment = Alignment.Center,
+                        ) {
+                            Text(
+                                AppLocale.pick("Voir le résultat global", "See overall result"),
+                                color = MaterialTheme.colorScheme.onPrimary,
+                                fontWeight = FontWeight.Black,
+                            )
+                        }
+                    }
+                }
+            }
+        } else {
+            LazyColumn(
+                Modifier.fillMaxWidth().weight(1f).graphicsLayer { alpha = reveal.value },
+                verticalArrangement = Arrangement.spacedBy(10.dp),
+            ) {
+                itemsIndexed(answers, key = { i, answer -> "$i:$answer" }) { index, answer ->
+                    val optionAccent = if (mode == GameMode.RED_GREEN) {
+                        if (index == 0) VibeColors.Green else VibeColors.Rose
+                    } else {
+                        accent
+                    }
+                    val optionBackground = optionAccent.copy(alpha = if (mode == GameMode.RED_GREEN) .12f else .18f)
+
+                    VibeActionSurface(
+                        onClick = { submit(answer) },
+                        enabled = !answering,
+                        modifier = Modifier.fillMaxWidth(),
+                        accent = optionAccent,
+                        containerColor = optionBackground,
+                        emphasized = false,
+                        minHeight = 62.dp,
+                    ) {
+                        Box(
+                            Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 17.dp),
+                            contentAlignment = Alignment.Center,
+                        ) {
+                            Text(
+                                answer,
+                                color = VibeColors.TextPrimary,
+                                fontSize = 17.sp,
+                                fontWeight = FontWeight.Black,
+                            )
+                        }
                     }
                 }
             }

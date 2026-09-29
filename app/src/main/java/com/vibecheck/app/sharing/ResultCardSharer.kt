@@ -14,6 +14,7 @@ import androidx.core.content.FileProvider
 import com.vibecheck.app.domain.model.GameMode
 import com.vibecheck.app.domain.model.GameIntensity
 import com.vibecheck.app.domain.model.GamePack
+import com.vibecheck.app.localization.AppLocale
 import java.io.File
 import java.io.FileOutputStream
 import kotlinx.coroutines.Dispatchers
@@ -35,7 +36,8 @@ object ResultCardSharer {
         localWins: Int = 0,
         bestScorePercent: Int = 0,
         ranking: List<Pair<String, Int>> = emptyList(),
-        totalVotes: Int = 0
+        totalVotes: Int = 0,
+        isFictionalSimulation: Boolean = false,
     ) {
         val safeWinner = sanitizeWinner(winner)
         val safePercent = percent.coerceIn(0, 100)
@@ -49,7 +51,8 @@ object ResultCardSharer {
                 localWins = localWins.coerceAtLeast(0),
                 bestScorePercent = bestScorePercent.coerceIn(0, 100),
                 ranking = ranking.take(3).map { sanitizeWinner(it.first) to it.second.coerceAtLeast(0) },
-                totalVotes = totalVotes.coerceAtLeast(0)
+                totalVotes = totalVotes.coerceAtLeast(0),
+                isFictionalSimulation = isFictionalSimulation,
             )
             try {
                 val directory = File(context.cacheDir, "shared_results")
@@ -108,19 +111,18 @@ object ResultCardSharer {
             }
             putExtra(
                 Intent.EXTRA_TEXT,
-                when {
-                    mode == GameMode.KNOWS_ME ->
-                        "Mon VibeCheck : $safeWinner connaît le mieux le groupe avec $safePercent% — ${mode.title}."
-                    podiumText.isNotBlank() ->
-                        "Mon VibeCheck : $safeWinner arrive en tête avec $safePercent% — $podiumText"
-                    else ->
-                        "Mon VibeCheck : $safeWinner arrive en tête avec $safePercent% — ${mode.title}."
-                }
+                ResultShareCopy.localized(
+                    mode = mode,
+                    winner = safeWinner,
+                    percent = safePercent,
+                    podium = podiumText,
+                    fictionalSimulation = isFictionalSimulation,
+                )
             )
             addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
         }
 
-        context.startActivity(Intent.createChooser(shareIntent, "Partager le VibeCheck"))
+        context.startActivity(Intent.createChooser(shareIntent, AppLocale.pick("Partager le VibeCheck","Share VibeCheck")))
     }
 
     private fun createCard(
@@ -132,7 +134,8 @@ object ResultCardSharer {
         localWins: Int,
         bestScorePercent: Int,
         ranking: List<Pair<String, Int>>,
-        totalVotes: Int
+        totalVotes: Int,
+        isFictionalSimulation: Boolean,
     ): Bitmap {
         val bitmap = Bitmap.createBitmap(WIDTH, HEIGHT, Bitmap.Config.ARGB_8888)
         val canvas = Canvas(bitmap)
@@ -145,9 +148,9 @@ object ResultCardSharer {
                 WIDTH.toFloat(),
                 HEIGHT.toFloat(),
                 intArrayOf(
-                    Color.rgb(16, 16, 20),
+                    Color.rgb(255, 250, 242),
                     accent.background,
-                    Color.rgb(20, 14, 29)
+                    Color.rgb(247, 236, 255)
                 ),
                 null,
                 Shader.TileMode.CLAMP
@@ -157,7 +160,7 @@ object ResultCardSharer {
 
         val glow = Paint(Paint.ANTI_ALIAS_FLAG).apply {
             color = Color.argb(
-                54,
+                42,
                 Color.red(accent.highlight),
                 Color.green(accent.highlight),
                 Color.blue(accent.highlight)
@@ -166,17 +169,22 @@ object ResultCardSharer {
         canvas.drawCircle(880f, 260f, 330f, glow)
         canvas.drawCircle(180f, 1580f, 420f, glow)
 
-        val brandPaint = textPaint(62f, accent.highlight, true).apply {
+        val brandPaint = textPaint(62f, accent.ink, true).apply {
             textScaleX = 1.08f
         }
         canvas.drawText("VIBECHECK", 86f, 150f, brandPaint)
 
-        val eyebrow = textPaint(44f, Color.rgb(186, 177, 202), false)
-        canvas.drawText("LE RÉSULTAT DU GROUPE", 86f, 270f, eyebrow)
+        val eyebrow = textPaint(44f, Color.rgb(95, 83, 105), false)
+        canvas.drawText(
+            if (isFictionalSimulation) AppLocale.pick("SIMULATION FICTIVE • DIVERTISSEMENT","FICTIONAL SIMULATION • ENTERTAINMENT") else AppLocale.pick("LE RÉSULTAT DU GROUPE","THE GROUP RESULT"),
+            86f,
+            270f,
+            eyebrow
+        )
         val badgePaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
-            color = Color.argb(70, 255, 255, 255)
+            color = Color.argb(205, 255, 255, 255)
         }
-        val badgeText = textPaint(32f, Color.WHITE, true)
+        val badgeText = textPaint(32f, accent.ink, true)
         val packLabel = "PACK " + pack.title.uppercase()
         val intensityLabel = intensity.title.uppercase()
         canvas.drawRoundRect(86f, 310f, 420f, 374f, 28f, 28f, badgePaint)
@@ -184,18 +192,17 @@ object ResultCardSharer {
         canvas.drawRoundRect(446f, 310f, 730f, 374f, 28f, 28f, badgePaint)
         canvas.drawText(intensityLabel, 470f, 352f, badgeText)
 
-
         val cardPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
-            color = Color.argb(225, 28, 24, 36)
+            color = Color.argb(238, 255, 253, 249)
         }
         canvas.drawRoundRect(64f, 420f, 1016f, 1620f, 72f, 72f, cardPaint)
 
-        val modePaint = textPaint(46f, accent.highlight, true)
+        val modePaint = textPaint(46f, accent.ink, true)
         drawCenteredWrappedText(
             canvas, mode.title.uppercase(), modePaint, WIDTH / 2f, 565f, 820f, 58f
         )
 
-        val winnerPaint = textPaint(112f, Color.WHITE, true)
+        val winnerPaint = textPaint(112f, Color.rgb(49, 42, 55), true)
         drawCenteredWrappedText(
             canvas, winner, winnerPaint, WIDTH / 2f, 835f, 820f, 126f
         )
@@ -209,8 +216,12 @@ object ResultCardSharer {
             percentPaint
         )
 
-        val subtitlePaint = textPaint(48f, Color.rgb(184, 176, 196), false)
-        val subtitle = if (mode == GameMode.KNOWS_ME) "de bonnes réponses" else "des réponses"
+        val subtitlePaint = textPaint(48f, Color.rgb(105, 94, 112), false)
+        val subtitle = when {
+            isFictionalSimulation -> AppLocale.pick("résultat simulé","simulated result")
+            mode == GameMode.KNOWS_ME -> AppLocale.pick("de bonnes réponses","correct answers")
+            else -> AppLocale.pick("des réponses","of answers")
+        }
         canvas.drawText(
             subtitle,
             WIDTH / 2f - subtitlePaint.measureText(subtitle) / 2f,
@@ -219,7 +230,7 @@ object ResultCardSharer {
         )
 
         if (ranking.isNotEmpty() && totalVotes > 0) {
-            val rankPaint = textPaint(34f, Color.rgb(220, 214, 230), true)
+            val rankPaint = textPaint(34f, Color.rgb(65, 57, 72), true)
             val rankPercentPaint = textPaint(32f, accent.highlight, true)
             ranking.take(3).forEachIndexed { index, entry ->
                 val y = 1410f + index * 52f
@@ -237,9 +248,9 @@ object ResultCardSharer {
         }
 
         if (localWins > 0) {
-            val historyPaint = textPaint(34f, Color.rgb(201, 193, 214), true)
+            val historyPaint = textPaint(34f, Color.rgb(80, 69, 88), true)
             val history = localWins.toString() +
-                if (localWins == 1) " victoire locale" else " victoires locales"
+                if (localWins == 1) AppLocale.pick(" victoire locale"," local win") else AppLocale.pick(" victoires locales"," local wins")
             canvas.drawText(
                 history,
                 WIDTH / 2f - historyPaint.measureText(history) / 2f,
@@ -247,8 +258,8 @@ object ResultCardSharer {
                 historyPaint
             )
             if (bestScorePercent > 0) {
-                val bestPaint = textPaint(30f, Color.rgb(159, 150, 174), false)
-                val best = "Meilleur score : " + bestScorePercent + "%"
+                val bestPaint = textPaint(30f, Color.rgb(112, 100, 121), false)
+                val best = AppLocale.pick("Meilleur score : ","Best score: ") + bestScorePercent + "%"
                 canvas.drawText(
                     best,
                     WIDTH / 2f - bestPaint.measureText(best) / 2f,
@@ -258,8 +269,12 @@ object ResultCardSharer {
             }
         }
 
-        val ctaPaint = textPaint(45f, Color.WHITE, true)
-        val cta = "Et toi, ton groupe dirait quoi ?"
+        val ctaPaint = textPaint(45f, Color.rgb(49, 42, 55), true)
+        val cta = if (isFictionalSimulation) {
+            AppLocale.pick("Crée ta propre simulation VibeCheck","Create your own VibeCheck simulation")
+        } else {
+            AppLocale.pick("Et toi, ton groupe dirait quoi ?","What would your group say about you?")
+        }
         canvas.drawText(
             cta,
             WIDTH / 2f - ctaPaint.measureText(cta) / 2f,
@@ -267,8 +282,8 @@ object ResultCardSharer {
             ctaPaint
         )
 
-        val footerPaint = textPaint(37f, Color.rgb(175, 163, 188), false)
-        val footer = "VibeCheck • joue • compare • partage"
+        val footerPaint = textPaint(37f, Color.rgb(104, 92, 113), false)
+        val footer = AppLocale.pick("VibeCheck • joue • compare • partage","VibeCheck • play • compare • share")
         canvas.drawText(
             footer,
             WIDTH / 2f - footerPaint.measureText(footer) / 2f,
@@ -282,30 +297,35 @@ object ResultCardSharer {
     private data class Accent(
         val background: Int,
         val highlight: Int,
-        val soft: Int
+        val soft: Int,
+        val ink: Int
     )
 
     private fun accentFor(mode: GameMode): Accent =
         when (mode) {
             GameMode.WHO_OF_US -> Accent(
-                background = Color.rgb(63, 34, 91),
-                highlight = Color.rgb(207, 171, 255),
-                soft = Color.rgb(239, 225, 255)
+                background = Color.rgb(232, 215, 255),
+                highlight = Color.rgb(159, 116, 202),
+                soft = Color.rgb(125, 82, 168),
+                ink = Color.rgb(92, 60, 126)
             )
             GameMode.MOST_LIKELY -> Accent(
-                background = Color.rgb(92, 49, 30),
-                highlight = Color.rgb(255, 184, 138),
-                soft = Color.rgb(255, 229, 211)
+                background = Color.rgb(255, 220, 198),
+                highlight = Color.rgb(218, 132, 86),
+                soft = Color.rgb(183, 95, 55),
+                ink = Color.rgb(139, 76, 46)
             )
             GameMode.RED_GREEN -> Accent(
-                background = Color.rgb(30, 74, 55),
-                highlight = Color.rgb(155, 230, 193),
-                soft = Color.rgb(220, 250, 235)
+                background = Color.rgb(207, 238, 222),
+                highlight = Color.rgb(83, 155, 119),
+                soft = Color.rgb(62, 137, 98),
+                ink = Color.rgb(50, 112, 80)
             )
             GameMode.KNOWS_ME -> Accent(
-                background = Color.rgb(29, 58, 92),
-                highlight = Color.rgb(149, 200, 255),
-                soft = Color.rgb(220, 237, 255)
+                background = Color.rgb(215, 232, 250),
+                highlight = Color.rgb(96, 145, 197),
+                soft = Color.rgb(72, 119, 169),
+                ink = Color.rgb(55, 93, 135)
             )
         }
 
@@ -315,7 +335,7 @@ object ResultCardSharer {
             .replace(Regex("\\s+"), " ")
             .trim()
             .take(MAX_WINNER_LENGTH)
-            .ifBlank { "Le groupe" }
+            .ifBlank { AppLocale.pick("Le groupe","The group") }
 
     private fun pruneOldCards(directory: File) {
         directory.listFiles()
