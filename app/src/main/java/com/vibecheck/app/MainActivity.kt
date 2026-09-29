@@ -13,6 +13,7 @@ import com.vibecheck.app.ui.VibeCheckApp
 
 class MainActivity : ComponentActivity() {
     private var incomingChallenge by mutableStateOf<Challenge?>(null)
+    private var appInForeground by mutableStateOf(false)
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -23,9 +24,20 @@ class MainActivity : ComponentActivity() {
         setContent {
             VibeCheckApp(
                 incomingChallenge = incomingChallenge,
+                appInForeground = appInForeground,
                 onChallengeConsumed = { incomingChallenge = null }
             )
         }
+    }
+
+    override fun onStart() {
+        super.onStart()
+        appInForeground = true
+    }
+
+    override fun onStop() {
+        appInForeground = false
+        super.onStop()
     }
 
     override fun onNewIntent(intent: Intent) {
