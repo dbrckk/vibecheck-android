@@ -21,6 +21,13 @@ class SoloGameViewModelTest {
         assertEquals(AppScreen.GAME.name, vm.screenName.value)
     }
 
+    @Test fun `solo session rejects unknown or non public persona ids`() {
+        val vm = GameViewModel(SavedStateHandle())
+        vm.startSoloSession(listOf("zendaya", "fictional_character"), GameMode.WHO_OF_US, 42L, "Moi")
+        assertFalse(vm.isSoloSession.value)
+        assertEquals(AppScreen.HOME.name, vm.screenName.value)
+    }
+
     @Test fun `solo session rejects fewer than two personas`() {
         val vm = GameViewModel(SavedStateHandle())
         vm.startSoloSession(listOf("zendaya"), GameMode.WHO_OF_US, 42L, "Moi")
@@ -73,6 +80,24 @@ class SoloGameViewModelTest {
             false,
         )
         assertEquals("Taylor Swift", SessionCodec.decodeVotes(vm.savedVotes.value).single().answer)
+    }
+
+    @Test fun `solo round rejects simulated answers that do not match the active cast`() {
+        val vm = GameViewModel(SavedStateHandle())
+        vm.startSoloSession(publicIds, GameMode.WHO_OF_US, 42L, "Moi")
+        vm.submitSoloPlayerAnswer("Moi")
+
+        vm.submitSoloRound(
+            "q1",
+            listOf(
+                PersonaAnswer("zendaya", "Moi", 70, true),
+                PersonaAnswer("unknown", "Moi", 65, true),
+            ),
+            false,
+        )
+
+        assertTrue(SessionCodec.decodeVotes(vm.savedVotes.value).isEmpty())
+        assertEquals("Moi", vm.soloPlayerAnswer.value)
     }
 
     @Test fun `active solo session survives recreation with player identity and mode`() {
