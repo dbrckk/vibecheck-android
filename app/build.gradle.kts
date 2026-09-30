@@ -35,8 +35,8 @@ android {
         applicationId = "com.dbrckk.vibecheck"
         minSdk = 24
         targetSdk = 36
-        versionCode = 3
-        versionName = "1.1.1"
+        versionCode = 4
+        versionName = "1.2.0"
     }
     sourceSets.getByName("main").res.srcDir(generatedAmbientRes)
     buildFeatures { compose = true }
