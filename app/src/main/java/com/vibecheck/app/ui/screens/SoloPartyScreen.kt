@@ -466,7 +466,7 @@ private fun PersonaCard(persona: Persona, selected: Boolean, onClick: () -> Unit
                 shape = RoundedCornerShape(999.dp),
             ) {
                 Text(
-                    if (selected) AppLocale.pick("✓ AJOUTÉE", "✓ ADDED") else AppLocale.pick("AJOUTER", "ADD"),
+                    if (selected) AppLocale.pick("✓ SÉLECTIONNÉE", "✓ SELECTED") else AppLocale.pick("AJOUTER", "ADD"),
                     color = VibeColors.TextPrimary,
                     fontWeight = FontWeight.Black,
                     fontSize = 10.sp,
