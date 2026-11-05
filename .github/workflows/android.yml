@@ -41,16 +41,41 @@ jobs:
             grep -Ei 'play-services-ads|firebase-analytics|com\.android\.billingclient:billing' release-dependencies.txt || true
             exit 1
           fi
+          echo "Resolved native-bearing AndroidX dependencies:"
+          grep -E 'androidx\.graphics:graphics-path|androidx\.datastore:datastore' release-dependencies.txt | sort -u || true
       - name: Build debug APK
         run: gradle :app:assembleDebug --stacktrace
       - name: Build release AAB
         run: gradle :app:bundleRelease --stacktrace
-      - name: Audit release bundle native code
+      - name: Audit 16 KB ELF alignment
         shell: bash
         run: |
-          if unzip -Z1 app/build/outputs/bundle/release/app-release.aab | grep -Eq '(^|/)lib/.*\.so$'; then
-            echo "Unexpected native library detected. Review 16 KB page-size compatibility before release."
-            unzip -Z1 app/build/outputs/bundle/release/app-release.aab | grep -E '(^|/)lib/.*\.so$' || true
+          set -euo pipefail
+          rm -rf /tmp/vibecheck-native
+          mkdir -p /tmp/vibecheck-native
+          unzip -qq app/build/outputs/bundle/release/app-release.aab 'base/lib/*/*.so' -d /tmp/vibecheck-native
+
+          native_count=0
+          failed=0
+          while IFS= read -r so; do
+            native_count=$((native_count + 1))
+            case "$so" in
+              */arm64-v8a/*|*/x86_64/*)
+                echo "Checking $so"
+                while IFS= read -r align; do
+                  [ -n "$align" ] || continue
+                  if (( align < 0x4000 )); then
+                    echo "UNALIGNED: $so LOAD segment alignment $align is below 0x4000"
+                    failed=1
+                  fi
+                done < <(readelf -lW "$so" | awk '$1 == "LOAD" { print $NF }')
+                ;;
+            esac
+          done < <(find /tmp/vibecheck-native -type f -name '*.so' | sort)
+
+          echo "Native libraries found: $native_count"
+          if (( failed != 0 )); then
+            echo "Release contains native libraries that are not 16 KB ELF-aligned."
             exit 1
           fi
       - name: Upload APK
