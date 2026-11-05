@@ -19,7 +19,7 @@ Pass the phone between players and compare your answers across several modes:
 - Who knows me best?
 
 ### Play solo too
-You genuinely take part in the game: you answer first, then fictional characters answer before the overall result.
+You genuinely take part in the game: you answer first, then clearly labelled fictional simulations attributed to public figures answer before the overall result.
 
 Answers attributed to public profiles in Solo Party are fictional entertainment simulations. They do not come from those people and do not represent their real opinions.
 
@@ -33,13 +33,11 @@ Answers attributed to public profiles in Solo Party are fictional entertainment 
 
 VibeCheck is a social entertainment game. Solo simulations must not be interpreted as real statements or opinions from public figures.
 
-## Version 1.0.0 release notes
-First public release of VibeCheck.
+## Current release notes
+VibeCheck 1.2.1 improves production reliability and privacy consistency.
 
-- New drawn pastel visual identity.
-- Group party modes.
-- Participative Solo Party: your answer genuinely counts.
-- Results and sharing.
-- Groups and statistics stored locally.
-- Public-profile solo simulations clearly identified as fictional.
-- French UI when the device language is French; English in every other case.
+- Refined home and Solo Party UX for small screens.
+- Public-figure Solo Party simulations remain clearly labelled fictional entertainment.
+- Local app data is excluded from Android cloud backup and device-transfer backup rules.
+- No account, ads, analytics, or behavioral tracking.
+- Core play remains available offline.
