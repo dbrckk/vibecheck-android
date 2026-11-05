@@ -32,6 +32,15 @@ jobs:
         run: gradle :app:compileDebugAndroidTestKotlin --stacktrace
       - name: Release lint
         run: gradle :app:lintRelease --stacktrace
+      - name: Audit release SDKs
+        shell: bash
+        run: |
+          gradle :app:dependencies --configuration releaseRuntimeClasspath > release-dependencies.txt
+          if grep -Eiq 'play-services-ads|firebase-analytics|com\.android\.billingclient:billing' release-dependencies.txt; then
+            echo "Forbidden ads, analytics, or billing SDK detected in releaseRuntimeClasspath"
+            grep -Ei 'play-services-ads|firebase-analytics|com\.android\.billingclient:billing' release-dependencies.txt || true
+            exit 1
+          fi
       - name: Build debug APK
         run: gradle :app:assembleDebug --stacktrace
       - name: Build release AAB
