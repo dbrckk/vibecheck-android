@@ -7,6 +7,7 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.ArrowForward
 import androidx.compose.material.icons.filled.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
@@ -357,7 +358,7 @@ private fun PlayEntryCard(
                     fontWeight = FontWeight.Black,
                     style = MaterialTheme.typography.labelLarge,
                 )
-                Icon(Icons.Default.ArrowForward, null, tint = accent)
+                Icon(Icons.AutoMirrored.Filled.ArrowForward, null, tint = accent)
             }
         }
     }
@@ -406,7 +407,7 @@ private fun ModeCard(mode: GameMode, express: Boolean, onClick: () -> Unit) {
                     overflow = TextOverflow.Ellipsis,
                 )
             }
-            Icon(Icons.Default.ArrowForward, null, tint = visual.accent)
+            Icon(Icons.AutoMirrored.Filled.ArrowForward, null, tint = visual.accent)
         }
     }
 }

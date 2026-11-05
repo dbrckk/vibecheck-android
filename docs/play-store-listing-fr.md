@@ -19,7 +19,7 @@ Passe le téléphone entre les joueurs et compare vos réponses dans plusieurs m
 - Qui me connaît le mieux ?
 
 ### Joue aussi en solo
-Tu participes réellement à la partie : tu réponds d’abord, puis des personnages fictifs répondent à leur tour avant le résultat global.
+Tu participes réellement à la partie : tu réponds d’abord, puis des simulations fictives clairement identifiées et attribuées à des personnalités publiques répondent avant le résultat global.
 
 Les réponses attribuées aux profils publics dans le mode solo sont des simulations fictives générées uniquement pour le divertissement. Elles ne proviennent pas de ces personnes et ne représentent pas leurs opinions réelles.
 
@@ -33,15 +33,14 @@ Les réponses attribuées aux profils publics dans le mode solo sont des simulat
 
 VibeCheck est conçu comme un jeu social de divertissement. Les simulations du mode solo ne doivent pas être interprétées comme des déclarations ou opinions réelles de personnes publiques.
 
-## Notes de version 1.0.0
-Première version publique de VibeCheck.
+## Notes de la version actuelle
+VibeCheck 1.2.1 améliore la fiabilité de production et la cohérence de confidentialité.
 
-- Nouveau thème pastel dessiné.
-- Modes de jeu en groupe.
-- Solo Party participatif : ta réponse compte réellement.
-- Résultats et partage.
-- Groupes et statistiques stockés localement.
-- Simulations solo publiques clairement identifiées comme fictives.
+- UX de l’accueil et de Solo Party affinée pour les petits écrans.
+- Les simulations Solo attribuées à des personnalités publiques restent clairement indiquées comme fictives et destinées au divertissement.
+- Les données locales de l’application sont exclues des règles de sauvegarde cloud et de transfert Android.
+- Aucun compte, aucune publicité, aucun analytics ni suivi comportemental.
+- Le cœur du jeu reste disponible hors ligne.
 
 ## Suggestions de captures téléphone
 1. Accueil — « Choisis ton vibe »

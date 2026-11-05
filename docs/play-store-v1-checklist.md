@@ -1,4 +1,4 @@
-# VibeCheck V1 — Play Store release checklist
+# VibeCheck V1.2.1 — Play Store release checklist
 
 This checklist is the final gate after source CI is green. Never commit keystores, passwords, Play service-account credentials, or other signing secrets.
 
@@ -7,7 +7,8 @@ This checklist is the final gate after source CI is green. Never commit keystore
 - [ ] Exact release SHA recorded.
 - [ ] `gradle :app:testDebugUnitTest --stacktrace` passes.
 - [ ] `gradle :app:compileDebugAndroidTestKotlin --stacktrace` passes.
-- [ ] `gradle :app:lintDebug --stacktrace` passes.
+- [ ] `gradle :app:lintRelease --stacktrace` passes.
+- [ ] Release runtime SDK audit passes (no ads, analytics or Billing SDK).
 - [ ] `gradle :app:assembleDebug --stacktrace` passes.
 - [ ] `gradle :app:bundleRelease --stacktrace` passes.
 - [ ] No signing material is tracked by Git.
@@ -60,9 +61,9 @@ V1 is ad-free and does **not** expose the legacy `remove_ads_lifetime` purchase.
 Release gate:
 
 - [ ] `ReleaseConfig.adRemovalPurchaseEnabled == false`.
-- [ ] No Premium / ad-removal purchase card is present in the V1.1 UI.
-- [ ] Google Play Billing SDK is not packaged in the V1.1 artifact.
-- [ ] Play Console does not need an active `remove_ads_lifetime` product for V1.1.
+- [ ] No Premium / ad-removal purchase card is present in the V1.2.1 UI.
+- [ ] Google Play Billing SDK is not packaged in the V1.2.1 artifact.
+- [ ] Play Console does not need an active `remove_ads_lifetime` product for V1.2.1.
 
 If ads or paid entitlements are introduced later, re-enable billing deliberately and run a new billing, privacy and Data Safety review before publication.
 

@@ -8,8 +8,8 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.ArrowBack
-import androidx.compose.material.icons.filled.ArrowForward
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.automirrored.filled.ArrowForward
 import androidx.compose.material.icons.filled.AutoAwesome
 import androidx.compose.material.icons.filled.Groups
 import androidx.compose.material.icons.filled.Search
@@ -58,7 +58,7 @@ fun SoloPartyScreen(
             verticalAlignment = Alignment.CenterVertically,
         ) {
             FilledTonalIconButton(onClick = onBack) {
-                Icon(Icons.Default.ArrowBack, AppLocale.pick("Retour", "Back"))
+                Icon(Icons.AutoMirrored.Filled.ArrowBack, AppLocale.pick("Retour", "Back"))
             }
             Card(
                 colors = CardDefaults.cardColors(containerColor = VibeColors.Purple.copy(alpha = .14f)),
@@ -275,7 +275,7 @@ fun SoloPartyScreen(
                                 fontWeight = FontWeight.Black,
                             )
                         }
-                        Icon(Icons.Default.ArrowForward, null, tint = VibeColors.Purple)
+                        Icon(Icons.AutoMirrored.Filled.ArrowForward, null, tint = VibeColors.Purple)
                     }
                 }
             }
@@ -343,7 +343,7 @@ fun SoloPartyScreen(
                         )
                         if (canStart) {
                             Spacer(Modifier.width(9.dp))
-                            Icon(Icons.Default.ArrowForward, null, tint = MaterialTheme.colorScheme.onPrimary)
+                            Icon(Icons.AutoMirrored.Filled.ArrowForward, null, tint = MaterialTheme.colorScheme.onPrimary)
                         }
                     }
                 }

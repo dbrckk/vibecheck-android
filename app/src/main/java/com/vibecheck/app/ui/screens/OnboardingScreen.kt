@@ -1,6 +1,8 @@
 package com.vibecheck.app.ui.screens
 
 import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.*
@@ -14,7 +16,7 @@ import com.vibecheck.app.localization.AppLocale
 
 @Composable
 fun OnboardingScreen(onStart: () -> Unit) {
-    Column(Modifier.fillMaxSize(), verticalArrangement=Arrangement.Center, horizontalAlignment=Alignment.CenterHorizontally) {
+    Column(Modifier.fillMaxSize().verticalScroll(rememberScrollState()).padding(vertical = 12.dp), verticalArrangement=Arrangement.Center, horizontalAlignment=Alignment.CenterHorizontally) {
         Text("VIBECHECK",color=VibeColors.Purple,style=MaterialTheme.typography.labelLarge,fontWeight=FontWeight.Black)
         Spacer(Modifier.height(12.dp))
         Text(AppLocale.pick("Ton groupe. Vos réponses. Le verdict.","Your group. Your answers. The verdict."),color=VibeColors.TextPrimary,style=MaterialTheme.typography.headlineLarge,fontWeight=FontWeight.Black)
@@ -29,7 +31,7 @@ fun OnboardingScreen(onStart: () -> Unit) {
             }
         }
         Spacer(Modifier.height(20.dp))
-        Button(onClick=onStart,modifier=Modifier.fillMaxWidth().height(60.dp),shape=RoundedCornerShape(24.dp),colors=ButtonDefaults.buttonColors(containerColor=VibeColors.Purple,contentColor=MaterialTheme.colorScheme.onPrimary)){Text(AppLocale.pick("Commencer","Start"),fontWeight=FontWeight.Black)}
+        Button(onClick=onStart,modifier=Modifier.fillMaxWidth().heightIn(min = 60.dp),shape=RoundedCornerShape(24.dp),colors=ButtonDefaults.buttonColors(containerColor=VibeColors.Purple,contentColor=MaterialTheme.colorScheme.onPrimary)){Text(AppLocale.pick("Commencer","Start"),fontWeight=FontWeight.Black)}
         Spacer(Modifier.height(10.dp));Text(AppLocale.pick("Pas de compte requis • fonctionne hors ligne","No account required • works offline"),color=VibeColors.TextSecondary,style=MaterialTheme.typography.bodySmall)
     }
 }

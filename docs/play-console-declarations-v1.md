@@ -4,24 +4,24 @@ This document is preparation material. Final Play Console answers must be checke
 
 ## Data and accounts
 
-Current app design does not require a VibeCheck account. Player names, local groups, preferences and local statistics are intended to remain on-device.
+Current app design does not require a VibeCheck account. Player names, local groups, preferences and local statistics remain on-device. The release manifest also points to backup rules that exclude app data from Android cloud backup and device-transfer backup.
 
 Before submission, inspect the final dependency/permission report and confirm whether any SDK transmits diagnostics, billing, device or other data off-device. Do not declare "no data collected" solely from application-domain code without checking the final artifact and Google Play SDK disclosures.
 
 ## Billing
 
-V1.1 is ad-free. Google Play Billing is not packaged in the app and there is no purchase UI or billing runtime:
+V1.2.1 is ad-free. Google Play Billing is not packaged in the app and there is no purchase UI or billing runtime:
 
 - `ReleaseConfig.adRemovalPurchaseEnabled == false`;
 - the Premium / ad-removal card has been removed;
-- the Billing SDK and billing manager are not included in V1.1;
-- no active `remove_ads_lifetime` Play product is required for V1.1.
+- the Billing SDK and billing manager are not included in V1.2.1;
+- no active `remove_ads_lifetime` Play product is required for V1.2.1.
 
 If monetization is reintroduced later, repeat the billing, privacy, Data Safety and store-copy review before publishing that update.
 
 ## Ads declaration
 
-Determine from the exact V1 artifact whether advertising SDKs or user-visible ads are present. The Play Console Ads declaration must match the shipped artifact. If ads are introduced after this audit, re-check Data Safety and consent/privacy requirements.
+The V1.2.1 release source contains no advertising SDK or user-visible ads. CI audits the release runtime classpath for common ads, analytics and Billing SDKs; still confirm the exact signed artifact in Play Console. The Play Console Ads declaration must match the shipped artifact. If ads are introduced after this audit, re-check Data Safety and consent/privacy requirements.
 
 ## Solo simulations
 

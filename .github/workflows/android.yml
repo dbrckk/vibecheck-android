@@ -5,8 +5,11 @@ on:
     branches: [main]
   pull_request:
 
+permissions:
+  contents: read
+
 concurrency:
-  group: android-${{ github.ref }}
+  group: android-\${{ github.ref }}
   cancel-in-progress: true
 
 jobs:
@@ -14,31 +17,78 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 20
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v6
       - uses: actions/setup-java@v5
         with:
           distribution: temurin
           java-version: "17"
-      - uses: gradle/actions/setup-gradle@v4
+      - uses: gradle/actions/setup-gradle@v6
         with:
           gradle-version: "8.11.1"
+          cache-provider: basic
       - name: Unit tests
         run: gradle :app:testDebugUnitTest --stacktrace
       - name: Compile instrumentation tests
         run: gradle :app:compileDebugAndroidTestKotlin --stacktrace
-      - name: Lint
-        run: gradle :app:lintDebug --stacktrace
+      - name: Release lint
+        run: gradle :app:lintRelease --stacktrace
+      - name: Audit release SDKs
+        shell: bash
+        run: |
+          gradle :app:dependencies --configuration releaseRuntimeClasspath > release-dependencies.txt
+          if grep -Eiq 'play-services-ads|firebase-analytics|com\.android\.billingclient:billing' release-dependencies.txt; then
+            echo "Forbidden ads, analytics, or billing SDK detected in releaseRuntimeClasspath"
+            grep -Ei 'play-services-ads|firebase-analytics|com\.android\.billingclient:billing' release-dependencies.txt || true
+            exit 1
+          fi
+          echo "Resolved native-bearing AndroidX dependencies:"
+          grep -E 'androidx\.graphics:graphics-path|androidx\.datastore:datastore' release-dependencies.txt | sort -u || true
       - name: Build debug APK
         run: gradle :app:assembleDebug --stacktrace
       - name: Build release AAB
         run: gradle :app:bundleRelease --stacktrace
+      - name: Audit 16 KB ELF alignment
+        shell: bash
+        run: |
+          set -euo pipefail
+          rm -rf /tmp/vibecheck-native
+          mkdir -p /tmp/vibecheck-native
+          unzip -qq app/build/outputs/bundle/release/app-release.aab 'base/lib/*/*.so' -d /tmp/vibecheck-native
+
+          native_count=0
+          failed=0
+          while IFS= read -r so; do
+            native_count=$((native_count + 1))
+            case "$so" in
+              */arm64-v8a/*|*/x86_64/*)
+                echo "Checking $so"
+                while IFS= read -r align; do
+                  [ -n "$align" ] || continue
+                  if (( align < 0x4000 )); then
+                    echo "UNALIGNED: $so LOAD segment alignment $align is below 0x4000"
+                    failed=1
+                  fi
+                done < <(readelf -lW "$so" | awk '$1 == "LOAD" { print $NF }')
+                ;;
+            esac
+          done < <(find /tmp/vibecheck-native -type f -name '*.so' | sort)
+
+          echo "Native libraries found: $native_count"
+          if (( failed != 0 )); then
+            echo "Release contains native libraries that are not 16 KB ELF-aligned."
+            exit 1
+          fi
       - name: Upload APK
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: vibecheck-debug-apk
           path: app/build/outputs/apk/debug/app-debug.apk
+          if-no-files-found: error
+          retention-days: 14
       - name: Upload unsigned release AAB
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: vibecheck-release-aab-unsigned
           path: app/build/outputs/bundle/release/app-release.aab
+          if-no-files-found: error
+          retention-days: 14
