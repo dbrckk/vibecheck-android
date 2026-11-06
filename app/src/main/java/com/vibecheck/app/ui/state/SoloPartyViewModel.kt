@@ -29,7 +29,7 @@ class SoloPartyViewModel(private val savedStateHandle: SavedStateHandle) : ViewM
     private val _canStart = MutableStateFlow(initialSelected.size in MIN_COMPANIONS..MAX_COMPANIONS); val canStart: StateFlow<Boolean> = _canStart
     private val _validationMessage = MutableStateFlow(validationFor(initialSelected.size)); val validationMessage: StateFlow<String> = _validationMessage
 
-    fun setPlayerName(value: String) { savedStateHandle[KEY_PLAYER_NAME] = value.trim().take(24).ifBlank { DEFAULT_PLAYER_NAME } }
+    fun setPlayerName(value: String) { savedStateHandle[KEY_PLAYER_NAME] = value.take(24) }
     fun setMode(mode: GameMode) {
         if (mode !in SOLO_MODES) return
         _selectedMode.value = mode
