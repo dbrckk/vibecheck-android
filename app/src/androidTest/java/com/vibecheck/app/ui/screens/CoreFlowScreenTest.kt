@@ -17,10 +17,17 @@ import com.vibecheck.app.domain.model.Vote
 import com.vibecheck.app.ui.theme.VibeCheckTheme
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertTrue
+import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
+import java.util.Locale
 
 class CoreFlowScreenTest {
+    @Before
+    fun forceFrenchLocale() {
+        Locale.setDefault(Locale.FRANCE)
+    }
+
     @get:Rule
     val composeRule = createComposeRule()
 
