@@ -243,6 +243,37 @@ class GameViewModelTest {
         assertEquals(listOf(1, 0), viewModel.knowScores.value)
     }
 
+
+    @Test
+    fun know_me_ignores_guesses_until_private_handoff_is_confirmed() {
+        val viewModel = GameViewModel(SavedStateHandle())
+        viewModel.selectMode(GameMode.KNOWS_ME)
+        viewModel.addPlayer("Alice")
+        viewModel.addPlayer("Bob")
+        viewModel.addPlayer("Chloe")
+        viewModel.startGame()
+        viewModel.setKnowMeSecret("Mer")
+
+        viewModel.submitKnowMeGuess("Mer", isLastQuestion = false)
+        assertEquals(listOf(0, 0), viewModel.knowScores.value)
+        assertEquals(0, viewModel.knowGuesserIndex.value)
+
+        viewModel.confirmKnowMeHandoff()
+        viewModel.submitKnowMeGuess("Mer", isLastQuestion = false)
+        assertEquals(listOf(1, 0), viewModel.knowScores.value)
+        assertEquals(1, viewModel.knowGuesserIndex.value)
+        assertTrue(viewModel.knowHandoffPending.value)
+
+        viewModel.submitKnowMeGuess("Mer", isLastQuestion = false)
+        assertEquals(listOf(1, 0), viewModel.knowScores.value)
+        assertEquals(1, viewModel.knowGuesserIndex.value)
+
+        viewModel.confirmKnowMeHandoff()
+        viewModel.submitKnowMeGuess("Montagne", isLastQuestion = false)
+        assertEquals(1, viewModel.questionIndex.value)
+        assertEquals(listOf(1, 0), viewModel.knowScores.value)
+    }
+
     @Test
     fun know_me_handoff_state_survives_recreation() {
         val state = SavedStateHandle()
@@ -270,6 +301,7 @@ class GameViewModelTest {
         viewModel.addPlayer("Bob")
         viewModel.startGame()
         viewModel.setKnowMeSecret("Mer")
+        viewModel.confirmKnowMeHandoff()
         viewModel.submitKnowMeGuess("Mer", isLastQuestion = true)
         val restored = GameViewModel(state)
         assertEquals(AppScreen.RESULT.name, restored.screenName.value)
@@ -285,6 +317,7 @@ class GameViewModelTest {
         viewModel.addPlayer("Bob")
         viewModel.startGame()
         viewModel.setKnowMeSecret("Mer")
+        viewModel.confirmKnowMeHandoff()
         viewModel.submitKnowMeGuess("Mer", isLastQuestion = true)
 
         viewModel.submitKnowMeGuess("Mer", isLastQuestion = true)
@@ -301,6 +334,7 @@ class GameViewModelTest {
         viewModel.addPlayer("Bob")
         viewModel.startGame()
         viewModel.setKnowMeSecret("Mer")
+        viewModel.confirmKnowMeHandoff()
         viewModel.submitKnowMeGuess("Mer", isLastQuestion = false)
         viewModel.abandonGame()
         assertEquals("", viewModel.knowSecretAnswer.value)
