@@ -47,4 +47,32 @@ class HomePrimaryActionsTest {
         composeRule.onNodeWithText("Jouer en solo").performClick()
         composeRule.runOnIdle { assertTrue(soloRequested) }
     }
+    @Test
+    fun home_exposes_leaderboard_when_group_has_a_recorded_leader() {
+        var leaderboardRequested = false
+
+        composeRule.setContent {
+            VibeCheckTheme {
+                HomeScreen(
+                    selectedIntensity = GameIntensity.NORMAL,
+                    selectedPack = GamePack.MIX,
+                    savedPlayerCount = 3,
+                    groupLeaderName = "Alex",
+                    groupLeaderWins = 2,
+                    onOpenLeaderboard = { leaderboardRequested = true },
+                    onEditGroup = {},
+                    onOpenSettings = {},
+                    onPlaySolo = {},
+                    onIntensity = {},
+                    onPack = {},
+                    onMode = {},
+                )
+            }
+        }
+
+        composeRule.onNodeWithText("Leader : Alex • 2 victoires").assertIsDisplayed()
+        composeRule.onNodeWithText("Classement").assertIsDisplayed().performClick()
+        composeRule.runOnIdle { assertTrue(leaderboardRequested) }
+    }
+
 }
