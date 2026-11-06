@@ -10,10 +10,17 @@ import com.vibecheck.app.data.PersonaCatalog
 import com.vibecheck.app.domain.model.GameMode
 import com.vibecheck.app.ui.theme.VibeCheckTheme
 import org.junit.Assert.assertTrue
+import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
+import java.util.Locale
 
 class SoloPartyScreenTest {
+    @Before
+    fun forceFrenchLocale() {
+        Locale.setDefault(Locale.FRANCE)
+    }
+
     @get:Rule val composeRule = createComposeRule()
 
     @Test fun screen_shows_human_participant_public_simulation_disclaimer_and_primary_controls() {
