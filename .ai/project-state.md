@@ -23,7 +23,7 @@ M1.2.1 — production hardening for Google Play.
 - Local preferences, groups and statistics remain on-device; Android cloud backup and device-transfer backup rules explicitly exclude app data.
 - targetSdk/compileSdk 36; minSdk 24.
 - Release builds use R8/resource shrinking.
-- GitHub Actions runs existing unit tests, instrumentation-test compilation, release lint, runtime-SDK audit, debug APK and release AAB builds.
+- GitHub Actions runs existing unit tests, instrumentation-test compilation, release lint, runtime-SDK audit, debug APK and release AAB builds, then executes the Compose/instrumentation suite on an Android 16 / API 36 emulator.
 - Google Play App Signing is enabled; the recovered upload key is stored outside Git.
 
 ## Production gate
@@ -34,6 +34,11 @@ M1.2.1 — production hardening for Google Play.
 5. Install the Play-delivered build on a physical device and smoke-test Home, all group modes, Solo Party, sharing, challenge links, music/settings, rotation/recreation and offline play.
 6. Review Play pre-launch results and resolve any blocking crash, ANR, rendering, accessibility or policy issue.
 7. Promote the exact validated artifact to production.
+
+## Production hardening applied
+- CI concurrency is branch-scoped correctly.
+- AndroidX Test runner is explicitly configured with a deterministic French test locale.
+- Home surfaces the persisted local group leader and restores access to the leaderboard.
 
 ## Remaining non-blocking improvements
 1. Replace the custom `vibecheck://` challenge URI with verified HTTPS App Links once a controlled domain and the Play app-signing certificate association are available.
