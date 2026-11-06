@@ -14,10 +14,17 @@ import com.vibecheck.app.ui.theme.VibeCheckTheme
 import com.vibecheck.app.ui.theme.VibeThemeStyle
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertTrue
+import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
+import java.util.Locale
 
 class SettingsScreenTest {
+    @Before
+    fun forceFrenchLocale() {
+        Locale.setDefault(Locale.FRANCE)
+    }
+
     @get:Rule
     val composeRule = createComposeRule()
 

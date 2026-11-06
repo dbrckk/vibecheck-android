@@ -10,10 +10,17 @@ import com.vibecheck.app.domain.model.GameMode
 import com.vibecheck.app.domain.model.GamePack
 import com.vibecheck.app.domain.model.GameResult
 import com.vibecheck.app.ui.theme.VibeCheckTheme
+import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
+import java.util.Locale
 
 class SoloResultScreenTest {
+    @Before
+    fun forceFrenchLocale() {
+        Locale.setDefault(Locale.FRANCE)
+    }
+
     @get:Rule
     val composeRule = createComposeRule()
 

@@ -9,10 +9,17 @@ import com.vibecheck.app.domain.model.GameIntensity
 import com.vibecheck.app.domain.model.GamePack
 import com.vibecheck.app.ui.theme.VibeCheckTheme
 import org.junit.Assert.assertTrue
+import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
+import java.util.Locale
 
 class HomePrimaryActionsTest {
+    @Before
+    fun forceFrenchLocale() {
+        Locale.setDefault(Locale.FRANCE)
+    }
+
     @get:Rule
     val composeRule = createComposeRule()
 
@@ -47,4 +54,32 @@ class HomePrimaryActionsTest {
         composeRule.onNodeWithText("Jouer en solo").performClick()
         composeRule.runOnIdle { assertTrue(soloRequested) }
     }
+    @Test
+    fun home_exposes_leaderboard_when_group_has_a_recorded_leader() {
+        var leaderboardRequested = false
+
+        composeRule.setContent {
+            VibeCheckTheme {
+                HomeScreen(
+                    selectedIntensity = GameIntensity.NORMAL,
+                    selectedPack = GamePack.MIX,
+                    savedPlayerCount = 3,
+                    groupLeaderName = "Alex",
+                    groupLeaderWins = 2,
+                    onOpenLeaderboard = { leaderboardRequested = true },
+                    onEditGroup = {},
+                    onOpenSettings = {},
+                    onPlaySolo = {},
+                    onIntensity = {},
+                    onPack = {},
+                    onMode = {},
+                )
+            }
+        }
+
+        composeRule.onNodeWithText("Leader : Alex • 2 victoires").assertIsDisplayed()
+        composeRule.onNodeWithText("Classement").assertIsDisplayed().performClick()
+        composeRule.runOnIdle { assertTrue(leaderboardRequested) }
+    }
+
 }
