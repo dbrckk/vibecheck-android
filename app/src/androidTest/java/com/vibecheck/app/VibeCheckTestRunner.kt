@@ -9,4 +9,9 @@ class VibeCheckTestRunner : AndroidJUnitRunner() {
         Locale.setDefault(Locale.FRANCE)
         super.onCreate(arguments)
     }
+
+    override fun onStart() {
+        Locale.setDefault(Locale.FRANCE)
+        super.onStart()
+    }
 }
