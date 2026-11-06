@@ -19,7 +19,7 @@ class SoloPartyViewModelTest {
     @Test fun `restored unknown ids are discarded`() { val public=PersonaCatalog.soloPublic.first(); val state=SavedStateHandle(mapOf("solo_party_selected_ids" to listOf("legacy_original_persona",public.id))); val vm=SoloPartyViewModel(state); assertEquals(listOf(public.id),vm.selectedIds.value) }
     @Test fun `selected public ids survive viewmodel recreation`() { val state=SavedStateHandle(); val a=SoloPartyViewModel(state); PersonaCatalog.soloPublic.take(3).forEach{a.toggle(it.id)}; assertEquals(a.selectedIds.value,SoloPartyViewModel(state).selectedIds.value) }
     @Test fun `solo player uses localized default and editable name survives recreation`() { val state=SavedStateHandle(); val first=SoloPartyViewModel(state); assertEquals(SoloPartyViewModel.DEFAULT_PLAYER_NAME, first.playerName.value); first.setPlayerName("Alex"); assertEquals("Alex", SoloPartyViewModel(state).playerName.value) }
-    @Test fun `blank solo player name normalizes back to localized default`() { val vm=SoloPartyViewModel(SavedStateHandle()); vm.setPlayerName("   "); assertEquals(SoloPartyViewModel.DEFAULT_PLAYER_NAME, vm.playerName.value) }
+    @Test fun `solo name input preserves spaces and can be cleared before submission`() { val vm=SoloPartyViewModel(SavedStateHandle()); vm.setPlayerName("Alex "); assertEquals("Alex ", vm.playerName.value); vm.setPlayerName(""); assertEquals("", vm.playerName.value) }
     @Test fun `solo mode defaults to who of us and survives recreation`() {
         val state = SavedStateHandle()
         val first = SoloPartyViewModel(state)
