@@ -52,7 +52,7 @@ class SoloGameScreenTest {
             }
         }
 
-        composeRule.onNodeWithText("Simulation fictive", substring = true).assertIsDisplayed()
+        composeRule.onNodeWithText("Simulation fictive hors ligne : les réponses des personnalités publiques sont générées pour le jeu et ne représentent pas leurs opinions réelles.").assertIsDisplayed()
         composeRule.onNodeWithText("Zendaya → Nova").assertIsDisplayed()
         composeRule.onNodeWithText("Nova → Nova").assertIsDisplayed()
         composeRule.onNodeWithText("Continuer").performClick()
