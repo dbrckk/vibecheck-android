@@ -37,6 +37,7 @@ android {
         targetSdk = 36
         versionCode = 5
         versionName = "1.2.1"
+        testInstrumentationRunner = "com.vibecheck.app.VibeCheckTestRunner"
     }
     sourceSets.getByName("main").res.srcDir(generatedAmbientRes)
     buildFeatures { compose = true }
